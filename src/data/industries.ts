@@ -1,0 +1,259 @@
+/**
+ * B2B / industry SEO strategy (Phase 2).
+ *
+ * IMPORTANT — same discipline as locationStrategy.ts:
+ * - 'active-page' sectors get a real, unique landing page at /toimialat/:slug.
+ * - 'covered-by-service' sectors already have a dedicated service page
+ *   (e.g. koulun-siivous, hoivakodin-siivous) — creating a separate industry
+ *   page for them would just be duplicate content, so they are NOT built as
+ *   pages here. They are still listed for completeness of the strategy.
+ * - 'flagged-review' sectors (healthcare-adjacent: clinics, dental, hospitals)
+ *   involve regulated hygiene/infection-control standards. Do not publish a
+ *   page claiming specialised capability here unless that capability is
+ *   verified (certifications, real contract experience) — publishing an
+ *   unverified claim would be misleading to customers in a sensitive sector.
+ * - 'too-broad' means the sector is really the whole B2B offering, not a
+ *   distinct audience — covered by /palvelut generally, not worth a page.
+ */
+
+export type IndustryStatus =
+  | 'active-page'
+  | 'covered-by-service'
+  | 'flagged-review'
+  | 'too-broad';
+
+export type Industry = {
+  slug: string;
+  name: string;
+  status: IndustryStatus;
+  /** For covered-by-service: which existing service page already serves this audience. */
+  coveredBy?: string[];
+  /** Internal note — not rendered on the site. */
+  note: string;
+  intro?: string;
+  description?: string;
+  challenges?: string[];
+  highlights?: string[];
+  relevantServiceSlugs?: string[];
+  faqs?: { q: string; a: string }[];
+};
+
+export const industries: Industry[] = [
+  {
+    slug: 'toimistot',
+    name: 'Toimistot',
+    status: 'active-page',
+    note: 'Broad, low-risk B2B sector; genuinely distinct angle from the product-focused service pages (toimistomaalaus/toimistosiivous already exist, but not combined as one commercial narrative).',
+    intro: 'Toimistotilojen maalaus ja siivous ilman katkoja arkeen.',
+    description:
+      'Toimistotila vaikuttaa suoraan sekä henkilöstön viihtyvyyteen että asiakkaiden ensivaikutelmaan. Teemme toimistojen maalaus- ja siivoustyöt aikataulutetusti niin, että työskentely voi jatkua mahdollisimman normaalisti — usein iltaisin tai viikonloppuisin.',
+    challenges: [
+      'Työ pitää sovittaa toimiston aukioloaikojen ympärille',
+      'Kalusteet, tietotekniikka ja asiakirjat on suojattava huolellisesti',
+      'Yritysilme ja värimaailma halutaan usein pitää yhtenäisenä',
+    ],
+    highlights: [
+      'Ilta- ja viikonlopputyöt toimiston sulkuajan mukaan',
+      'Huolellinen kalusteiden ja laitteiden suojaus',
+      'Toimistomaalaus ja säännöllinen toimistosiivous samalta toimittajalta',
+      'Kiinteä yhteyshenkilö koko projektin ajan',
+    ],
+    relevantServiceSlugs: ['toimistomaalaus', 'toimistosiivous'],
+    faqs: [
+      { q: 'Voitteko työskennellä normaalin työajan ulkopuolella?', a: 'Kyllä. Sovimme toimistotöiden ajankohdan aina asiakkaan kanssa — usein työ tehdään iltaisin, viikonloppuisin tai muuten hiljaisempaan aikaan, jotta arki toimistolla häiriintyy mahdollisimman vähän.' },
+      { q: 'Suojaatteko kalusteet ja tietotekniikan?', a: 'Kyllä, peitämme ja suojaamme kalusteet, laitteet ja lattiat huolellisesti ennen työn aloittamista.' },
+      { q: 'Voiko sopimus kattaa sekä maalauksen että säännöllisen siivouksen?', a: 'Kyllä, monet toimistoasiakkaamme yhdistävät kertaluontoisen maalausurakan ja jatkuvan siivoussopimuksen saman toimittajan kanssa.' },
+    ],
+  },
+  {
+    slug: 'myymalat-ja-marketit',
+    name: 'Myymälät ja marketit',
+    status: 'active-page',
+    note: 'Real, distinct B2B audience with a matching keyword ("myymäläsiivous") already noted in the SEO keyword list; no existing dedicated page.',
+    intro: 'Siisti ja ajantasainen myymäläympäristö vaikuttaa suoraan myyntiin.',
+    description:
+      'Myymälän ja marketin ilme vaikuttaa asiakkaiden ostopäätöksiin ja viihtyvyyteen. Teemme liiketilojen maalaus- ja siivoustyöt joustavasti aukioloajat huomioiden, jotta myynti keskeytyy mahdollisimman vähän.',
+    challenges: [
+      'Työ pitää usein tehdä suljettuna aikana tai osissa',
+      'Hyllyt, tuotteet ja kalusteet vaativat huolellista suojausta',
+      'Lattiapinnat kuluvat nopeasti ja kaipaavat säännöllistä huoltoa',
+    ],
+    highlights: [
+      'Työ myymälän aukioloajat huomioiden, tarvittaessa osissa',
+      'Hyllyjen ja tuotteiden suojaus työn ajaksi',
+      'Seinä- ja kalustepintojen maalaus sekä säännöllinen siivous',
+      'Nopea reagointi kiireellisiin tarpeisiin',
+    ],
+    relevantServiceSlugs: ['toimistomaalaus', 'yrityssiivous'],
+    faqs: [
+      { q: 'Voitteko tehdä työn myymälän ollessa suljettuna?', a: 'Kyllä, teemme mielellämme työt myymälän suljettuna ollessa esimerkiksi öisin tai aikaisin aamulla, jotta myynti ei häiriinny.' },
+      { q: 'Voidaanko työ tehdä osissa, esimerkiksi osasto kerrallaan?', a: 'Kyllä, isommat kohteet voidaan usein jaksottaa osastoittain tai alueittain, jotta myymälä pysyy suurimmaksi osaksi auki.' },
+      { q: 'Sopiiko tämä myös ketjumyymälöille ja useammalle toimipisteelle?', a: 'Kyllä, palvelemme sekä yksittäisiä liikkeitä että useamman toimipisteen ketjuja Uudellamaalla.' },
+    ],
+  },
+  {
+    slug: 'ravintolat-ja-ammattikeittiot',
+    name: 'Ravintolat ja ammattikeittiöt',
+    status: 'active-page',
+    note: 'Real, common B2B sector. Kept to painting + general commercial cleaning only — no food-safety/HACCP certification claims made, since none are verified in company data.',
+    intro: 'Ravintolan ja keittiön pinnat kestävässä, siistissä kunnossa.',
+    description:
+      'Ravintolan ja ammattikeittiön tilat altistuvat kovalle kulutukselle: rasvalle, kosteudelle ja jatkuvalle käytölle. Teemme maalaus- ja siivoustyöt aikataulutetusti aukioloaikojen ulkopuolella, jotta liiketoiminta ei keskeydy.',
+    challenges: [
+      'Työ tehdään usein yöllä tai sulkupäivinä',
+      'Pinnat altistuvat rasvalle, höyrylle ja kosteudelle',
+      'Elintarvikehygienian vaatimukset on huomioitava tilan käytössä',
+    ],
+    highlights: [
+      'Työ aukioloaikojen ulkopuolella, yleensä yöllä tai sulkupäivänä',
+      'Kestävät, kosteutta ja kulutusta sietävät maalipinnat',
+      'Ruokasalin, keittiötilojen ja asiakastilojen siivous',
+      'Joustava aikataulutus ravintola-alan kiireiden ympärille',
+    ],
+    relevantServiceSlugs: ['toimistomaalaus', 'yrityssiivous'],
+    faqs: [
+      { q: 'Voitteko työskennellä yöaikaan?', a: 'Kyllä, teemme ravintola- ja keittiökohteita usein yöllä tai sulkupäivinä, jotta liiketoiminta ei häiriinny.' },
+      { q: 'Sopivatko maalinne kosteisiin ja rasvaisiin tiloihin?', a: 'Valitsemme kohteeseen sopivan, kosteutta ja kulutusta kestävän maalityypin. Kerromme tarjouksessa suosituksemme kohteen käyttötarkoituksen mukaan.' },
+      { q: 'Voitteko siivota myös asiakastilat, ei vain keittiön?', a: 'Kyllä, siivouspalvelumme voi kattaa sekä ravintolasalin että keittiön oheistilat asiakkaan tarpeen mukaan.' },
+    ],
+  },
+  {
+    slug: 'hotellit',
+    name: 'Hotellit',
+    status: 'active-page',
+    note: 'Real hospitality B2B sector; distinct maintenance-cycle framing (room-by-room rotation) not covered elsewhere.',
+    intro: 'Huonemaalaus ja ylläpito ilman pitkiä käyttökatkoja.',
+    description:
+      'Hotellihuoneiden ja yleisten tilojen kunto vaikuttaa suoraan asiakaskokemukseen ja arvosteluihin. Teemme maalaus- ja huoltotyöt usein huone tai kerros kerrallaan, jotta suurin osa kapasiteetista pysyy myynnissä koko projektin ajan.',
+    challenges: [
+      'Huoneita ei voida sulkea kaikkia yhtä aikaa',
+      'Työn pitää olla nopeaa ja siistiä huonekohtaisesti',
+      'Yleisten tilojen ilme halutaan pitää yhtenäisenä',
+    ],
+    highlights: [
+      'Huone- tai kerroskohtainen aikataulutus myyntikapasiteetin turvaamiseksi',
+      'Nopeat, siistit huonekohtaiset maalausprojektit',
+      'Käytävien, aulojen ja yleisten tilojen maalaus ja huolto',
+      'Sovitut aikataulut, jotka pidetään',
+    ],
+    relevantServiceSlugs: ['huoneistomaalaus', 'yrityssiivous'],
+    faqs: [
+      { q: 'Voitteko maalata huoneita yksi kerrallaan käytön jatkuessa?', a: 'Kyllä, tämä on tavallisin tapa toteuttaa hotellikohteita — huone tai muutama huone kerrallaan, jotta loput kapasiteetista pysyy käytössä.' },
+      { q: 'Kuinka nopeasti yksittäinen huone valmistuu?', a: 'Riippuu huoneen koosta ja työn laajuudesta — kerromme arvioidun aikataulun tarjouksen yhteydessä.' },
+      { q: 'Voitteko huoltaa myös käytävät ja yleiset tilat?', a: 'Kyllä, teemme myös käytävien, aulojen ja muiden yleisten tilojen maalaus- ja siivoustyöt.' },
+    ],
+  },
+  {
+    slug: 'taloyhtiot',
+    name: 'Taloyhtiöt',
+    status: 'active-page',
+    note: 'Very common real target audience for Finnish painting companies (rivitalo/kerrostalo maintenance contracts). Strong genuine content potential, low risk.',
+    intro: 'Julkisivu- ja porrashuoltoa taloyhtiön aikataulussa.',
+    description:
+      'Taloyhtiön julkisivun, porraskäytävien ja yhteisten tilojen kunnossapito on osa kiinteistön arvon säilyttämistä. Autamme hallituksia ja isännöitsijöitä aikataulutuksessa, tarjousvertailussa ja itse toteutuksessa.',
+    challenges: [
+      'Työ koskettaa useita asukkaita samaan aikaan',
+      'Aikataulu ja tiedotus asukkaille pitää suunnitella huolella',
+      'Hallitus tarvitsee selkeän, vertailukelpoisen tarjouksen',
+    ],
+    highlights: [
+      'Selkeä tarjous ja aikataulu hallituksen päätöksenteon tueksi',
+      'Julkisivu-, rappaus- ja huoltomaalaus taloyhtiöille',
+      'Porraskäytävien ja yhteisten tilojen siivous ja maalaus',
+      'Asukastiedotteiden ja aikataulun suunnittelu yhdessä isännöitsijän kanssa',
+    ],
+    relevantServiceSlugs: ['julkisivumaalaus', 'huoltomaalaus', 'rakennussiivous'],
+    faqs: [
+      { q: 'Autatteko myös tarjouksen valmistelussa hallitukselle?', a: 'Kyllä, laadimme selkeän, eritellyn tarjouksen, joka on helppo esittää ja vertailla taloyhtiön hallituksessa.' },
+      { q: 'Miten hoidatte tiedottamisen asukkaille?', a: 'Sovimme yhdessä isännöitsijän tai hallituksen kanssa aikataulun ja autamme tarvittaessa asukastiedotteiden sisällössä.' },
+      { q: 'Teettekö sekä julkisivu- että porrashuoltoa?', a: 'Kyllä, voimme yhdistää julkisivun huoltomaalauksen ja porraskäytävien maalaus- ja siivoustyöt samaan projektiin.' },
+    ],
+  },
+  {
+    slug: 'huvilat-ja-vapaa-ajan-asunnot',
+    name: 'Huvilat ja vapaa-ajan asunnot',
+    status: 'active-page',
+    note: 'Common, genuine Finnish market (kesämökki/huvila maintenance painting) with real seasonal-access framing distinct from generic ulkomaalaus.',
+    intro: 'Kesämökin ja huvilan ulkomaalaus sesongin mukaan.',
+    description:
+      'Vapaa-ajan asunnon ja huvilan maalaus kannattaa ajoittaa oikein — usein kohde on käytössä vain osan vuotta, ja kulkuyhteydet voivat vaikuttaa aikatauluun. Suunnittelemme työn yhdessä niin, että se sopii kohteen käyttöön ja sesonkiin.',
+    challenges: [
+      'Kohde voi olla käytössä vain osan vuotta',
+      'Kulkuyhteydet ja sijainti voivat vaikuttaa aikatauluun',
+      'Sää ja kosteusolosuhteet rannalla tai metsässä poikkeavat kaupunkikohteista',
+    ],
+    highlights: [
+      'Aikataulutus kohteen käyttökauden mukaan',
+      'Kokemus ranta- ja metsäympäristön sääolosuhteista',
+      'Ulko- ja huoltomaalaus huviloille ja kesämökeille',
+      'Voidaan sopia myös lyhyellä varoitusajalla ennen sesonkia',
+    ],
+    relevantServiceSlugs: ['ulkomaalaus', 'talon-maalaus', 'huoltomaalaus'],
+    faqs: [
+      { q: 'Voitteko tehdä työn, vaikka kohde on kaukana Uudenmaan keskuksista?', a: 'Riippuu sijainnista — kerro kohteen tarkka paikka, niin arvioimme onnistuuko työ osana palvelualuettamme.' },
+      { q: 'Milloin kesämökin ulkomaalaus kannattaa ajoittaa?', a: 'Yleensä paras ajankohta on kuiva kausi keväästä alkusyksyyn. Katso tarkemmat vinkit blogistamme tai kysy suoraan meiltä kohteesi tilanteeseen sopiva ajankohta.' },
+      { q: 'Voitteko sopia aikataulun ennen kesäsesonkia?', a: 'Kyllä, kannattaa olla yhteydessä hyvissä ajoin ennen kesää, jotta saamme sovittua sopivan ajankohdan.' },
+    ],
+  },
+
+  // Sectors already served by an existing, dedicated service page —
+  // deliberately NOT given a separate industry page (would be duplicate content).
+  {
+    slug: 'koulut-ja-paivakodit',
+    name: 'Koulut ja päiväkodit',
+    status: 'covered-by-service',
+    coveredBy: ['koulun-siivous', 'paivakodin-siivous'],
+    note: 'Already has dedicated, more specific service pages. A separate industry page would duplicate that content.',
+  },
+  {
+    slug: 'hoivakodit',
+    name: 'Hoivakodit',
+    status: 'covered-by-service',
+    coveredBy: ['hoivakodin-siivous'],
+    note: 'Already has a dedicated service page.',
+  },
+  {
+    slug: 'rakennus-ja-remonttikohteet',
+    name: 'Rakennus- ja remonttikohteet',
+    status: 'covered-by-service',
+    coveredBy: ['rakennussiivous', 'remonttisiivous'],
+    note: 'Already has dedicated service pages for both construction and renovation cleaning.',
+  },
+
+  // Regulated / healthcare-adjacent sectors — flagged, not published.
+  {
+    slug: 'klinikat-ja-laakarikeskukset',
+    name: 'Klinikat ja lääkärikeskukset',
+    status: 'flagged-review',
+    note: 'Healthcare hygiene/infection-control standards apply. Do not publish claiming this capability without verified certification or real contract experience — ask the business owner before building.',
+  },
+  {
+    slug: 'hammaslaakariasemat',
+    name: 'Hammaslääkäriasemat',
+    status: 'flagged-review',
+    note: 'Same as clinics — dental-specific hygiene regulation. Needs verified capability before publishing.',
+  },
+  {
+    slug: 'sairaalat',
+    name: 'Sairaalat',
+    status: 'flagged-review',
+    note: 'Hospital-grade infection control is heavily regulated. Do not publish without verified certification/experience — a false claim here is a real liability and trust risk.',
+  },
+  {
+    slug: 'yritykset',
+    name: 'Yritykset',
+    status: 'too-broad',
+    note: '"Companies" in general is the whole B2B offering, not a distinct audience — already the umbrella covered by /palvelut and the other industry pages above. A standalone page would be thin/duplicate.',
+  },
+];
+
+export const getIndustry = (slug: string) =>
+  industries.find((i) => i.slug === slug);
+
+export const activeIndustries = industries.filter(
+  (i) => i.status === 'active-page',
+);
+
+/** Reverse lookup used by service pages to link to relevant industries. */
+export const getIndustriesForService = (serviceSlug: string) =>
+  activeIndustries.filter((i) => i.relevantServiceSlugs?.includes(serviceSlug));
