@@ -89,7 +89,7 @@ export const processSteps: ProcessStep[] = [
     number: '04',
     title: 'Takuu ja lopetus',
     description:
-      'Tarkistamme lopputuloksen kanssasi ja siivoamme työalueen. Annamme kirjallisen takuun työjäljestä jopa 5 vuotta.',
+      'Tarkistamme lopputuloksen kanssasi ja siivoamme työalueen. Annamme kirjallisen takuun työjäljestä 2 vuotta.',
     icon: 'shield',
   },
 ];

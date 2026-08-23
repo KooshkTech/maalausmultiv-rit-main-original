@@ -10,6 +10,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { company } from '@/data/company';
+import { trackPhoneClick, trackCtaClick } from '@/lib/analytics';
 import { Reveal } from '@/components/Reveal';
 import { images } from '@/config/images';
 
@@ -31,6 +32,9 @@ export function Hero() {
           alt="Ammattitaitoinen maalari maalaamassa puutalon julkisivua rullalla Uudellamaalla"
           className="h-full w-full object-cover opacity-35"
           fetchPriority="high"
+          width={926}
+          height={1024}
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-navy-950 via-navy-950/85 to-navy-900/70" />
         <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-navy-950/40" />
@@ -62,11 +66,11 @@ export function Hero() {
 
           <Reveal delay={300}>
             <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
-              <Link to="/yhteystiedot" className="btn-primary text-base">
+              <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä ilmainen tarjous', 'homepage_hero')} className="btn-primary text-base">
                 Pyydä ilmainen tarjous
                 <ArrowRight className="h-5 w-5" />
               </Link>
-              <a href={company.phoneHref} className="btn-ghost-light text-base">
+              <a href={company.phoneHref} onClick={() => trackPhoneClick('homepage_hero')} className="btn-ghost-light text-base">
                 <Phone className="h-5 w-5" />
                 Soita nyt
               </a>
@@ -102,7 +106,7 @@ export function Hero() {
             <p className="mt-5 text-sm leading-relaxed text-white/90">
               Soita tai täytä tarjouspyyntö, niin käymme paikan päällä tutkimassa
               kohteen ja laadimme tarkan aikataulun ja hinta-arvion. Kilpailukykyiset
-              hinnat ja takuu työjäljestä jopa 5 vuotta.
+              hinnat ja takuu työjäljestä 2 vuotta.
             </p>
 
             <div className="mt-6 grid grid-cols-3 gap-3 border-t border-white/15 pt-6">
@@ -111,7 +115,7 @@ export function Hero() {
                 <p className="text-[11px] text-navy-200">Vuotta alalla</p>
               </div>
               <div>
-                <p className="font-display text-2xl font-extrabold text-orange-400">5 v</p>
+                <p className="font-display text-2xl font-extrabold text-orange-400">2 v</p>
                 <p className="text-[11px] text-navy-200">Takuu</p>
               </div>
               <div>

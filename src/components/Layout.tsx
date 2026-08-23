@@ -6,13 +6,20 @@ import { FloatingButtons } from './FloatingButtons';
 import { CookieConsent } from './CookieConsent';
 import { LeadPopups } from './LeadPopups';
 import { Analytics } from './Analytics';
-import { initializeAnalytics } from '@/lib/analytics';
+import { initializeAnalytics, trackPageView } from '@/lib/analytics';
 
 export function Layout() {
   const { pathname } = useLocation();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [pathname]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      trackPageView(pathname, document.title);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [pathname]);
 
   useEffect(() => {

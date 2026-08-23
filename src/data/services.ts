@@ -48,7 +48,7 @@ export const services: Service[] = [
       'Pohjustus ja halkeamien kunnostus',
       'Kaksi maalauskerrosta sääluokiteltua maalia',
       'Koristelistojen ja ikkunapäiden maalaus',
-      'Takuu työjäljestä jopa 5 vuotta',
+      'Takuu työjäljestä 2 vuotta',
     ],
     image: images.services.ulkomaalaus,
   },

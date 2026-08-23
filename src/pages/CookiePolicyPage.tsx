@@ -1,5 +1,6 @@
 import { Seo } from '@/components/Seo';
 import { company } from '@/data/company';
+import { trackEmailClick } from '@/lib/analytics';
 
 export function CookiePolicyPage() {
   return (
@@ -83,7 +84,7 @@ export function CookiePolicyPage() {
               <h2 className="font-display text-xl font-bold text-navy-900">Yhteystiedot</h2>
               <p className="mt-2 leading-relaxed">
                 Kysymyksissä evästeiden käytöstä ota yhteyttä:{' '}
-                <a href={company.emailHref} className="text-orange-600 underline">
+                <a href={company.emailHref} onClick={() => trackEmailClick('cookie_policy')} className="text-orange-600 underline">
                   {company.email}
                 </a>
                 . Lue myös{' '}

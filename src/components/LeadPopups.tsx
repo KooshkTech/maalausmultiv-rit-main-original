@@ -28,7 +28,7 @@ const POPUPS: Record<PopupVariant, PopupState> = {
   time: {
     variant: 'time',
     headline: 'Tuo talosi kuntoon',
-    body: 'Varaa ilmainen arviokäynti jo tänään. Meiltä saat ammattilaisten työn ja jopa 5 vuoden takuun.',
+    body: 'Varaa ilmainen arviokäynti jo tänään. Meiltä saat ammattilaisten työn ja 2 vuoden kirjallisen takuun.',
     primaryLabel: 'Pyydä tarjous',
     primaryHref: '/yhteystiedot',
     primaryIcon: 'send',
@@ -252,12 +252,3 @@ export function LeadPopups() {
   );
 }
 
-/** Dispatch a portfolio lightbox open event */
-export function trackPortfolioView() {
-  window.dispatchEvent(new Event('lightbox-open'));
-}
-
-/** Dispatch a calculator completion event */
-export function trackCalcComplete() {
-  window.dispatchEvent(new Event('calc-complete'));
-}

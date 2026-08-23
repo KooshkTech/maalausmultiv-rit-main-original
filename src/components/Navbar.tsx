@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Menu, X, Phone, PaintRoller, ChevronDown, Brush, ArrowRight } from 'lucide-react';
 import { company } from '@/data/company';
 import { getPaintingServices, getCleaningServices } from '@/data/services';
+import { trackPhoneClick } from '@/lib/analytics';
 
 const navLinks = [
   { to: '/palvelut', label: 'Palvelut', hasMega: true },
@@ -81,7 +82,7 @@ export function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <a href={company.phoneHref} className="flex items-center gap-2 text-sm font-semibold text-navy-800 hover:text-orange-600"><Phone className="h-4 w-4" />{company.phone}</a>
+          <a href={company.phoneHref} onClick={() => trackPhoneClick('navbar_desktop')} className="flex items-center gap-2 text-sm font-semibold text-navy-800 hover:text-orange-600"><Phone className="h-4 w-4" />{company.phone}</a>
           <Link to="/yhteystiedot" className="btn-primary">Pyydä tarjous</Link>
         </div>
 
@@ -92,7 +93,7 @@ export function Navbar() {
         <div className="lg:hidden border-t border-navy-100 bg-white shadow-lift">
           <div className="container-base max-h-[calc(100vh-4rem)] overflow-y-auto px-5 py-4">
             <div className="mb-4 grid grid-cols-2 gap-2">
-              <a href={company.phoneHref} className="flex items-center justify-center gap-2 rounded-xl bg-navy-50 py-3 text-sm font-bold text-navy-800"><Phone className="h-4 w-4" />Soita</a>
+              <a href={company.phoneHref} onClick={() => trackPhoneClick('navbar_mobile')} className="flex items-center justify-center gap-2 rounded-xl bg-navy-50 py-3 text-sm font-bold text-navy-800"><Phone className="h-4 w-4" />Soita</a>
               <Link to="/yhteystiedot" className="btn-primary justify-center">Pyydä tarjous</Link>
             </div>
             <ul className="flex flex-col gap-1">

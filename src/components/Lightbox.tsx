@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { trackPortfolioView } from '@/components/LeadPopups';
+import { trackPortfolioView } from '@/lib/leadPopupEvents';
 
 type LightboxProps = {
   images: { url: string; alt: string; caption?: string }[];

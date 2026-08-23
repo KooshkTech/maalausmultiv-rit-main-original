@@ -17,10 +17,19 @@ type SeoProps = {
     description: string;
     areaServed: string;
   };
+  articleSchema?: {
+    headline: string;
+    description: string;
+    image: string;
+    datePublished: string;
+    dateModified?: string;
+    author: string;
+  };
 };
 
 const BASE_URL = 'https://maalausmultivari.fi';
 const DEFAULT_IMAGE = ogImage;
+const absoluteUrl = (value: string) => (value.startsWith('http') ? value : `${BASE_URL}${value}`);
 
 const localBusinessSchema = {
   '@context': 'https://schema.org',
@@ -32,7 +41,7 @@ const localBusinessSchema = {
   url: BASE_URL,
   telephone: '+358402429650',
   email: company.email,
-  image: DEFAULT_IMAGE,
+  image: absoluteUrl(DEFAULT_IMAGE),
   priceRange: '€€',
   areaServed: serviceAreas.map((a) => a.name),
   address: {
@@ -101,11 +110,16 @@ export function Seo({
   breadcrumbs,
   faqSchema,
   serviceSchema,
+  articleSchema,
 }: SeoProps) {
   const fullTitle = title
     ? `${title} | ${company.name}`
     : `${company.name} | Maalaus- ja siivouspalveluja Uudellamaalla`;
   const url = `${BASE_URL}${path}`;
+  // Social crawlers (Facebook, LinkedIn, WhatsApp, X) require an absolute
+  // URL for og:image / twitter:image — a root-relative path like
+  // "/images/..." is not reliably resolved and breaks link previews.
+  const absoluteImage = absoluteUrl(image);
 
   const schemas: Record<string, unknown>[] = [localBusinessSchema, organizationSchema, websiteSchema];
 
@@ -153,6 +167,34 @@ export function Seo({
     });
   }
 
+  if (articleSchema) {
+    schemas.push({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: articleSchema.headline,
+      description: articleSchema.description,
+      image: absoluteUrl(articleSchema.image),
+      datePublished: articleSchema.datePublished,
+      dateModified: articleSchema.dateModified ?? articleSchema.datePublished,
+      author: {
+        '@type': 'Organization',
+        name: articleSchema.author,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: company.name,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${BASE_URL}/OY.png`,
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': url,
+      },
+    });
+  }
+
   return (
     <Helmet>
       <html lang="fi" />
@@ -166,7 +208,7 @@ export function Seo({
       <meta property="og:url" content={url} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={absoluteImage} />
       <meta property="og:locale" content="fi_FI" />
       <meta property="og:site_name" content={company.name} />
       <meta property="og:image:alt" content={`${company.name} — maalaus- ja siivouspalvelut`} />
@@ -174,7 +216,7 @@ export function Seo({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={absoluteImage} />
       <meta name="twitter:image:alt" content={`${company.name} — maalaus- ja siivouspalvelut`} />
 
       {schemas.map((schema, i) => (

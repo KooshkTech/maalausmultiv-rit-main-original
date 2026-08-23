@@ -4,6 +4,7 @@ import { SectionHeading } from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
 import { serviceAreas } from '@/data/site';
 import { company } from '@/data/company';
+import { trackEmailClick } from '@/lib/analytics';
 
 const growthAreas = ['Porvoo', 'Lohja', 'Vihti', 'Tuusula', 'Mäntsälä', 'Riihimäki'];
 
@@ -76,7 +77,7 @@ export function ServiceAreas() {
         <Reveal className="mt-8 text-center">
           <p className="text-sm text-navy-600">
             Etkö löydä kotikuntaasi listasta?{' '}
-            <a href={company.emailHref} className="font-semibold text-orange-600 hover:underline">
+            <a href={company.emailHref} onClick={() => trackEmailClick('service_areas_fallback')} className="font-semibold text-orange-600 hover:underline">
               Ota yhteyttä
             </a>{' '}
             — tarkistamme mielellämme kohteesi ja palvelumahdollisuuden.

@@ -8,6 +8,7 @@ import { getService } from '@/data/services';
 import { cities } from '@/data/cities';
 import { company } from '@/data/company';
 import { images } from '@/config/images';
+import { trackPhoneClick } from '@/lib/analytics';
 
 export function IndustryPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -184,6 +185,7 @@ export function IndustryPage() {
               <div className="mt-4 space-y-3">
                 <a
                   href={company.phoneHref}
+                  onClick={() => trackPhoneClick('industry_page_sidebar')}
                   className="btn-primary w-full"
                   aria-label={`Soita Maalaus Multivärille, ${company.phone}`}
                 >

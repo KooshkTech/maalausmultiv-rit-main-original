@@ -11,25 +11,55 @@
     <meta name="author" content="Maalaus Multiväri" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#0f2e5c" />
+    <link rel="preload" as="image" href="/images/hero/hero-house-painting.webp" type="image/webp" fetchpriority="high" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://maalausmultivari.fi/" />
     <meta property="og:title" content="Maalaus Multiväri | Maalaus- ja siivouspalveluja Uudellamaalla" />
     <meta property="og:description" content="Laadukkaita maalaus- ja siivouspalveluja yksityisille ja yrityksille Uudellamaalla. Pyydä ilmainen arvio!" />
-    <meta property="og:image" content="https://images.pexels.com/photos/5691479/pexels-photo-5691479.jpeg?auto=compress&cs=tinysrgb&w=1200&h=630&fit=crop" />
+    <meta property="og:image" content="https://maalausmultivari.fi/images/hero/hero-house-painting.webp" />
     <meta property="og:locale" content="fi_FI" />
     <meta property="og:site_name" content="Maalaus Multiväri" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Maalaus Multiväri | Maalaus- ja siivouspalveluja Uudellamaalla" />
     <meta name="twitter:description" content="Laadukkaita maalaus- ja siivouspalveluja Uudellamaalla. Pyydä ilmainen arvio!" />
-    <meta name="twitter:image" content="https://images.pexels.com/photos/5691479/pexels-photo-5691479.jpeg?auto=compress&cs=tinysrgb&w=1200&h=630&fit=crop" />
+    <meta name="twitter:image" content="https://maalausmultivari.fi/images/hero/hero-house-painting.webp" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script type="module" crossorigin src="/assets/index-BfWOpwjy.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-B6SbzvDU.css">
+
+    <!--
+      Google Analytics 4 (Consent Mode v2).
+      All storage is denied by default until the cookie-consent banner
+      grants it; src/components/Analytics.tsx then calls
+      gtag('consent','update', ...) once the user chooses, and
+      src/lib/analytics.ts gates every event on that same consent state
+      before calling gtag('event', ...).
+    -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = gtag;
+
+      gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        wait_for_update: 500,
+      });
+
+      gtag('js', new Date());
+      gtag('config', 'G-J9TBS9HKFD', {
+        send_page_view: false,
+        anonymize_ip: true,
+      });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J9TBS9HKFD"></script>
+    <script type="module" crossorigin src="/assets/index-DMHILssf.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BcqqvvL3.css">
   </head>
   <body>
     <div id="root"></div>

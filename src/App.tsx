@@ -38,24 +38,10 @@ export default function App() {
         <Route index element={<Suspense fallback={<PageLoader />}><HomePage /></Suspense>} />
         <Route path="palvelut" element={<Suspense fallback={<PageLoader />}><ServicesPage /></Suspense>} />
         <Route path="palvelut/siivous" element={<Suspense fallback={<PageLoader />}><CleaningServicesPage /></Suspense>} />
+        <Route path="palvelut/:serviceSlug/:citySlug" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
         <Route path="palvelut/:slug" element={<Suspense fallback={<PageLoader />}><ServiceDetailPage /></Suspense>} />
         <Route path="palvelualueet" element={<Suspense fallback={<PageLoader />}><CitiesIndexPage /></Suspense>} />
         <Route path="palvelualueet/:slug" element={<Suspense fallback={<PageLoader />}><CityPage /></Suspense>} />
-        <Route path="talon-maalaus-helsinki" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="talon-maalaus-espoo" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="talon-maalaus-vantaa" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="sisamaalaus-helsinki" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="sisamaalaus-espoo" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="sisamaalaus-vantaa" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="julkisivumaalaus-helsinki" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="julkisivumaalaus-espoo" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="julkisivumaalaus-vantaa" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="kattomaalaus-helsinki" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="kattomaalaus-espoo" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="kattomaalaus-vantaa" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="ulkomaalaus-helsinki" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="ulkomaalaus-espoo" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="ulkomaalaus-vantaa" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
         <Route path="toimialat" element={<Suspense fallback={<PageLoader />}><IndustriesIndexPage /></Suspense>} />
         <Route path="toimialat/:slug" element={<Suspense fallback={<PageLoader />}><IndustryPage /></Suspense>} />
         <Route path="kustannuslaskuri" element={<Suspense fallback={<PageLoader />}><CostCalculatorPage /></Suspense>} />

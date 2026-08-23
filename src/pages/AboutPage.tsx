@@ -7,6 +7,7 @@ import { Reveal } from '@/components/Reveal';
 import { Stats } from '@/sections/Stats';
 import { ContactCTA } from '@/sections/ContactCTA';
 import { company } from '@/data/company';
+import { trackPhoneClick, trackEmailClick } from '@/lib/analytics';
 
 const values = [
   {
@@ -80,10 +81,10 @@ export function AboutPage() {
               </p>
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a href={company.phoneHref} className="btn-secondary">
+              <a href={company.phoneHref} onClick={() => trackPhoneClick('about_hero')} className="btn-secondary">
                 Soita meille
               </a>
-              <a href={company.emailHref} className="btn-outline">
+              <a href={company.emailHref} onClick={() => trackEmailClick('about_hero')} className="btn-outline">
                 Lähetä sähköpostia
               </a>
             </div>
@@ -139,7 +140,7 @@ export function AboutPage() {
               <p className="text-navy-200">Kuulemme mielellämme kokemustasi. Lähetä palautetta sähköpostitse!</p>
             </div>
           </div>
-          <a href={company.emailHref} className="btn-primary">
+          <a href={company.emailHref} onClick={() => trackEmailClick('about_feedback')} className="btn-primary">
             Ota yhteyttä
             <ArrowRight className="h-4 w-4" />
           </a>

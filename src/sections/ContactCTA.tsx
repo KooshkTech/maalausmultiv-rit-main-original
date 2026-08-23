@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Reveal } from '@/components/Reveal';
 import { company } from '@/data/company';
 import { ContactForm } from '@/components/ContactForm';
+import { trackPhoneClick, trackEmailClick } from '@/lib/analytics';
 
 export function ContactCTA() {
   return (
@@ -20,7 +21,7 @@ export function ContactCTA() {
             </p>
 
             <div className="mt-8 flex flex-col gap-5">
-              <a href={company.phoneHref} className="group flex items-center gap-4">
+              <a href={company.phoneHref} onClick={() => trackPhoneClick('contact_cta')} className="group flex items-center gap-4">
                 <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition group-hover:bg-orange-500 group-hover:text-white">
                   <Phone className="h-5 w-5" />
                 </span>
@@ -29,7 +30,7 @@ export function ContactCTA() {
                   <p className="font-display text-base font-bold text-navy-900">{company.phone}</p>
                 </div>
               </a>
-              <a href={company.emailHref} className="group flex items-center gap-4">
+              <a href={company.emailHref} onClick={() => trackEmailClick('contact_cta')} className="group flex items-center gap-4">
                 <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition group-hover:bg-orange-500 group-hover:text-white">
                   <Mail className="h-5 w-5" />
                 </span>

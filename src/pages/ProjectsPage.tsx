@@ -8,6 +8,9 @@ import { Lightbox } from '@/components/Lightbox';
 import { ContactCTA } from '@/sections/ContactCTA';
 import { projects, projectCategories } from '@/data/projects';
 import { getServiceByTitle } from '@/data/services';
+
+const priorityCitySlugs: Record<string, string> = { Helsinki: 'helsinki', Espoo: 'espoo', Vantaa: 'vantaa' };
+const localPaintingServices = new Set(['talon-maalaus', 'ulkomaalaus', 'sisamaalaus', 'julkisivumaalaus', 'kattomaalaus']);
 import { images } from '@/config/images';
 
 export function ProjectsPage() {
@@ -99,10 +102,14 @@ export function ProjectsPage() {
                       {project.services.map((s) => {
                         const matchedService = getServiceByTitle(s);
                         if (matchedService) {
+                          const citySlug = priorityCitySlugs[project.location];
+                          const servicePath = citySlug && localPaintingServices.has(matchedService.slug)
+                            ? `/palvelut/${matchedService.slug}/${citySlug}`
+                            : `/palvelut/${matchedService.slug}`;
                           return (
                             <Link
                               key={s}
-                              to={`/palvelut/${matchedService.slug}`}
+                              to={servicePath}
                               className="inline-flex items-center gap-1 rounded-md bg-navy-50 px-2 py-0.5 text-xs font-medium text-navy-600 transition hover:bg-orange-50 hover:text-orange-700"
                             >
                               <CheckCircle2 className="h-3 w-3 text-green-500" />
@@ -170,6 +177,7 @@ export function ProjectsPage() {
           )
         }
       />
+
 
       <ContactCTA />
     </>

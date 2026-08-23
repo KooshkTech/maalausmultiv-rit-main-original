@@ -5,6 +5,7 @@ import { Reveal } from '@/components/Reveal';
 import { QuoteForm } from '@/components/QuoteForm';
 import { company } from '@/data/company';
 import { images } from '@/config/images';
+import { trackPhoneClick, trackEmailClick, trackWhatsAppClick } from '@/lib/analytics';
 
 export function ContactPage() {
   return (
@@ -39,7 +40,7 @@ export function ContactPage() {
               </p>
 
               <div className="mt-8 flex flex-col gap-4">
-                <a href={company.phoneHref} className="card group flex items-center gap-4 p-5 hover:border-orange-200">
+                <a href={company.phoneHref} onClick={() => trackPhoneClick('contact_page_card')} className="card group flex items-center gap-4 p-5 hover:border-orange-200">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition group-hover:bg-orange-500 group-hover:text-white">
                     <Phone className="h-5 w-5" />
                   </span>
@@ -48,7 +49,7 @@ export function ContactPage() {
                     <p className="font-display text-base font-bold text-navy-900">{company.phone}</p>
                   </div>
                 </a>
-                <a href={company.emailHref} className="card group flex items-center gap-4 p-5 hover:border-orange-200">
+                <a href={company.emailHref} onClick={() => trackEmailClick('contact_page_card')} className="card group flex items-center gap-4 p-5 hover:border-orange-200">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition group-hover:bg-orange-500 group-hover:text-white">
                     <Mail className="h-5 w-5" />
                   </span>
@@ -57,7 +58,7 @@ export function ContactPage() {
                     <p className="font-display text-base font-bold text-navy-900">{company.email}</p>
                   </div>
                 </a>
-                <a href={company.whatsappHref} target="_blank" rel="noopener noreferrer" className="card group flex items-center gap-4 p-5 hover:border-orange-200">
+                <a href={company.whatsappHref} target="_blank" rel="noopener noreferrer" onClick={() => trackWhatsAppClick('contact_page_card')} className="card group flex items-center gap-4 p-5 hover:border-orange-200">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#25D366] transition group-hover:bg-[#25D366] group-hover:text-white">
                     <MessageCircle className="h-5 w-5" />
                   </span>

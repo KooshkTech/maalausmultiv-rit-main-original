@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { company } from '@/data/company';
 import { getPaintingServices, getCleaningServices } from '@/data/services';
+import { trackPhoneClick, trackEmailClick, trackWhatsAppClick } from '@/lib/analytics';
 
 export function Footer() {
   return (
@@ -31,13 +32,14 @@ export function Footer() {
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-navy-200">
               {company.name} tarjoaa laadukkaita maalaus- ja siivouspalveluja
               yksityisille ja yrityksille Uudellamaalla. Kilpailukykyiset hinnat ja
-              takuu työjäljestä jopa 5 vuotta.
+              takuu työjäljestä 2 vuotta.
             </p>
             <div className="mt-6 flex gap-3">
               <a
                 href={company.whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackWhatsAppClick('footer_icon')}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 transition hover:bg-[#25D366]"
                 aria-label="WhatsApp"
               >
@@ -45,6 +47,7 @@ export function Footer() {
               </a>
               <a
                 href={company.phoneHref}
+                onClick={() => trackPhoneClick('footer_icon')}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 transition hover:bg-orange-500"
                 aria-label="Soita"
               >
@@ -52,6 +55,7 @@ export function Footer() {
               </a>
               <a
                 href={company.emailHref}
+                onClick={() => trackEmailClick('footer_icon')}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 transition hover:bg-orange-500"
                 aria-label="Sähköposti"
               >
@@ -137,13 +141,13 @@ export function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />
-                <a href={company.phoneHref} className="text-navy-200 transition hover:text-white">
+                <a href={company.phoneHref} onClick={() => trackPhoneClick('footer_contact_info')} className="text-navy-200 transition hover:text-white">
                   {company.phone}
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" />
-                <a href={company.emailHref} className="text-navy-200 transition hover:text-white break-all">
+                <a href={company.emailHref} onClick={() => trackEmailClick('footer_contact_info')} className="text-navy-200 transition hover:text-white break-all">
                   {company.email}
                 </a>
               </li>

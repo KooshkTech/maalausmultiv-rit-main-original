@@ -7,7 +7,8 @@ import { getCity, cities } from '@/data/cities';
 import { services } from '@/data/services';
 import { company } from '@/data/company';
 import { locationSeoMap } from '@/data/seoMap';
-import { getServiceLocationTarget } from '@/data/serviceLocationSeo';
+import { trackPhoneClick } from '@/lib/analytics';
+import { localServicePath } from '@/data/localSeo';
 
 export function CityPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -123,29 +124,18 @@ export function CityPage() {
               </h3>
 
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {services
-                  .filter((service) => ['talon-maalaus', 'ulkomaalaus', 'sisamaalaus', 'julkisivumaalaus', 'kattomaalaus'].includes(service.slug))
-                  .map((service) => {
-                    const target = getServiceLocationTarget(`${service.slug}-${city.slug}`);
-                    if (!target) return null;
-                    return (
-                      <Link
-                        key={target.slug}
-                        to={`/${target.slug}`}
-                        className="flex items-center gap-2 text-sm text-navy-600 transition hover:text-orange-600"
-                      >
-                        <ArrowRight className="h-3.5 w-3.5 text-orange-400" />
-                        <span>{service.title} {city.locative}</span>
-                      </Link>
-                    );
-                  })}
-                <Link
-                  to="/palvelut"
-                  className="flex items-center gap-2 text-sm font-semibold text-orange-600 transition hover:text-orange-700"
-                >
-                  <ArrowRight className="h-3.5 w-3.5" />
-                  <span>Kaikki palvelut</span>
-                </Link>
+                {services.map((service) => (
+                  <Link
+                    key={service.slug}
+                    to={localServicePath(service.slug, city.slug)}
+                    className="flex items-center gap-2 text-sm text-navy-600 transition hover:text-orange-600"
+                  >
+                    <ArrowRight className="h-3.5 w-3.5 text-orange-400" />
+                    <span>
+                      {service.title} {city.locative}
+                    </span>
+                  </Link>
+                ))}
               </div>
             </div>
 
@@ -193,6 +183,7 @@ export function CityPage() {
               <div className="mt-4 space-y-3">
                 <a
                   href={company.phoneHref}
+                  onClick={() => trackPhoneClick('city_page_sidebar')}
                   className="btn-primary w-full"
                   aria-label={`Soita Maalaus Multivärille, ${company.phone}`}
                 >

@@ -7,7 +7,8 @@ import { images } from '@/config/images';
 import { company } from '@/data/company';
 import { services } from '@/data/services';
 import { Link } from 'react-router-dom';
-import { trackCalcComplete } from '@/components/LeadPopups';
+import { trackCalcComplete } from '@/lib/leadPopupEvents';
+import { trackPhoneClick, trackCtaClick } from '@/lib/analytics';
 
 const propertyTypes = [
   { id: 'apartment', label: 'Kerrostalo-asunto', factor: 1.0 },
@@ -241,18 +242,18 @@ export function CostCalculatorPage() {
                   Arvio on suuntaa-antava. Lopullinen hinta määräytyy kohteen tarkastuksen
                   perusteella. Pyydä ilmainen tarjous tarkalla hinnalla.
                 </p>
-                <Link to="/yhteystiedot" className="btn-primary w-full">
+                <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä virallinen tarjous', 'cost_calculator_result')} className="btn-primary w-full">
                   <Send className="h-4 w-4" />
                   Pyydä virallinen tarjous
                 </Link>
-                <a href={company.phoneHref} className="btn-outline mt-3 w-full">
+                <a href={company.phoneHref} onClick={() => trackPhoneClick('cost_calculator_result')} className="btn-outline mt-3 w-full">
                   <Phone className="h-4 w-4" />
                   Soita {company.phone}
                 </a>
                 <div className="mt-5 space-y-2">
                   <Bullet text="Ilmainen paikallinen arviokäynti" />
                   <Bullet text="Sitouttamaton tarjous 24 h sisällä" />
-                  <Bullet text="Kirjallinen takuu jopa 5 v" />
+                  <Bullet text="Kirjallinen takuu 2 vuotta" />
                 </div>
               </div>
             </div>

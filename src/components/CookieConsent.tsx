@@ -44,6 +44,13 @@ export function CookieConsent() {
       const timer = setTimeout(() => setVisible(true), 1500);
       return () => clearTimeout(timer);
     }
+    // Returning visitor: the banner stays hidden, but the consent state
+    // must still be rehydrated into window.__mmConsent on every fresh
+    // page load, or analytics.ts silently blocks every event forever.
+    setAnalytics(stored.analytics);
+    setMarketing(stored.marketing);
+    window.__mmConsent = { analytics: stored.analytics, marketing: stored.marketing };
+    window.dispatchEvent(new Event('mm-consent-update'));
   }, []);
 
   const acceptAll = () => {

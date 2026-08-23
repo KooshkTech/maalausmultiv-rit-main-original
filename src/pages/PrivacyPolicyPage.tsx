@@ -1,5 +1,6 @@
 import { Seo } from '@/components/Seo';
 import { company } from '@/data/company';
+import { trackEmailClick, trackPhoneClick } from '@/lib/analytics';
 
 export function PrivacyPolicyPage() {
   return (
@@ -25,12 +26,12 @@ export function PrivacyPolicyPage() {
                 {company.city}, {company.region}, {company.country}
                 <br />
                 Sähköposti:{' '}
-                <a href={company.emailHref} className="text-orange-600 underline">
+                <a href={company.emailHref} onClick={() => trackEmailClick('privacy_policy_registrar')} className="text-orange-600 underline">
                   {company.email}
                 </a>
                 <br />
                 Puhelin:{' '}
-                <a href={company.phoneHref} className="text-orange-600 underline">
+                <a href={company.phoneHref} onClick={() => trackPhoneClick('privacy_policy')} className="text-orange-600 underline">
                   {company.phone}
                 </a>
               </p>
@@ -82,7 +83,7 @@ export function PrivacyPolicyPage() {
                 Sinulla on oikeus tarkastaa itseäsi koskevat tiedot, pyytää niiden oikaisua tai
                 poistoa, sekä vastustaa tai rajoittaa käsittelyä soveltuvan lainsäädännön
                 mukaisesti. Voit käyttää oikeuksiasi ottamalla yhteyttä osoitteeseen{' '}
-                <a href={company.emailHref} className="text-orange-600 underline">
+                <a href={company.emailHref} onClick={() => trackEmailClick('privacy_policy_rights_request')} className="text-orange-600 underline">
                   {company.email}
                 </a>
                 . Sinulla on myös oikeus tehdä valitus tietosuojavaltuutetun toimistolle.

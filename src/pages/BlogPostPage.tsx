@@ -5,6 +5,7 @@ import { Reveal } from '@/components/Reveal';
 import { ContactCTA } from '@/sections/ContactCTA';
 import { getBlogPost, blogPosts } from '@/data/blog';
 import { getService } from '@/data/services';
+import { priorityLocalServiceSlugs } from '@/data/localSeo';
 
 export function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -30,6 +31,13 @@ export function BlogPostPage() {
           { name: 'Blogi', path: '/blogi' },
           { name: post.title, path: `/blogi/${post.slug}` },
         ]}
+        articleSchema={{
+          headline: post.title,
+          description: post.excerpt,
+          image: post.image,
+          datePublished: post.date,
+          author: post.author,
+        }}
       />
 
       <article className="bg-navy-950 pt-16 text-white lg:pt-20">
@@ -110,6 +118,27 @@ export function BlogPostPage() {
                       {service.title}
                     </Link>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {relatedServiceItems.some((service) => (priorityLocalServiceSlugs as readonly string[]).includes(service.slug)) && (
+              <div className="mt-8 border-t border-navy-100 pt-6">
+                <p className="text-sm font-bold text-navy-900">Paikalliset maalauspalvelut</p>
+                <p className="mt-1 text-sm text-navy-600">Jos kohteesi on pääkaupunkiseudulla, tutustu palveluun suoraan omalla alueellasi.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {relatedServiceItems
+                    .filter((service) => (priorityLocalServiceSlugs as readonly string[]).includes(service.slug))
+                    .flatMap((service) => ['helsinki', 'espoo', 'vantaa'].map((city) => ({ service, city })))
+                    .map(({ service, city }) => (
+                      <Link
+                        key={`${service.slug}-${city}`}
+                        to={`/palvelut/${service.slug}/${city}`}
+                        className="rounded-full bg-navy-50 px-3 py-1.5 text-xs font-semibold text-navy-700 transition hover:bg-orange-50 hover:text-orange-700"
+                      >
+                        {service.title} {city.charAt(0).toUpperCase() + city.slice(1)}
+                      </Link>
+                    ))}
                 </div>
               </div>
             )}

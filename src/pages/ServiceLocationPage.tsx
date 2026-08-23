@@ -1,207 +1,266 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ArrowRight, Check, Phone, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Check, MapPin, Phone, ShieldCheck } from 'lucide-react';
 import { Seo } from '@/components/Seo';
 import { Reveal } from '@/components/Reveal';
-import { company } from '@/data/company';
-import { cities, getCity } from '@/data/cities';
+import { ContactCTA } from '@/sections/ContactCTA';
 import { getService } from '@/data/services';
-import { getServiceLocationTarget } from '@/data/serviceLocationSeo';
+import { getCity } from '@/data/cities';
+import { company } from '@/data/company';
 import { images } from '@/config/images';
-import { SeoInternalLinks } from '@/components/SeoInternalLinks';
+import { trackCtaClick, trackPhoneClick } from '@/lib/analytics';
+import { priorityLocalServiceSlugs } from '@/data/localSeo';
+import { projects } from '@/data/projects';
 
-const priorityCities = ['helsinki', 'espoo', 'vantaa'];
+const supportedServices = new Set<string>(priorityLocalServiceSlugs);
+const supportedCities = new Set(['helsinki', 'espoo', 'vantaa']);
+
+const localCopy: Record<string, Record<string, { intro: string; consideration: string }>> = {
+  helsinki: {
+    'talon-maalaus': {
+      intro: 'Helsingin talokanta vaihtelee puutaloista rapattuihin ja moderneihin pientaloihin. Talon maalaus suunnitellaan aina julkisivumateriaalin, nykyisen maalipinnan ja kohteen kunnon mukaan.',
+      consideration: 'Helsingissä rannikon kosteus, tuuli ja vaihtelevat sääolot korostavat pesun, irtoavan maalin poiston ja oikean pohjustuksen merkitystä.',
+    },
+    ulkomaalaus: {
+      intro: 'Ulkomaalaus Helsingissä alkaa pintojen kunnon arvioinnista. Puujulkisivut, listat ja muut ulkopinnat käsitellään materiaalille sopivalla tavalla ennen pintamaalausta.',
+      consideration: 'Meri-ilma ja vuodenaikojen vaihtelut rasittavat Helsingin ulkopintoja, joten esikäsittely ja sääolosuhteisiin sopiva maalausajankohta ovat keskeisiä.',
+    },
+    sisamaalaus: {
+      intro: 'Sisämaalaus Helsingissä sopii niin kerrostaloasuntoihin, pientaloihin kuin toimitiloihin. Suojaamme tilat huolellisesti ja sovitamme työn asumisen tai liiketoiminnan aikatauluun.',
+      consideration: 'Vanhemmissa helsinkiläisissä asunnoissa pohjatyöt, tasoitukset ja aiempien pintojen kunto vaikuttavat erityisesti lopputulokseen.',
+    },
+    julkisivumaalaus: {
+      intro: 'Julkisivumaalaus Helsingissä suunnitellaan rakennuksen materiaalin, vanhan pinnoitteen ja ympäristön rasituksen mukaan. Toteutamme puu-, rappaus- ja muita soveltuvia julkisivuja huolellisilla pohjatöillä.',
+      consideration: 'Helsingin merellinen ilmasto, tuuli ja kosteus korostavat hengittävän pintakäsittelyn, halkeamien korjauksen ja oikean sääikkunan merkitystä julkisivumaalauksessa.',
+    },
+    kattomaalaus: {
+      intro: 'Kattomaalaus Helsingissä auttaa suojaamaan peltikattoa ruosteelta ja säältä. Katon kunto tarkistetaan, pinta pestään ja ruostekohdat käsitellään ennen soveltuvaa kattopinnoitetta.',
+      consideration: 'Rannikon kosteus, ilmansaasteet ja vaihtelevat sääolosuhteet voivat rasittaa kattopintoja Helsingissä, joten pesu, ruosteenpoisto ja kuivumisolosuhteet tarkistetaan ennen maalausta.',
+    },
+  },
+  espoo: {
+    'talon-maalaus': {
+      intro: 'Espoon pientaloalueilla talon maalaus tehdään rakennuksen materiaalin ja ympäristön mukaan. Arvioimme julkisivun, listat ja muut sovitut pinnat ennen työn aloitusta.',
+      consideration: 'Espoon rannikkoalueilla kosteus ja merellinen ilmasto voivat rasittaa maalipintaa, kun taas sisämaan pientaloalueilla auringon ja sään vaihtelut korostuvat.',
+    },
+    ulkomaalaus: {
+      intro: 'Ulkomaalaus Espoossa toteutetaan puu-, rappaus- ja muille soveltuville julkisivupinnoille huolellisen esikäsittelyn jälkeen.',
+      consideration: 'Tapiolan, Matinkylän ja muiden Espoon alueiden rakennuskanta on monipuolinen, joten maalityyppi ja työmenetelmä valitaan aina pinnan mukaan.',
+    },
+    sisamaalaus: {
+      intro: 'Sisämaalaus Espoossa uudistaa kodin, asunnon tai toimitilan nopeasti ilman raskasta remonttia. Maalaamme seinät, katot ja sovitut yksityiskohdat siististi.',
+      consideration: 'Kerrostalo- ja pientalokohteissa suojaus, pölynhallinta ja pohjatöiden oikea laajuus suunnitellaan erikseen ennen maalausta.',
+    },
+    julkisivumaalaus: {
+      intro: 'Julkisivumaalaus Espoossa toteutetaan rakennuksen materiaalin ja ympäristön mukaan. Käsittelemme puu- ja rappausjulkisivuja sekä muita soveltuvia pintoja huolellisella esikäsittelyllä.',
+      consideration: 'Espoon rannikkoalueilla kosteus ja merellinen ilmasto lisäävät julkisivujen rasitusta, kun taas sisämaan pientaloalueilla UV-säteily ja lämpötilavaihtelut korostuvat.',
+    },
+    kattomaalaus: {
+      intro: 'Kattomaalaus Espoossa sisältää katon kunnon arvioinnin, pesun, ruostekohtien käsittelyn ja sovitun pinnoituksen. Työmenetelmä valitaan kattomateriaalin ja nykyisen pinnan mukaan.',
+      consideration: 'Espoon merellisillä alueilla katto altistuu kosteudelle ja tuulelle, joten pesun jälkeinen kuivuminen ja ruostesuojauksen laatu ovat erityisen tärkeitä.',
+    },
+  },
+  vantaa: {
+    'talon-maalaus': {
+      intro: 'Vantaa on kotimarkkinaamme. Talon maalaus Vantaalla kattaa omakoti- ja pientalojen pintojen arvioinnin, esikäsittelyn ja sovitut maalaustyöt.',
+      consideration: 'Tikkurilan, Myyrmäen, Hakunilan ja muiden Vantaan alueiden pientalokanta vaihtelee, joten tarkistamme aina materiaalin ja vanhan maalipinnan ennen työmenetelmän valintaa.',
+    },
+    ulkomaalaus: {
+      intro: 'Ulkomaalaus Vantaalla tehdään kohteen kunnon perusteella: pinnat pestään, irtoava maali poistetaan ja tarvittavat kohdat pohjustetaan ennen maalausta.',
+      consideration: 'Paikallinen sijaintimme helpottaa kohdekäyntiä ja työn suunnittelua Vantaan eri alueilla sekä auttaa ajoittamaan ulkomaalauksen sopiviin sääolosuhteisiin.',
+    },
+    sisamaalaus: {
+      intro: 'Sisämaalaus Vantaalla palvelee asuntoja, omakotitaloja ja toimitiloja. Työ voidaan toteuttaa huone kerrallaan tai laajempana kokonaisuutena.',
+      consideration: 'Asutuissa kohteissa painotamme huolellista suojausta, siisteyttä ja vaiheistusta, jotta arki voi jatkua mahdollisimman normaalisti.',
+    },
+    julkisivumaalaus: {
+      intro: 'Julkisivumaalaus Vantaalla tehdään pientaloihin, taloyhtiöihin ja muihin kiinteistöihin materiaalikohtaisilla menetelmillä. Arvioimme pinnan kunnon ja tarvittavat korjaukset ennen maalausta.',
+      consideration: 'Vantaan vaihteleva pientalo- ja kiinteistökanta edellyttää oikeaa maalityyppiä sekä riittäviä pohjatöitä. Paikallinen sijaintimme helpottaa kohdekäyntiä ja työn ajoitusta.',
+    },
+    kattomaalaus: {
+      intro: 'Kattomaalaus Vantaalla uudistaa ja suojaa peltikaton pintaa. Pesemme katon, käsittelemme ruostekohdat ja toteutamme pinnoituksen kohteen kunnon mukaan.',
+      consideration: 'Vantaalla lämpötilavaihtelut, puuston aiheuttama lika ja kosteus voivat rasittaa kattoa. Siksi katon puhdistus, ruosteenesto ja oikea maalausajankohta tarkistetaan ennen työtä.',
+    },
+  },
+};
 
 export function ServiceLocationPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const target = slug ? getServiceLocationTarget(slug) : undefined;
-  if (!target) return <Navigate to="/palvelut" replace />;
+  const { serviceSlug = '', citySlug = '' } = useParams<{ serviceSlug: string; citySlug: string }>();
+  const service = getService(serviceSlug);
+  const city = getCity(citySlug);
 
-  const service = getService(target.serviceSlug);
-  const city = getCity(target.citySlug);
-  if (!service || !city) return <Navigate to="/palvelut" replace />;
+  if (!service || !city || !supportedServices.has(serviceSlug) || !supportedCities.has(citySlug)) {
+    return <Navigate to="/404" replace />;
+  }
 
+  const copy = localCopy[citySlug][serviceSlug];
   const serviceImage = images.services[service.slug as keyof typeof images.services] || service.image;
-  const otherCities = cities.filter((item) =>
-    priorityCities.includes(item.slug) && item.slug !== city.slug
-  );
-
+  const localProjects = projects
+    .filter((project) => project.location === city.name)
+    .filter((project) => project.services.some((projectService) =>
+      projectService.toLowerCase().includes(service.title.toLowerCase().replace('talon maalaus', 'ulkomaalaus')) ||
+      service.title.toLowerCase().includes(projectService.toLowerCase())
+    ))
+    .slice(0, 2);
+  const title = `${service.title} ${city.name}`;
+  const titleSuffix: Record<string, string> = {
+    'talon-maalaus': 'omakoti- ja pientaloille',
+    ulkomaalaus: 'kestävät pohjatyöt ja maalaus',
+    sisamaalaus: 'kodit ja toimitilat',
+    julkisivumaalaus: 'puu- ja rappauspinnat',
+    kattomaalaus: 'peltikaton pesu ja pinnoitus',
+  };
+  const descriptionLead: Record<string, string> = {
+    'talon-maalaus': 'Omakoti- ja pientalon maalaus',
+    ulkomaalaus: 'Ulkomaalaus',
+    sisamaalaus: 'Sisämaalaus koteihin ja toimitiloihin',
+    julkisivumaalaus: 'Julkisivumaalaus puu- ja rappauspinnoille',
+    kattomaalaus: 'Peltikaton pesu ja kattomaalaus',
+  };
+  const seoTitle = `${title} – ${titleSuffix[service.slug]}`;
+  const description = `${descriptionLead[service.slug]} ${city.locative}. Kohdekohtaiset pohjatyöt, selkeä tarjous ja 2 vuoden kirjallinen takuu maalaustyöjäljestä. Pyydä maksuton arvio.`;
+  const serviceIntentFaq: Record<string, { q: string; a: string }> = {
+    'talon-maalaus': { q: `Milloin talon maalaus ${city.locative} kannattaa tehdä?`, a: 'Ulkomaalaus ajoitetaan kuivalle kaudelle, jolloin pinta on riittävän kuiva ja lämpötila sopii käytettävälle maalille. Tarkistamme olosuhteet ennen työn aloitusta.' },
+    ulkomaalaus: { q: `Miten ulkomaalauksen pohjatyöt arvioidaan ${city.locative}?`, a: 'Tarkistamme vanhan maalipinnan, lian, irtoavan maalin ja mahdolliset vauriot. Pesu, kaavinta, korjaukset ja pohjustus määritellään pinnan todellisen kunnon mukaan.' },
+    sisamaalaus: { q: `Voiko sisämaalauksen tehdä asutussa kodissa ${city.locative}?`, a: 'Usein kyllä. Työ voidaan vaiheistaa huoneittain, ja lattiat sekä kalusteet suojataan huolellisesti. Aikataulu sovitaan kohteen käytön mukaan.' },
+    julkisivumaalaus: { q: `Miten julkisivun materiaali vaikuttaa maalaukseen ${city.locative}?`, a: 'Puu-, rappaus- ja muut julkisivut vaativat materiaalille ja vanhalle pinnoitteelle sopivan esikäsittelyn sekä maalityypin. Tarkistamme nämä ennen tarjousta.' },
+    kattomaalaus: { q: `Mitä tarkistetaan ennen kattomaalausta ${city.locative}?`, a: 'Tarkistamme kattopinnan kunnon, ruostekohdat, puhdistustarpeen ja nykyisen pinnoitteen. Maalaus tehdään vasta puhtaalle ja riittävän kuivalle pinnalle sopivissa sääolosuhteissa.' },
+  };
   const faqs = [
-    {
-      q: `Paljonko ${service.title.toLowerCase()} ${city.locative} maksaa?`,
-      a: `Hinta riippuu kohteen koosta, pintojen kunnosta, esikäsittelystä ja työn laajuudesta. Teemme kohdekohtaisen arvion ja ilmaisen tarjouksen ennen työn aloittamista.`,
-    },
-    {
-      q: `Kuinka nopeasti ${service.title.toLowerCase()} voidaan aloittaa ${city.locative}?`,
-      a: `Aikataulu sovitaan kohteen laajuuden ja sesongin mukaan. Ota yhteyttä, niin arvioimme sopivan aloitusajan ja käymme tarvittaessa kohteessa paikan päällä.`,
-    },
-    {
-      q: `Mitä ${service.title.toLowerCase()} sisältää?`,
-      a: service.description,
-    },
+    serviceIntentFaq[service.slug],
+    { q: `Mitä ${service.title.toLowerCase()} ${city.locative} sisältää?`, a: `Työn sisältö sovitaan kohteen mukaan. Arvioimme pinnat, tarvittavat pohjatyöt, suojaukset, materiaalit ja maalausvaiheet ennen tarjousta.` },
+    { q: `Onko arvio ${city.locative} maksuton?`, a: 'Kyllä. Arviokäynti ja tarjous ovat maksuttomia ja sitoutumattomia.' },
+    { q: 'Kuinka pitkä takuu maalaustyöllä on?', a: 'Annamme maalaustyöjäljelle 2 vuoden kirjallisen takuun sovittujen takuuehtojen mukaisesti.' },
+    { q: `Miten työn ajankohta sovitaan ${city.locative}?`, a: 'Sovimme aikataulun kohteen, työn laajuuden ja maalausolosuhteiden mukaan. Ulkotöissä huomioimme erityisesti sään ja pintojen kuivumisen.' },
   ];
 
   return (
     <>
       <Seo
-        title={target.title}
-        description={target.description}
-        path={`/${target.slug}`}
+        title={seoTitle}
+        description={description}
+        path={`/palvelut/${service.slug}/${city.slug}`}
         image={serviceImage}
         breadcrumbs={[
           { name: 'Etusivu', path: '/' },
           { name: 'Palvelut', path: '/palvelut' },
           { name: service.title, path: `/palvelut/${service.slug}` },
-          { name: `${service.title} ${city.name}`, path: `/${target.slug}` },
+          { name: city.name, path: `/palvelut/${service.slug}/${city.slug}` },
         ]}
-        serviceSchema={{
-          name: `${service.title} ${city.name}`,
-          description: target.description,
-          areaServed: city.name,
-        }}
+        serviceSchema={{ name: title, description, areaServed: city.name }}
         faqSchema={faqs}
       />
 
-      <section className="bg-navy-950 pt-16 text-white lg:pt-20">
-        <div className="container-base grid gap-12 py-16 lg:grid-cols-12 lg:items-center lg:py-24">
+      <section className="bg-navy-950 text-white">
+        <div className="container-base grid gap-10 py-16 lg:grid-cols-12 lg:items-center lg:py-24">
           <Reveal className="lg:col-span-6">
-            <nav className="flex flex-wrap items-center gap-1.5 text-xs text-navy-300">
-              <Link to="/" className="hover:text-white">Etusivu</Link>
-              <span>/</span>
-              <Link to="/palvelut" className="hover:text-white">Palvelut</Link>
-              <span>/</span>
-              <Link to={`/palvelut/${service.slug}`} className="hover:text-white">{service.title}</Link>
-              <span>/</span>
-              <span className="text-orange-400">{city.name}</span>
-            </nav>
-            <h1 className="mt-5 font-display text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-              {service.title} {city.name}
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-navy-100 sm:text-lg">
-              {target.intro}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/yhteystiedot" className="btn-primary">
-                Pyydä ilmainen tarjous <ArrowRight className="h-4 w-4" />
-              </Link>
-              <a href={company.phoneHref} className="btn-ghost-light">
-                <Phone className="h-4 w-4" /> Soita {company.phone}
-              </a>
+            <div className="flex items-center gap-2 text-sm font-semibold text-orange-400"><MapPin className="h-4 w-4" />{city.name}, {city.region}</div>
+            <h1 className="mt-4 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">{title}</h1>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-navy-100">{copy.intro}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä tarjous', 'service_location_hero')} className="btn-primary">Pyydä maksuton tarjous <ArrowRight className="h-4 w-4" /></Link>
+              <a href={company.phoneHref} onClick={() => trackPhoneClick('service_location_hero')} className="btn-ghost-light"><Phone className="h-4 w-4" />{company.phone}</a>
             </div>
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-navy-200">
-              <span className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-orange-400" />Takuu työjäljestä jopa 5 v</span>
-              <span className="flex items-center gap-2"><Check className="h-5 w-5 text-orange-400" />Ilmainen ja sitoutumaton arvio</span>
-            </div>
+            <div className="mt-7 flex items-center gap-2 text-sm text-navy-200"><ShieldCheck className="h-5 w-5 text-orange-400" />2 vuoden kirjallinen takuu maalaustyöjäljestä</div>
           </Reveal>
-
-          <Reveal delay={150} className="lg:col-span-6">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-white/10">
-              <img src={serviceImage} alt={`${service.title} ${city.name}`} className="h-full w-full object-cover" loading="eager" />
-            </div>
+          <Reveal delay={120} className="lg:col-span-6">
+            <img src={serviceImage} alt={`${service.title} ${city.locative}`} className="aspect-[4/3] w-full rounded-3xl object-cover" loading="eager" fetchPriority="high" />
           </Reveal>
         </div>
       </section>
 
       <section className="section-pad bg-white">
-        <div className="container-base grid gap-12 lg:grid-cols-12">
-          <Reveal className="lg:col-span-7">
-            <span className="eyebrow-orange">{city.name} · Uusimaa</span>
-            <h2 className="mt-4 font-display text-3xl font-bold text-navy-900 sm:text-4xl">
-              {service.title} {city.locative}
-            </h2>
-            <p className="mt-5 text-navy-600 leading-relaxed">{target.intro}</p>
-            <p className="mt-4 text-navy-600 leading-relaxed">{city.localFacts}</p>
-
-            <h3 className="mt-8 font-display text-2xl font-bold text-navy-900">Mitä palveluun kuuluu?</h3>
-            <ul className="mt-5 grid gap-3">
-              {service.bullets.map((item) => (
-                <li key={item} className="flex items-start gap-3 rounded-xl border border-navy-100 bg-navy-50/50 p-4">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white"><Check className="h-4 w-4" /></span>
-                  <span className="text-sm font-medium text-navy-800 sm:text-base">{item}</span>
-                </li>
-              ))}
+        <div className="container-base grid gap-10 lg:grid-cols-[1fr_360px]">
+          <div>
+            <h2 className="font-display text-3xl font-bold text-navy-900">{service.title} {city.locative} – mitä työ sisältää?</h2>
+            <p className="mt-4 leading-relaxed text-navy-600">{service.description}</p>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+              {service.bullets.map((bullet) => <li key={bullet} className="flex gap-2 rounded-xl bg-navy-50 p-4 text-sm text-navy-700"><Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />{bullet}</li>)}
             </ul>
-          </Reveal>
+            <div className="mt-10 rounded-2xl border border-navy-100 p-6">
+              <h2 className="font-display text-2xl font-bold text-navy-900">{city.genitive} kohteissa huomioitavaa</h2>
+              <p className="mt-3 leading-relaxed text-navy-600">{copy.consideration}</p>
+              <p className="mt-3 leading-relaxed text-navy-600">{city.localFacts}</p>
+            </div>
+          </div>
+          <aside className="card h-fit p-6 lg:sticky lg:top-24">
+            <h2 className="font-display text-xl font-bold text-navy-900">Pyydä arvio {city.locative}</h2>
+            <p className="mt-3 text-sm leading-relaxed text-navy-600">Kerro kohteen sijainti, pintamateriaali ja työn arvioitu laajuus. Saat selkeän tarjouksen ennen työn aloitusta.</p>
+            <Link to="/yhteystiedot" className="btn-primary mt-5 w-full">Pyydä tarjous <ArrowRight className="h-4 w-4" /></Link>
+            <Link to={`/palvelualueet/${city.slug}`} className="mt-4 block text-center text-sm font-semibold text-orange-600">Kaikki palvelut {city.locative} →</Link>
+          </aside>
+        </div>
+      </section>
 
-          <Reveal delay={120} className="lg:col-span-5">
-            <div className="card sticky top-24 p-8">
-              <h3 className="font-display text-xl font-bold text-navy-900">Pyydä ilmainen arvio</h3>
-              <p className="mt-3 text-sm leading-relaxed text-navy-600">
-                Kerro meille kohteesta {city.locative}. Arvioimme työn laajuuden ja laadimme selkeän tarjouksen.
-              </p>
-              <div className="mt-6 flex flex-col gap-3">
-                <Link to="/yhteystiedot" className="btn-primary w-full">Pyydä tarjous <ArrowRight className="h-4 w-4" /></Link>
-                <a href={company.phoneHref} className="btn-outline w-full"><Phone className="h-4 w-4" />{company.phone}</a>
-                <Link to="/kustannuslaskuri" className="text-center text-sm font-semibold text-orange-600 hover:text-orange-700">Laske alustava kustannus →</Link>
+      {localProjects.length > 0 && (
+        <section className="section-pad bg-navy-50/60">
+          <div className="container-base">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+              <div>
+                <span className="eyebrow-orange">Paikallista näyttöä</span>
+                <h2 className="mt-3 font-display text-3xl font-bold text-navy-900">Toteutettuja kohteita {city.locative}</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-navy-600">Katso esimerkkejä alueella toteutetuista töistä. Projektit auttavat arvioimaan työn laajuutta ja toteutustapaa ennen tarjouspyyntöä.</p>
+              </div>
+              <Link to="/projektit" className="text-sm font-bold text-orange-600 hover:underline">Kaikki projektit →</Link>
+            </div>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              {localProjects.map((project) => (
+                <article key={project.id} className="card overflow-hidden">
+                  <img src={project.image} alt={`${project.title}, ${project.location}`} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+                  <div className="p-5">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-orange-600"><MapPin className="h-3.5 w-3.5" />{project.location} · {project.year}</div>
+                    <h3 className="mt-2 font-display text-lg font-bold text-navy-900">{project.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-navy-600">{project.description}</p>
+                    {project.review && (
+                      <blockquote className="mt-4 border-l-2 border-orange-300 pl-4 text-sm italic text-navy-600">
+                        “{project.review.text}” <span className="not-italic font-semibold text-navy-700">— {project.review.author}</span>
+                      </blockquote>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="section-pad bg-white">
+        <div className="container-base">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="card p-6">
+              <h2 className="font-display text-xl font-bold text-navy-900">Tutustu palveluun ja alueeseen</h2>
+              <p className="mt-2 text-sm leading-relaxed text-navy-600">Pääpalvelusivu kertoo työn yleisestä sisällöstä. {city.name}-sivu kokoaa kaikki alueella tarjoamamme palvelut.</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link to={`/palvelut/${service.slug}`} className="text-sm font-bold text-orange-600 hover:underline">{service.title} – pääpalvelu →</Link>
+                <Link to={`/palvelualueet/${city.slug}`} className="text-sm font-bold text-orange-600 hover:underline">Palvelut {city.locative} →</Link>
               </div>
             </div>
-          </Reveal>
+            <div className="card p-6">
+              <h2 className="font-display text-xl font-bold text-navy-900">Muut maalauspalvelut {city.locative}</h2>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {priorityLocalServiceSlugs.filter((slug) => slug !== service.slug).map((slug) => {
+                  const relatedService = getService(slug);
+                  if (!relatedService) return null;
+                  return (
+                    <Link key={slug} to={`/palvelut/${slug}/${city.slug}`} className="flex items-center gap-2 text-sm font-semibold text-navy-700 hover:text-orange-600">
+                      <ArrowRight className="h-3.5 w-3.5 text-orange-400" />
+                      {relatedService.title} {city.name}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="section-pad bg-navy-50/60">
-        <div className="container-base">
-          <div className="text-center">
-            <span className="eyebrow-orange">Paikallinen palvelu</span>
-            <h2 className="mt-4 font-display text-3xl font-bold text-navy-900">Miksi valita Maalaus Multiväri?</h2>
-          </div>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ['Paikallinen palvelu', `Palvelemme ${city.locative} ja tunnemme Uudenmaan kohteet.`],
-              ['Huolellinen esikäsittely', 'Pintojen valmistelu on osa kestävää lopputulosta.'],
-              ['Selkeä tarjous', 'Saat kohdekohtaisen arvion ennen työn aloittamista.'],
-              ['Takuu', 'Kirjallinen takuu työjäljestä sovitun mukaisesti.'],
-            ].map(([title, text]) => (
-              <div key={title} className="card p-6">
-                <h3 className="font-display font-bold text-navy-900">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-navy-600">{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section-pad bg-white">
         <div className="container-base max-w-3xl">
-          <div className="text-center">
-            <span className="eyebrow-orange">FAQ</span>
-            <h2 className="mt-4 font-display text-3xl font-bold text-navy-900">Usein kysytyt kysymykset</h2>
-          </div>
-          <div className="mt-10 space-y-3">
-            {faqs.map((faq) => (
-              <details key={faq.q} className="rounded-xl border border-navy-100 p-5">
-                <summary className="cursor-pointer text-sm font-semibold text-navy-800">{faq.q}</summary>
-                <p className="mt-3 text-sm leading-relaxed text-navy-600">{faq.a}</p>
-              </details>
-            ))}
-          </div>
+          <h2 className="text-center font-display text-3xl font-bold text-navy-900">Usein kysyttyä – {service.title.toLowerCase()} {city.locative}</h2>
+          <div className="mt-8 space-y-3">{faqs.map((faq) => <details key={faq.q} className="rounded-xl border border-navy-100 bg-white p-5"><summary className="cursor-pointer font-semibold text-navy-800">{faq.q}</summary><p className="mt-3 text-sm leading-relaxed text-navy-600">{faq.a}</p></details>)}</div>
         </div>
       </section>
 
-      <SeoInternalLinks serviceSlug={service.slug} citySlug={city.slug} />
-
-      <section className="section-pad bg-navy-950 text-white">
-        <div className="container-base">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <span className="eyebrow-orange">Muut alueet</span>
-              <h2 className="mt-4 font-display text-3xl font-bold">{service.title} myös lähialueilla</h2>
-            </div>
-            <Link to={`/palvelut/${service.slug}`} className="btn-outline border-white/20 text-white hover:bg-white/10">Katso yleinen palvelusivu →</Link>
-          </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {otherCities.map((otherCity) => {
-              const otherTarget = getServiceLocationTarget(`${service.slug}-${otherCity.slug}`);
-              if (!otherTarget) return null;
-              return (
-                <Link key={otherCity.slug} to={`/${otherTarget.slug}`} className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/10">
-                  <span className="font-display text-lg font-bold">{service.title} {otherCity.name}</span>
-                  <span className="mt-2 block text-sm text-navy-200">Katso paikallinen palvelusivu →</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <ContactCTA />
     </>
   );
 }

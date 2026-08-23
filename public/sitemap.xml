@@ -24,21 +24,6 @@
   <url><loc>https://maalausmultivari.fi/palvelut/hoivakodin-siivous</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/pihan-kunnostus</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/kattosiivous</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maalausmultivari.fi/talon-maalaus-helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://maalausmultivari.fi/talon-maalaus-espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://maalausmultivari.fi/talon-maalaus-vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://maalausmultivari.fi/sisamaalaus-helsinki</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/sisamaalaus-espoo</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/sisamaalaus-vantaa</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/julkisivumaalaus-helsinki</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/julkisivumaalaus-espoo</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/julkisivumaalaus-vantaa</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/kattomaalaus-helsinki</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/kattomaalaus-espoo</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/kattomaalaus-vantaa</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/ulkomaalaus-helsinki</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/ulkomaalaus-espoo</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://maalausmultivari.fi/ulkomaalaus-vantaa</loc><changefreq>monthly</changefreq><priority>0.85</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/helsinki</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/espoo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -62,6 +47,7 @@
   <url><loc>https://maalausmultivari.fi/blogi/sisamaalauksen-kustannukset</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://maalausmultivari.fi/blogi/tapetin-poisto-ja-pinnan-valmistelu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://maalausmultivari.fi/blogi/kattomaalauksen-tarve</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maalausmultivari.fi/blogi/vahapaastoiset-maalit-ja-m1-luokitus</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://maalausmultivari.fi/toimialat</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/toimialat/toimistot</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/toimialat/myymalat-ja-marketit</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -73,4 +59,31 @@
   <url><loc>https://maalausmultivari.fi/tietosuojaseloste</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://maalausmultivari.fi/evastekaytanto</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://maalausmultivari.fi/kayttoehdot</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/talon-maalaus/helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/talon-maalaus/espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/talon-maalaus/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/ulkomaalaus/helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/ulkomaalaus/espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/ulkomaalaus/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/sisamaalaus/helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/sisamaalaus/espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/sisamaalaus/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/julkisivumaalaus/helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/julkisivumaalaus/espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/julkisivumaalaus/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/kattomaalaus/helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/kattomaalaus/espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/kattomaalaus/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url>
+    <loc>https://maalausmultivari.fi/blogi/milloin-talo-pitaa-maalata-uudelleen</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://maalausmultivari.fi/blogi/talon-maalauksen-hinta-mista-kustannus-muodostuu</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

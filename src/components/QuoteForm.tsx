@@ -3,7 +3,7 @@ import { CheckCircle2, AlertCircle, Send, Loader2, Upload, X, Phone } from 'luci
 import { getPaintingServices, getCleaningServices } from '@/data/services';
 import { useSearchParams } from 'react-router-dom';
 import { company } from '@/data/company';
-import { trackGenerateLead } from '@/lib/analytics';
+import { trackGenerateLead, trackPhoneClick } from '@/lib/analytics';
 
 type FormValues = {
   name: string;
@@ -387,7 +387,7 @@ export function QuoteForm() {
                 <AlertCircle className="h-5 w-5 text-orange-500" />
                 <span className="text-sm font-medium text-navy-700">Tarvitsetko apua? Soita tai pyydä soittopyyntö.</span>
               </div>
-              <a href={company.phoneHref} className="btn-primary !py-2 text-sm"><Phone className="h-4 w-4" /> Soita</a>
+              <a href={company.phoneHref} onClick={() => trackPhoneClick('quote_form_help')} className="btn-primary !py-2 text-sm"><Phone className="h-4 w-4" /> Soita</a>
             </div>
           )}
 

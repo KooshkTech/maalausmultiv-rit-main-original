@@ -24,7 +24,7 @@ export const images = {
     team: `${BASE}/hero/hero-painters-team.webp`,
     nordicHouse: `${BASE}/hero/hero-nordic-house.webp`,
   },
-  og: `${BASE}/hero/hero-house-painting.webp`,
+  og: `${BASE}/hero/og-share.webp`,
   favicon: '/favicon.svg',
   logo: '/OY.png',
   logoDark: '/OY.png',

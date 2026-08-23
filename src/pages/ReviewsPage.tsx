@@ -7,6 +7,7 @@ import { Reveal } from '@/components/Reveal';
 import { ContactCTA } from '@/sections/ContactCTA';
 import { testimonials } from '@/data/testimonials';
 import { company } from '@/data/company';
+import { trackEmailClick } from '@/lib/analytics';
 
 export function ReviewsPage() {
   return (
@@ -67,7 +68,7 @@ export function ReviewsPage() {
                 Kuulemme mielellämme kokemustasi. Lähetä palautetta sähköpostitse,
                 niin julkaisemme sen sivuillamme.
               </p>
-              <a href={company.emailHref} className="btn-primary mt-2">
+              <a href={company.emailHref} onClick={() => trackEmailClick('reviews_feedback')} className="btn-primary mt-2">
                 Lähetä palautetta
               </a>
             </div>

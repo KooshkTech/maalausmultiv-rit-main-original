@@ -1,5 +1,6 @@
 import { Seo } from '@/components/Seo';
 import { company } from '@/data/company';
+import { trackEmailClick } from '@/lib/analytics';
 
 export function TermsOfUsePage() {
   return (
@@ -85,7 +86,7 @@ export function TermsOfUsePage() {
               <h2 className="font-display text-xl font-bold text-navy-900">7. Yhteystiedot</h2>
               <p className="mt-2 leading-relaxed">
                 Kysymyksissä käyttöehdoista ota yhteyttä:{' '}
-                <a href={company.emailHref} className="text-orange-600 underline">
+                <a href={company.emailHref} onClick={() => trackEmailClick('terms_of_use')} className="text-orange-600 underline">
                   {company.email}
                 </a>
                 .
