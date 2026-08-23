@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.app.json"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "verify:images": "node scripts/verify-images.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run verify:images && npm run build"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
