@@ -1,0 +1,16 @@
+import{c as a,r as s,j as e}from"./index-BfWOpwjy.js";import{R as g}from"./Reveal-DL1-bQNV.js";import{a as j}from"./Seo-BI0QlFHC.js";import{S as b}from"./shield-check-PjnRpZjy.js";/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const w=a("Briefcase",[["rect",{width:"20",height:"14",x:"2",y:"7",rx:"2",ry:"2",key:"eto64e"}],["path",{d:"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",key:"zwj3tp"}]]);/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const M=a("CalendarClock",[["path",{d:"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5",key:"1osxxc"}],["path",{d:"M16 2v4",key:"4m81vk"}],["path",{d:"M8 2v4",key:"1cmpym"}],["path",{d:"M3 10h5",key:"r794hk"}],["path",{d:"M17.5 17.5 16 16.3V14",key:"akvzfd"}],["circle",{cx:"16",cy:"16",r:"6",key:"qoo3c4"}]]);/**
+ * @license lucide-react v0.344.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const N=a("HeartHandshake",[["path",{d:"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z",key:"c3ymky"}],["path",{d:"M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66",key:"12sd6o"}],["path",{d:"m18 15-2-2",key:"60u0ii"}],["path",{d:"m15 18-2-2",key:"6p76be"}]]);function C({value:t,suffix:r="",duration:n=2e3,className:x=""}){const[p,c]=s.useState(0),o=s.useRef(null),i=s.useRef(!1);return s.useEffect(()=>{const l=o.current;if(!l)return;const d=new IntersectionObserver(f=>{f.forEach(u=>{if(u.isIntersecting&&!i.current){i.current=!0;const y=performance.now(),m=k=>{const h=Math.min((k-y)/n,1),v=1-Math.pow(1-h,3);c(Math.floor(v*t)),h<1?requestAnimationFrame(m):c(t)};requestAnimationFrame(m)}})},{threshold:.4});return d.observe(l),()=>d.disconnect()},[t,n]),e.jsxs("span",{ref:o,className:x,children:[p,r]})}const S={projects:w,customers:N,experience:M,warranty:b};function E(){return e.jsx("section",{className:"relative -mt-12 z-20","aria-label":"Yrityksen avainluvut",children:e.jsx("div",{className:"container-base",children:e.jsx(g,{className:"card grid grid-cols-2 gap-px overflow-hidden rounded-3xl bg-navy-100/60 lg:grid-cols-4",children:j.map(t=>{const r=S[t.icon];return e.jsxs("div",{className:"group flex flex-col items-center justify-center bg-white px-4 py-8 text-center transition-colors duration-300 hover:bg-orange-50/40 sm:py-10",children:[e.jsx("span",{className:"mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600 transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14",children:e.jsx(r,{className:"h-6 w-6 sm:h-7 sm:w-7","aria-hidden":"true"})}),e.jsx("p",{className:"font-display text-4xl font-extrabold text-navy-900 sm:text-5xl",children:e.jsx(C,{value:t.value,suffix:t.suffix})}),e.jsx("p",{className:"mt-2 text-sm font-semibold text-navy-800",children:t.label}),e.jsx("p",{className:"mt-1 hidden text-xs text-navy-500 sm:block",children:t.description})]},t.label)})})})})}export{E as S};
