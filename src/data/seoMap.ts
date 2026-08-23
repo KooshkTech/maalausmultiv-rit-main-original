@@ -148,7 +148,19 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
 };
 
 export const locationSeoMap: Record<string, { primaryKeywords: string[]; title: string; description: string }> = {
-  helsinki: { primaryKeywords: ['maalaus Helsinki', 'siivous Helsinki'], title: 'Maalaus ja siivous Helsingissä', description: 'Maalaus- ja siivouspalvelut Helsingissä koteihin, yrityksille ja taloyhtiöille. Pyydä ilmainen tarjous.' },
-  vantaa: { primaryKeywords: ['maalaus Vantaa', 'siivous Vantaa'], title: 'Maalaus ja siivous Vantaalla', description: 'Maalaus- ja siivouspalvelut Vantaalla koteihin, yrityksille ja kiinteistöille. Pyydä ilmainen tarjous.' },
-  espoo: { primaryKeywords: ['maalaus Espoo', 'siivous Espoo'], title: 'Maalaus ja siivous Espoossa', description: 'Maalaus- ja siivouspalvelut Espoossa omakotitaloihin, asuntoihin, yrityksille ja taloyhtiöille.' },
+  helsinki: {
+    primaryKeywords: ['maalaus Helsinki', 'talon maalaus Helsinki', 'siivous Helsinki'],
+    title: 'Maalaus Helsinki – talon maalaus ja siivouspalvelut',
+    description: 'Maalaus Helsingissä koteihin, taloyhtiöille ja yrityksille: talon maalaus, ulko- ja sisämaalaus sekä siivouspalvelut. Maksuton arvio ja tarjous.',
+  },
+  vantaa: {
+    primaryKeywords: ['maalaus Vantaa', 'talon maalaus Vantaa', 'siivous Vantaa'],
+    title: 'Maalaus Vantaa – talon maalaus ja siivouspalvelut',
+    description: 'Maalaus Vantaalla koteihin, taloyhtiöille ja yrityksille: talon maalaus, ulko- ja sisämaalaus sekä siivouspalvelut. Pyydä maksuton tarjous.',
+  },
+  espoo: {
+    primaryKeywords: ['maalaus Espoo', 'talon maalaus Espoo', 'siivous Espoo'],
+    title: 'Maalaus Espoo – talon maalaus ja siivouspalvelut',
+    description: 'Maalaus Espoossa omakotitaloihin, asuntoihin, taloyhtiöille ja yrityksille. Ulko- ja sisämaalaus sekä siivouspalvelut. Pyydä maksuton tarjous.',
+  },
 };
