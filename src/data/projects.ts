@@ -22,7 +22,7 @@ export const projects: Project[] = [
     location: 'Helsinki',
     year: '2024',
     description:
-      'Puutalon täysi ulkomaalaus. Vanha maali poistettiin harjaamalla ja pinnat pohjustettiin ennen kahden kerroksen sääluokiteltua maalausta. Takuu työjäljestä 5 vuotta.',
+      'Puutalon täysi ulkomaalaus. Vanha maali poistettiin harjaamalla ja pinnat pohjustettiin ennen kahden kerroksen sääluokiteltua maalausta. Takuu työjäljestä 2 vuotta.',
     image: images.projects['project-01'],
     beforeImage: images.beforeAfter['ba-02-before'],
     afterImage: images.beforeAfter['ba-02-after'],
