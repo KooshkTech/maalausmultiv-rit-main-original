@@ -200,9 +200,20 @@ export async function uploadProjectImage(projectId: string, file: File) {
   return path;
 }
 
-export function getProjectImageUrl(path: string | null) {
-  if (!path || !SUPABASE_URL) return null;
-  return `${SUPABASE_URL}/storage/v1/object/public/paint-planner/${path}`;
+export async function getSignedProjectImageUrl(path: string | null, expiresIn = 3600) {
+  if (!path) return null;
+  const session = await requireSession();
+  assertConfigured();
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/paint-planner/${path}`, {
+    method: 'POST',
+    headers: baseHeaders(session.access_token),
+    body: JSON.stringify({ expiresIn }),
+  });
+  if (!response.ok) throw new Error(await parseError(response));
+  const payload = await response.json() as { signedURL?: string; signedUrl?: string };
+  const signedPath = payload.signedURL || payload.signedUrl;
+  if (!signedPath) return null;
+  return signedPath.startsWith('http') ? signedPath : `${SUPABASE_URL}/storage/v1${signedPath}`;
 }
 
 export const customerAppConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
