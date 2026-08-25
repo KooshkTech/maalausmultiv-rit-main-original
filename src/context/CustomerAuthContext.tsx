@@ -66,6 +66,8 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   return <CustomerAuthContext.Provider value={value}>{children}</CustomerAuthContext.Provider>;
 }
 
+// The provider and its consumer hook intentionally live together so the app has one auth source of truth.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCustomerAuth() {
   const value = useContext(CustomerAuthContext);
   if (!value) throw new Error('useCustomerAuth must be used inside CustomerAuthProvider');
