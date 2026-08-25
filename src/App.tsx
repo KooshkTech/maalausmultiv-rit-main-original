@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { Layout } from '@/components/Layout';
+import { CustomerAppGuard, CustomerAppLayout } from '@/components/CustomerAppLayout';
+import { CustomerAuthProvider } from '@/context/CustomerAuthContext';
 
 const HomePage = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m.HomePage })));
 const ServicesPage = lazy(() => import('@/pages/ServicesPage').then((m) => ({ default: m.ServicesPage })));
@@ -15,6 +17,7 @@ const BlogPostPage = lazy(() => import('@/pages/BlogPostPage').then((m) => ({ de
 const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then((m) => ({ default: m.CostCalculatorPage })));
+const PaintPlannerLandingPage = lazy(() => import('@/pages/PaintPlannerLandingPage').then((m) => ({ default: m.PaintPlannerLandingPage })));
 const CitiesIndexPage = lazy(() => import('@/pages/CitiesIndexPage').then((m) => ({ default: m.CitiesIndexPage })));
 const CityPage = lazy(() => import('@/pages/CityPage').then((m) => ({ default: m.CityPage })));
 const IndustriesIndexPage = lazy(() => import('@/pages/IndustriesIndexPage').then((m) => ({ default: m.IndustriesIndexPage })));
@@ -22,6 +25,14 @@ const IndustryPage = lazy(() => import('@/pages/IndustryPage').then((m) => ({ de
 const PrivacyPolicyPage = lazy(() => import('@/pages/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage })));
 const CookiePolicyPage = lazy(() => import('@/pages/CookiePolicyPage').then((m) => ({ default: m.CookiePolicyPage })));
 const TermsOfUsePage = lazy(() => import('@/pages/TermsOfUsePage').then((m) => ({ default: m.TermsOfUsePage })));
+const AppLoginPage = lazy(() => import('@/pages/CustomerAuthPages').then((m) => ({ default: m.AppLoginPage })));
+const AppRegisterPage = lazy(() => import('@/pages/CustomerAuthPages').then((m) => ({ default: m.AppRegisterPage })));
+const AppForgotPasswordPage = lazy(() => import('@/pages/CustomerAuthPages').then((m) => ({ default: m.AppForgotPasswordPage })));
+const CustomerDashboardPage = lazy(() => import('@/pages/CustomerDashboardPages').then((m) => ({ default: m.CustomerDashboardPage })));
+const CustomerEstimatesPage = lazy(() => import('@/pages/CustomerDashboardPages').then((m) => ({ default: m.CustomerEstimatesPage })));
+const CustomerQuotesPage = lazy(() => import('@/pages/CustomerDashboardPages').then((m) => ({ default: m.CustomerQuotesPage })));
+const CustomerProfilePage = lazy(() => import('@/pages/CustomerDashboardPages').then((m) => ({ default: m.CustomerProfilePage })));
+const DesignWizardPage = lazy(() => import('@/pages/DesignWizardPage').then((m) => ({ default: m.DesignWizardPage })));
 
 function PageLoader() {
   return (
@@ -31,31 +42,51 @@ function PageLoader() {
   );
 }
 
+const suspense = (node: React.ReactNode) => <Suspense fallback={<PageLoader />}>{node}</Suspense>;
+
 export default function App() {
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Suspense fallback={<PageLoader />}><HomePage /></Suspense>} />
-        <Route path="palvelut" element={<Suspense fallback={<PageLoader />}><ServicesPage /></Suspense>} />
-        <Route path="palvelut/siivous" element={<Suspense fallback={<PageLoader />}><CleaningServicesPage /></Suspense>} />
-        <Route path="palvelut/:serviceSlug/:citySlug" element={<Suspense fallback={<PageLoader />}><ServiceLocationPage /></Suspense>} />
-        <Route path="palvelut/:slug" element={<Suspense fallback={<PageLoader />}><ServiceDetailPage /></Suspense>} />
-        <Route path="palvelualueet" element={<Suspense fallback={<PageLoader />}><CitiesIndexPage /></Suspense>} />
-        <Route path="palvelualueet/:slug" element={<Suspense fallback={<PageLoader />}><CityPage /></Suspense>} />
-        <Route path="toimialat" element={<Suspense fallback={<PageLoader />}><IndustriesIndexPage /></Suspense>} />
-        <Route path="toimialat/:slug" element={<Suspense fallback={<PageLoader />}><IndustryPage /></Suspense>} />
-        <Route path="kustannuslaskuri" element={<Suspense fallback={<PageLoader />}><CostCalculatorPage /></Suspense>} />
-        <Route path="yhteistyossa" element={<Suspense fallback={<PageLoader />}><AboutPage /></Suspense>} />
-        <Route path="projektit" element={<Suspense fallback={<PageLoader />}><ProjectsPage /></Suspense>} />
-        <Route path="arvostelut" element={<Suspense fallback={<PageLoader />}><ReviewsPage /></Suspense>} />
-        <Route path="blogi" element={<Suspense fallback={<PageLoader />}><BlogPage /></Suspense>} />
-        <Route path="blogi/:slug" element={<Suspense fallback={<PageLoader />}><BlogPostPage /></Suspense>} />
-        <Route path="yhteystiedot" element={<Suspense fallback={<PageLoader />}><ContactPage /></Suspense>} />
-        <Route path="tietosuojaseloste" element={<Suspense fallback={<PageLoader />}><PrivacyPolicyPage /></Suspense>} />
-        <Route path="evastekaytanto" element={<Suspense fallback={<PageLoader />}><CookiePolicyPage /></Suspense>} />
-        <Route path="kayttoehdot" element={<Suspense fallback={<PageLoader />}><TermsOfUsePage /></Suspense>} />
-        <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFoundPage /></Suspense>} />
-      </Route>
-    </Routes>
+    <CustomerAuthProvider>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={suspense(<HomePage />)} />
+          <Route path="palvelut" element={suspense(<ServicesPage />)} />
+          <Route path="palvelut/siivous" element={suspense(<CleaningServicesPage />)} />
+          <Route path="palvelut/:serviceSlug/:citySlug" element={suspense(<ServiceLocationPage />)} />
+          <Route path="palvelut/:slug" element={suspense(<ServiceDetailPage />)} />
+          <Route path="palvelualueet" element={suspense(<CitiesIndexPage />)} />
+          <Route path="palvelualueet/:slug" element={suspense(<CityPage />)} />
+          <Route path="toimialat" element={suspense(<IndustriesIndexPage />)} />
+          <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
+          <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
+          <Route path="maalauslaskuri" element={suspense(<PaintPlannerLandingPage />)} />
+          <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
+          <Route path="projektit" element={suspense(<ProjectsPage />)} />
+          <Route path="arvostelut" element={suspense(<ReviewsPage />)} />
+          <Route path="blogi" element={suspense(<BlogPage />)} />
+          <Route path="blogi/:slug" element={suspense(<BlogPostPage />)} />
+          <Route path="yhteystiedot" element={suspense(<ContactPage />)} />
+          <Route path="tietosuojaseloste" element={suspense(<PrivacyPolicyPage />)} />
+          <Route path="evastekaytanto" element={suspense(<CookiePolicyPage />)} />
+          <Route path="kayttoehdot" element={suspense(<TermsOfUsePage />)} />
+          <Route path="*" element={suspense(<NotFoundPage />)} />
+        </Route>
+
+        <Route path="app" element={<CustomerAppLayout />}>
+          <Route path="login" element={suspense(<AppLoginPage />)} />
+          <Route path="register" element={suspense(<AppRegisterPage />)} />
+          <Route path="forgot-password" element={suspense(<AppForgotPasswordPage />)} />
+          <Route element={<CustomerAppGuard />}>
+            <Route index element={suspense(<CustomerDashboardPage />)} />
+            <Route path="dashboard" element={suspense(<CustomerDashboardPage />)} />
+            <Route path="design/new" element={suspense(<DesignWizardPage />)} />
+            <Route path="design/:id" element={suspense(<DesignWizardPage />)} />
+            <Route path="estimates" element={suspense(<CustomerEstimatesPage />)} />
+            <Route path="quotes" element={suspense(<CustomerQuotesPage />)} />
+            <Route path="profile" element={suspense(<CustomerProfilePage />)} />
+          </Route>
+        </Route>
+      </Routes>
+    </CustomerAuthProvider>
   );
 }
