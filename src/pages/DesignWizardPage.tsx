@@ -184,7 +184,7 @@ function QuoteDialog({ projectId, title, city, estimateLow, estimateHigh, onClos
     event.preventDefault();
     setSending(true); setError(null);
     try {
-      let effectiveProjectId = projectId;
+      const effectiveProjectId = projectId;
       if (!effectiveProjectId) throw new Error('Tallenna projekti ennen tarjouspyyntöä.');
       await createQuoteRequest({ project_id: effectiveProjectId, project_title: title, city, estimate_low: estimateLow, estimate_high: estimateHigh, name, email: session?.user.email || '', phone, message, status: 'received' });
       await fetch('/send-mail.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ formType: 'quote', name, email: session?.user.email || '', phone, city, service: 'Maalaussuunnittelija', message: `${title}\nHinta-arvio ${estimateLow}–${estimateHigh} €\n${message}` }) }).catch(() => undefined);
