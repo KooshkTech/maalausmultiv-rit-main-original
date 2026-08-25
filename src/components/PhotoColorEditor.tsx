@@ -5,25 +5,26 @@ import type { SurfaceSelection } from '@/lib/paintPlannerEngine';
 
 type Props = {
   file: File | null;
+  initialImageUrl?: string | null;
   selections: SurfaceSelection[];
   onChange: (next: SurfaceSelection[]) => void;
 };
 
-export function PhotoColorEditor({ file, selections, onChange }: Props) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+export function PhotoColorEditor({ file, initialImageUrl = null, selections, onChange }: Props) {
+  const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl);
   const [activeKey, setActiveKey] = useState(selections[0]?.surfaceKey ?? '');
   const [points, setPoints] = useState<Array<{ x: number; y: number }>>([]);
   const imageRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     if (!file) {
-      setImageUrl(null);
+      setImageUrl(initialImageUrl);
       return;
     }
     const url = URL.createObjectURL(file);
     setImageUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [file]);
+  }, [file, initialImageUrl]);
 
   useEffect(() => {
     if (!selections.some((selection) => selection.surfaceKey === activeKey)) {
@@ -117,7 +118,7 @@ export function PhotoColorEditor({ file, selections, onChange }: Props) {
         </div>
 
         <div className="relative overflow-hidden rounded-xl bg-navy-900" onClick={clickImage} role="button" tabIndex={0} aria-label="Lisää alueen piste napauttamalla kuvaa">
-          <img ref={imageRef} src={imageUrl} alt="Asiakkaan lataama maalattava kohde" className="block w-full object-contain" />
+          <img ref={imageRef} src={imageUrl} alt="Asiakkaan lataama maalattava kohde" crossOrigin={imageUrl.startsWith('blob:') ? undefined : 'anonymous'} className="block w-full object-contain" />
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
             {selections.map((selection) => selection.polygon && selection.polygon.length >= 3 ? (
               <polygon key={selection.surfaceKey} points={selection.polygon.map((p) => `${p.x},${p.y}`).join(' ')} fill={selection.colorHex} fillOpacity="0.58" style={{ mixBlendMode: 'multiply' }} stroke="white" strokeWidth="0.35" />
