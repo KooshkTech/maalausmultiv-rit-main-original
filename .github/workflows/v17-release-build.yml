@@ -1,0 +1,43 @@
+name: V17 Production Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_SUPABASE_URL: https://xxfzqbcoajwuctzdtknn.supabase.co
+      VITE_SUPABASE_ANON_KEY: sb_publishable_fx056f4doh6fuE4cKQ5Srw_F-z8iucz
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
+      - name: Package dist
+        run: |
+          cd dist
+          zip -r ../maalausmultivari-V17-production-dist.zip .
+      - name: Upload production package
+        uses: actions/upload-artifact@v4
+        with:
+          name: maalausmultivari-V17-production-dist
+          path: maalausmultivari-V17-production-dist.zip
+          retention-days: 30
