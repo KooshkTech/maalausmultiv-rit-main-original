@@ -29,3 +29,12 @@ jobs:
         run: npm run lint
       - name: Production build
         run: npm run build
+      - name: Package latest V17 source
+        run: git archive --format=zip --output=maalausmultivari-V17-latest.zip HEAD
+      - name: Upload V17 project ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: maalausmultivari-V17-latest
+          path: maalausmultivari-V17-latest.zip
+          if-no-files-found: error
+          retention-days: 30
