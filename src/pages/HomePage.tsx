@@ -14,6 +14,7 @@ import { QuickQuote } from '@/components/QuickQuote';
 import { MobileStickyCTA } from '@/components/MobileStickyCTA';
 import { LocalSeoLinks } from '@/sections/LocalSeoLinks';
 import { LocalProjectProof } from '@/sections/LocalProjectProof';
+import { PaintPlannerPromo } from '@/sections/PaintPlannerPromo';
 
 export function HomePage() {
   return (
@@ -27,6 +28,7 @@ export function HomePage() {
       <Hero />
       <ServiceFinder />
       <QuickQuote />
+      <PaintPlannerPromo />
       <Stats />
       <ServicesOverview />
       <BeforeAfterGallery />
