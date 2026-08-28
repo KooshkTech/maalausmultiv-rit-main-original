@@ -18,7 +18,6 @@ type HistoryEntry = {
   layers: Layer[];
 };
 
-const BRUSH_SIZES = { brush: 8, roller: 24, eraser: 20 };
 const COLORS = [
   { name: 'Lämmin valkoinen', hex: '#F2EFE6' },
   { name: 'Pehmeä beige', hex: '#D8C9B5' },
@@ -42,8 +41,18 @@ export function PaintStudioPage() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [before, setBefore] = useState(false);
   const [opacity, setOpacity] = useState(0.28);
-  const [area, setArea] = useState(35);
-  const estimate = Math.round(area * 24 + 190);
+  const [brushSize, setBrushSize] = useState(24);
+  const [hardness, setHardness] = useState(0.65);
+  const [surface, setSurface] = useState('Seinät');
+  const [finish, setFinish] = useState('Matta');
+  const [width, setWidth] = useState(5);
+  const [length, setLength] = useState(7);
+  const [height, setHeight] = useState(2.7);
+  const [coats, setCoats] = useState(2);
+  const [snapshots, setSnapshots] = useState<string[]>([]);
+  const area = Math.max(5, Math.round(width * length * 2 + width * length * 0.7));
+  const liters = Math.ceil((area * coats) / 8);
+  const estimate = Math.round(area * (18 + coats * 3) + 190);
 
   useEffect(() => {
     if (!canvasRef.current || !imageUrl) return;
@@ -133,13 +142,21 @@ export function PaintStudioPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const size = tool === 'selector' ? 8 : BRUSH_SIZES[tool];
-    ctx.globalAlpha = tool === 'eraser' ? 0 : opacity;
-    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'multiply';
+    const size = tool === 'eraser' ? brushSize : tool === 'roller' ? brushSize * 2.5 : brushSize;
+    ctx.globalAlpha = tool === 'eraser' ? 1 : opacity;
+    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : finish === 'Kiiltävä' ? 'screen' : 'multiply';
     ctx.fillStyle = tool === 'eraser' ? 'rgba(0,0,0,1)' : color;
-    ctx.beginPath();
-    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-    ctx.fill();
+    if (tool === 'roller') {
+      ctx.fillRect(x - size, y - size / 2, size * 2, size);
+    } else {
+      const gradient = ctx.createRadialGradient(x, y, size * hardness * 0.2, x, y, size / 2);
+      gradient.addColorStop(0, tool === 'eraser' ? 'rgba(0,0,0,1)' : color);
+      gradient.addColorStop(1, tool === 'eraser' ? 'rgba(0,0,0,0)' : `${color}00`);
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
   };
@@ -150,6 +167,11 @@ export function PaintStudioPage() {
     link.href = canvasRef.current.toDataURL('image/png');
     link.download = `maalaus-design-${Date.now()}.png`;
     link.click();
+  };
+
+  const createSnapshot = () => {
+    if (!canvasRef.current) return;
+    setSnapshots((current) => [...current.slice(-3), canvasRef.current!.toDataURL('image/jpeg', 0.75)]);
   };
 
   const resetCanvas = () => {
@@ -319,6 +341,15 @@ export function PaintStudioPage() {
                 </div>
 
                 <div className="card space-y-3 p-5">
+                  <p className="text-xs font-bold uppercase text-navy-700">Maalauspinta</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {['Seinät', 'Katto', 'Ovet', 'Listat', 'Ikkunat', 'Oma alue'].map((item) => (
+                      <button key={item} type="button" onClick={() => setSurface(item)} className={`rounded-lg border px-2 py-2 text-xs font-bold ${surface === item ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-navy-200 text-navy-600'}`}>{item}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card space-y-3 p-5">
                   <p className="text-xs font-bold uppercase text-navy-700">Väri</p>
                   <div className="grid grid-cols-4 gap-2">
                     {COLORS.map((c) => (
@@ -335,12 +366,15 @@ export function PaintStudioPage() {
                       />
                     ))}
                   </div>
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-navy-200 p-1 cursor-pointer"
-                  />
+                  <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-10 w-full cursor-pointer rounded-lg border border-navy-200 p-1" aria-label="Valitse väri" />
+                  <label className="block text-xs font-bold text-navy-600">HEX-väri<input value={color} onChange={(e) => /^#[0-9A-Fa-f]{0,6}$/.test(e.target.value) && setColor(e.target.value)} className="mt-1 w-full rounded-lg border border-navy-200 px-3 py-2 font-mono text-sm" aria-label="HEX-väri" /></label>
+                  <div className="flex flex-wrap gap-2 pt-1"><span className="text-xs font-bold text-navy-500">Väri-ideat:</span>{[color, '#E8D8C3', '#5D7564', '#293746'].map((hex) => <button key={hex} type="button" onClick={() => setColor(hex)} className="h-6 w-6 rounded-full border border-white shadow" style={{ backgroundColor: hex }} aria-label={`Valitse väri ${hex}`} />)}</div>
+                </div>
+
+                <div className="card space-y-3 p-5">
+                  <label className="text-xs font-bold uppercase text-navy-700">Työkalun asetukset</label>
+                  <label className="block text-xs font-bold text-navy-600">Koko: {brushSize}px<input type="range" min="8" max="80" value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} className="w-full" /></label>
+                  <label className="block text-xs font-bold text-navy-600">Pehmeys: {Math.round(hardness * 100)}%<input type="range" min="0.15" max="1" step="0.05" value={hardness} onChange={(e) => setHardness(Number(e.target.value))} className="w-full" /></label>
                 </div>
 
                 <div className="card space-y-3 p-5">
@@ -357,6 +391,14 @@ export function PaintStudioPage() {
                     className="w-full"
                   />
                 </div>
+
+                <div className="card space-y-3 p-5">
+                  <div className="flex items-center justify-between"><p className="text-xs font-bold uppercase text-navy-700">Inspiraatio</p><span className="text-xs text-navy-400">Valitse tyyli</span></div>
+                  <div className="grid grid-cols-2 gap-2">{[{ name: 'Nordic', hex: '#D8C9B5' }, { name: 'Luonnollinen', hex: '#A8B39E' }, { name: 'Moderni', hex: '#8A8E8B' }, { name: 'Rohkea', hex: '#B86F52' }].map((style) => <button key={style.name} type="button" onClick={() => setColor(style.hex)} className="flex items-center gap-2 rounded-lg border border-navy-200 px-2 py-2 text-left text-xs font-bold text-navy-700"><span className="h-5 w-5 rounded-full" style={{ backgroundColor: style.hex }} />{style.name}</button>)}</div>
+                  <button type="button" onClick={() => setColor(COLORS[Math.floor(Math.random() * COLORS.length)].hex)} className="w-full rounded-lg bg-orange-50 px-3 py-2 text-xs font-bold text-orange-700 hover:bg-orange-100">Yllätä minut</button>
+                </div>
+
+                <div className="card space-y-3 p-5"><div className="flex items-center justify-between"><p className="text-xs font-bold uppercase text-navy-700">Tilannekuvat</p><button type="button" onClick={createSnapshot} className="text-xs font-bold text-orange-600">Ota kuva</button></div>{snapshots.length === 0 ? <p className="text-xs text-navy-500">Tallenna vertailua varten suunnitelman eri versioita.</p> : <div className="grid grid-cols-4 gap-2">{snapshots.map((shot, index) => <img key={`${shot}-${index}`} src={shot} alt={`Suunnitelman versio ${index + 1}`} className="aspect-square rounded object-cover" />)}</div>}</div>
 
                 <div className="card space-y-3 p-5">
                   <p className="text-xs font-bold uppercase text-navy-700">Tasot</p>
@@ -387,21 +429,10 @@ export function PaintStudioPage() {
                     </div>
                     <Palette className="h-5 w-5 text-orange-300" />
                   </div>
-                  <label className="block text-sm text-navy-100">
-                    Maalattava pinta-ala
-                    <span className="mt-2 flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="5"
-                        max="500"
-                        value={area}
-                        onChange={(e) => setArea(Math.max(5, Math.min(500, Number(e.target.value) || 5)))}
-                        className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white outline-none focus:border-orange-300"
-                        aria-label="Maalattava pinta-ala neliömetreinä"
-                      />
-                      <span>m²</span>
-                    </span>
-                  </label>
+                  <div className="grid grid-cols-3 gap-2 text-xs"><label>Leveys (m)<input type="number" min="1" max="30" step="0.1" value={width} onChange={(e) => setWidth(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white" /></label><label>Pituus (m)<input type="number" min="1" max="30" step="0.1" value={length} onChange={(e) => setLength(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white" /></label><label>Korkeus (m)<input type="number" min="2" max="6" step="0.1" value={height} onChange={(e) => setHeight(Math.max(2, Number(e.target.value) || 2))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white" /></label></div>
+                  <div className="flex items-center justify-between text-sm"><span>Arvioitu pinta-ala</span><strong>{area} m²</strong></div>
+                  <div className="flex items-center justify-between text-sm"><span>Arvioitu maalimäärä</span><strong>{liters} l</strong></div>
+                  <div className="grid grid-cols-2 gap-3 text-xs"><label>Maalauskertoja<select value={coats} onChange={(e) => setCoats(Number(e.target.value))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white"><option value="1">1 kerros</option><option value="2">2 kerrosta</option><option value="3">3 kerrosta</option></select></label><label>Viimeistely<select value={finish} onChange={(e) => setFinish(e.target.value)} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white"><option>Matta</option><option>Silkki</option><option>Satiini</option><option>Kiiltävä</option></select></label></div>
                   <p className="text-xs leading-5 text-navy-200">Suuntaa-antava arvio sisältää työn ja perustarvikkeet. Lopullinen hinta varmistetaan kohteen mukaan.</p>
                 </div>
 
