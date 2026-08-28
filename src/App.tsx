@@ -18,6 +18,7 @@ const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ defa
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then((m) => ({ default: m.CostCalculatorPage })));
 const PaintStudioPage = lazy(() => import('@/pages/PaintStudioPage').then((m) => ({ default: m.PaintStudioPage })));
+const CleaningStudioPage = lazy(() => import('@/pages/CleaningStudioPage').then((m) => ({ default: m.CleaningStudioPage })));
 const CitiesIndexPage = lazy(() => import('@/pages/CitiesIndexPage').then((m) => ({ default: m.CitiesIndexPage })));
 const CityPage = lazy(() => import('@/pages/CityPage').then((m) => ({ default: m.CityPage })));
 const IndustriesIndexPage = lazy(() => import('@/pages/IndustriesIndexPage').then((m) => ({ default: m.IndustriesIndexPage })));
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
           <Route path="paint-studio" element={suspense(<PaintStudioPage />)} />
+          <Route path="cleaning-studio" element={suspense(<CleaningStudioPage />)} />
           <Route path="maalauslaskuri" element={<Navigate to="/paint-studio" replace />} />
           <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
           <Route path="projektit" element={suspense(<ProjectsPage />)} />

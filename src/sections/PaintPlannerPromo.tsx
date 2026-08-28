@@ -12,11 +12,11 @@ export function PaintPlannerPromo() {
             <div className="relative grid gap-10 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-7">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-orange-300"><Palette className="h-4 w-4" />Uusi asiakastyökalu</span>
-                <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight sm:text-4xl">Kokeile värejä omassa kuvassasi ja arvioi maalaustyön hinta</h2>
-                <p className="mt-4 max-w-2xl leading-relaxed text-navy-100">Suunnittele talon ulkomaalaus, peltikaton maalaus tai sisätilojen väritys. Valitse julkisivu, katto, ovet, ikkunat, seinät ja muut maalattavat pinnat, lisää mitat ja saat alustavan hintahaarukan.</p>
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <Link to="/paint-studio" className="btn-primary">Kokeile värejä ja laske hinta <ArrowRight className="h-4 w-4" /></Link>
-                  <Link to="/app/login" className="btn-ghost-light">Oma tili</Link>
+                <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight sm:text-4xl">Muuta tilasi ennen kuin päätät</h2>
+                <p className="mt-4 max-w-2xl leading-relaxed text-navy-100">Lataa kuva tilastasi, kokeile värejä tai merkitse puhdistettavat alueet. Suunnittele rauhassa ja pyydä ammattilainen toteuttamaan hyvältä tuntuva lopputulos.</p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <Link to="/paint-studio" className="btn-primary">Aloita maalausstudio <ArrowRight className="h-4 w-4" /></Link>
+                  <Link to="/cleaning-studio" className="btn-ghost-light">Aloita siivousstudio <ArrowRight className="h-4 w-4" /></Link>
                 </div>
               </div>
               <div className="lg:col-span-5">

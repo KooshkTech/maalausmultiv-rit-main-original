@@ -169,10 +169,10 @@ export function PaintStudioPage() {
   return (
     <>
       <Seo
-        title="Maalisuunnittelija | Maalaus Multiväri"
+        title="Maalausstudio | Maalaus Multiväri"
         description="Suunnittele huoneen värit interaktiivisen maalisuunnittelijoiden avulla. Lataa kuva, maalaa värit ja näe suuntaa-antava lopputulos."
         path="/paint-studio"
-        breadcrumbs={[{ name: 'Etusivu', path: '/' }, { name: 'Maalisuunnittelija', path: '/paint-studio' }]}
+        breadcrumbs={[{ name: 'Etusivu', path: '/' }, { name: 'Maalausstudio', path: '/paint-studio' }]}
       />
 
       <main className="min-h-screen bg-navy-50">
@@ -181,7 +181,7 @@ export function PaintStudioPage() {
             <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-navy-600 hover:text-navy-800">
               <ArrowLeft className="h-4 w-4" />Takaisin
             </Link>
-            <h1 className="font-display text-lg font-bold text-navy-950">Maalisuunnittelija</h1>
+            <div className="flex items-center gap-4"><h1 className="font-display text-lg font-bold text-navy-950">Maalausstudio</h1><Link to="/cleaning-studio" className="hidden text-xs font-bold text-navy-500 hover:text-orange-600 sm:inline">Siivousstudio</Link></div>
             <button type="button" onClick={downloadDesign} className="btn-primary !px-4 !py-2">
               <Download className="h-4 w-4" />Lataa
             </button>
