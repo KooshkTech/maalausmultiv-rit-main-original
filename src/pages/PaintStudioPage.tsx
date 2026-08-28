@@ -4,7 +4,6 @@ import { ArrowLeft, Download, RotateCcw, Undo2, Redo2, Palette, ImagePlus, Eye, 
 import { Link } from 'react-router-dom';
 import { Seo } from '@/components/Seo';
 import { images } from '@/config/images';
-
 type ToolType = 'brush' | 'roller' | 'eraser' | 'selector';
 type Layer = {
   id: string;
@@ -43,6 +42,8 @@ export function PaintStudioPage() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [before, setBefore] = useState(false);
   const [opacity, setOpacity] = useState(0.28);
+  const [area, setArea] = useState(35);
+  const estimate = Math.round(area * 24 + 190);
 
   useEffect(() => {
     if (!canvasRef.current || !imageUrl) return;
@@ -82,6 +83,13 @@ export function PaintStudioPage() {
 
   const handleRedo = () => {
     if (historyIndex < history.length - 1) setHistoryIndex(historyIndex + 1);
+  };
+
+  const loadImageUrl = (url: string) => {
+    setImageUrl(url);
+    setLayers([]);
+    setHistory([]);
+    setHistoryIndex(-1);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +133,7 @@ export function PaintStudioPage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const size = BRUSH_SIZES[tool] || 8;
+    const size = tool === 'selector' ? 8 : BRUSH_SIZES[tool];
     ctx.globalAlpha = tool === 'eraser' ? 0 : opacity;
     ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'multiply';
     ctx.fillStyle = tool === 'eraser' ? 'rgba(0,0,0,1)' : color;
@@ -187,13 +195,22 @@ export function PaintStudioPage() {
                 <ImagePlus className="mx-auto h-12 w-12 text-navy-300" />
                 <p className="mt-4 text-lg font-bold text-navy-900">Lataa kuva huoneestasi</p>
                 <p className="mt-2 text-sm text-navy-600">JPG, PNG tai WebP, enintään 10 Mt</p>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="btn-primary mt-6"
-                >
-                  <ImagePlus className="h-5 w-5" />Valitse kuva
-                </button>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="btn-primary"
+                  >
+                    <ImagePlus className="h-5 w-5" />Valitse kuva
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => loadImageUrl(images.projects['project-05'])}
+                    className="btn-outline"
+                  >
+                    Kokeile esimerkkihuonetta
+                  </button>
+                </div>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -360,6 +377,32 @@ export function PaintStudioPage() {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                <div className="card space-y-4 bg-navy-950 p-5 text-white">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-orange-300">Suunnittelun arvio</p>
+                      <p className="mt-2 text-3xl font-bold">{estimate.toLocaleString('fi-FI')} €</p>
+                    </div>
+                    <Palette className="h-5 w-5 text-orange-300" />
+                  </div>
+                  <label className="block text-sm text-navy-100">
+                    Maalattava pinta-ala
+                    <span className="mt-2 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="5"
+                        max="500"
+                        value={area}
+                        onChange={(e) => setArea(Math.max(5, Math.min(500, Number(e.target.value) || 5)))}
+                        className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white outline-none focus:border-orange-300"
+                        aria-label="Maalattava pinta-ala neliömetreinä"
+                      />
+                      <span>m²</span>
+                    </span>
+                  </label>
+                  <p className="text-xs leading-5 text-navy-200">Suuntaa-antava arvio sisältää työn ja perustarvikkeet. Lopullinen hinta varmistetaan kohteen mukaan.</p>
                 </div>
 
                 <Link
