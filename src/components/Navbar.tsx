@@ -82,7 +82,7 @@ export function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Link to="/maalauslaskuri" className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition hover:bg-orange-100"><Palette className="h-4 w-4" />Suunnittele & laske</Link>
+          <Link to="/paint-studio" className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition hover:bg-orange-100"><Palette className="h-4 w-4" />Suunnittele & laske</Link>
           <a href={company.phoneHref} onClick={() => trackPhoneClick('navbar_desktop')} className="flex items-center gap-2 text-sm font-semibold text-navy-800 hover:text-orange-600"><Phone className="h-4 w-4" />{company.phone}</a>
           <Link to="/yhteystiedot" className="btn-primary">Pyydä tarjous</Link>
         </div>
@@ -93,7 +93,7 @@ export function Navbar() {
       {open && (
         <div className="lg:hidden border-t border-navy-100 bg-white shadow-lift">
           <div className="container-base max-h-[calc(100vh-4rem)] overflow-y-auto px-5 py-4">
-            <Link to="/maalauslaskuri" className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-orange-50 py-3 text-sm font-extrabold text-orange-700"><Palette className="h-5 w-5" />Kokeile värejä ja laske hinta</Link>
+            <Link to="/paint-studio" className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-orange-50 py-3 text-sm font-extrabold text-orange-700"><Palette className="h-5 w-5" />Kokeile värejä ja laske hinta</Link>
             <div className="mb-4 grid grid-cols-2 gap-2">
               <a href={company.phoneHref} onClick={() => trackPhoneClick('navbar_mobile')} className="flex items-center justify-center gap-2 rounded-xl bg-navy-50 py-3 text-sm font-bold text-navy-800"><Phone className="h-4 w-4" />Soita</a>
               <Link to="/yhteystiedot" className="btn-primary justify-center">Pyydä tarjous</Link>

@@ -15,7 +15,7 @@ export function PaintPlannerPromo() {
                 <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight sm:text-4xl">Kokeile värejä omassa kuvassasi ja arvioi maalaustyön hinta</h2>
                 <p className="mt-4 max-w-2xl leading-relaxed text-navy-100">Suunnittele talon ulkomaalaus, peltikaton maalaus tai sisätilojen väritys. Valitse julkisivu, katto, ovet, ikkunat, seinät ja muut maalattavat pinnat, lisää mitat ja saat alustavan hintahaarukan.</p>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <Link to="/maalauslaskuri" className="btn-primary">Kokeile värejä ja laske hinta <ArrowRight className="h-4 w-4" /></Link>
+                  <Link to="/paint-studio" className="btn-primary">Kokeile värejä ja laske hinta <ArrowRight className="h-4 w-4" /></Link>
                   <Link to="/app/login" className="btn-ghost-light">Oma tili</Link>
                 </div>
               </div>

@@ -33,7 +33,7 @@ export function CustomerAppLayout() {
               <button type="button" onClick={signOut} className="flex h-10 w-10 items-center justify-center rounded-xl text-navy-700 hover:bg-navy-50" aria-label="Kirjaudu ulos"><LogOut className="h-5 w-5" /></button>
             </div>
           ) : (
-            <Link to="/maalauslaskuri" className="inline-flex items-center gap-2 text-sm font-bold text-orange-600"><Palette className="h-4 w-4" />Tietoa työkalusta</Link>
+            <Link to="/paint-studio" className="inline-flex items-center gap-2 text-sm font-bold text-orange-600"><Palette className="h-4 w-4" />Tietoa työkalusta</Link>
           )}
         </div>
       </header>

@@ -23,7 +23,7 @@ export function ContactCTA() {
             </div>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link to="/maalauslaskuri" className="btn-primary"><Palette className="h-4 w-4" />Kokeile värejä ja laske hinta</Link>
+              <Link to="/paint-studio" className="btn-primary"><Palette className="h-4 w-4" />Kokeile värejä ja laske hinta</Link>
               <Link to="/projektit" className="btn-outline">Tutustu projekteihin <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </Reveal>
