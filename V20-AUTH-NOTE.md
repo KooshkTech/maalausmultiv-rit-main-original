@@ -1,0 +1,1 @@
+VäriKamu and SiivousKamu public SEO landing pages are crawlable, while the interactive editors are protected by the existing Supabase-backed `CustomerAppGuard`. No plaintext password storage or fake authentication is introduced.
