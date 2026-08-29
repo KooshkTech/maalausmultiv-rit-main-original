@@ -14,6 +14,7 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
+    allowedHosts: true,
     // Proxy the PHP mail endpoint to a local PHP server during development.
     // Run `php -S localhost:8000` from the public/ folder, then the Vite dev
     // server forwards /send-mail.php to it. In production on HostGator the

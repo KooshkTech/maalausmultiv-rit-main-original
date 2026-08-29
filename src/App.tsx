@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { Layout } from '@/components/Layout';
 import { CustomerAppGuard, CustomerAppLayout } from '@/components/CustomerAppLayout';
@@ -17,7 +17,10 @@ const BlogPostPage = lazy(() => import('@/pages/BlogPostPage').then((m) => ({ de
 const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then((m) => ({ default: m.CostCalculatorPage })));
-const PaintPlannerLandingPage = lazy(() => import('@/pages/PaintPlannerLandingPage').then((m) => ({ default: m.PaintPlannerLandingPage })));
+const PaintStudioPage = lazy(() => import('@/pages/PaintStudioPage').then((m) => ({ default: m.PaintStudioPage })));
+const CleaningStudioPage = lazy(() => import('@/pages/CleaningStudioPage').then((m) => ({ default: m.CleaningStudioPage })));
+const VarikamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.VarikamuLanding })));
+const SiivouskamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.SiivouskamuLanding })));
 const CitiesIndexPage = lazy(() => import('@/pages/CitiesIndexPage').then((m) => ({ default: m.CitiesIndexPage })));
 const CityPage = lazy(() => import('@/pages/CityPage').then((m) => ({ default: m.CityPage })));
 const IndustriesIndexPage = lazy(() => import('@/pages/IndustriesIndexPage').then((m) => ({ default: m.IndustriesIndexPage })));
@@ -59,7 +62,11 @@ export default function App() {
           <Route path="toimialat" element={suspense(<IndustriesIndexPage />)} />
           <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
-          <Route path="maalauslaskuri" element={suspense(<PaintPlannerLandingPage />)} />
+          <Route path="varikamu" element={suspense(<VarikamuLanding />)} />
+          <Route path="siivouskamu" element={suspense(<SiivouskamuLanding />)} />
+          <Route path="paint-studio" element={<Navigate to="/varikamu" replace />} />
+          <Route path="cleaning-studio" element={<Navigate to="/siivouskamu" replace />} />
+          <Route path="maalauslaskuri" element={<Navigate to="/paint-studio" replace />} />
           <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
           <Route path="projektit" element={suspense(<ProjectsPage />)} />
           <Route path="arvostelut" element={suspense(<ReviewsPage />)} />
@@ -79,6 +86,8 @@ export default function App() {
           <Route element={<CustomerAppGuard />}>
             <Route index element={suspense(<CustomerDashboardPage />)} />
             <Route path="dashboard" element={suspense(<CustomerDashboardPage />)} />
+            <Route path="varikamu" element={suspense(<PaintStudioPage />)} />
+            <Route path="siivouskamu" element={suspense(<CleaningStudioPage />)} />
             <Route path="design/new" element={suspense(<DesignWizardPage />)} />
             <Route path="design/:id" element={suspense(<DesignWizardPage />)} />
             <Route path="estimates" element={suspense(<CustomerEstimatesPage />)} />

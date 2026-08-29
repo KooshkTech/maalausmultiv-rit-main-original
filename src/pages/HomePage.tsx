@@ -15,6 +15,7 @@ import { MobileStickyCTA } from '@/components/MobileStickyCTA';
 import { LocalSeoLinks } from '@/sections/LocalSeoLinks';
 import { LocalProjectProof } from '@/sections/LocalProjectProof';
 import { PaintPlannerPromo } from '@/sections/PaintPlannerPromo';
+import { StudioIntroPopup } from '@/components/StudioIntroPopup';
 
 export function HomePage() {
   return (
@@ -40,6 +41,7 @@ export function HomePage() {
       <FAQSection />
       <ContactCTA />
       <MobileStickyCTA />
+      <StudioIntroPopup />
     </>
   );
 }

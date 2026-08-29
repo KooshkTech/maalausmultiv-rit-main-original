@@ -36,6 +36,8 @@
   <url><loc>https://maalausmultivari.fi/palvelualueet/nurmijarvi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/sipoo</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/kustannuslaskuri</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/varikamu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/siivouskamu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/yhteistyossa</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/projektit</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/arvostelut</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
