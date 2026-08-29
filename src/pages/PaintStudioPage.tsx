@@ -1,452 +1,384 @@
-'use client';
-import { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Download, RotateCcw, Undo2, Redo2, Palette, ImagePlus, Eye, EyeOff, Paintbrush, PaintRoller, Eraser } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { ArrowLeft, Camera, Check, Download, Eraser, Eye, EyeOff, ImagePlus, Layers3, Move, Paintbrush, PaintRoller, Redo2, RotateCcw, Save, SlidersHorizontal, Undo2, Upload, ZoomIn, ZoomOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Seo } from '@/components/Seo';
-import { images } from '@/config/images';
-type ToolType = 'brush' | 'roller' | 'eraser' | 'selector';
-type Layer = {
-  id: string;
-  name: string;
-  color: string;
-  opacity: number;
-  visible: boolean;
-  data: ImageData | null;
-};
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
 
-type HistoryEntry = {
-  layers: Layer[];
-};
+const QUOTE_ENDPOINT = '/send-mail.php';
 
-const COLORS = [
-  { name: 'Lämmin valkoinen', hex: '#F2EFE6' },
-  { name: 'Pehmeä beige', hex: '#D8C9B5' },
-  { name: 'Vaalea harmaa', hex: '#C9CBC8' },
-  { name: 'Harmaa', hex: '#8A8E8B' },
-  { name: 'Terrakotta', hex: '#B86F52' },
-  { name: 'Syvä vihreä', hex: '#496255' },
-  { name: 'Grafiitti', hex: '#45494B' },
-  { name: 'Musta', hex: '#1D2022' },
+type Surface = 'walls' | 'ceiling' | 'doors' | 'trim';
+type Tool = 'brush' | 'roller' | 'eraser' | 'pan';
+type HistoryFrame = Record<Surface, string>;
+type PanPoint = { x: number; y: number };
+
+type QuoteForm = { name: string; phone: string; city: string; message: string };
+
+const surfaces: Array<{ id: Surface; label: string }> = [
+  { id: 'walls', label: 'Seinät' },
+  { id: 'ceiling', label: 'Katto' },
+  { id: 'doors', label: 'Ovet' },
+  { id: 'trim', label: 'Listat' },
 ];
 
+const palette = [
+  ['Lämmin valkoinen', '#F2EFE6'], ['Pehmeä beige', '#D8C9B5'], ['Vaalea harmaa', '#C9CBC8'],
+  ['Hiekka', '#C7B69E'], ['Salvia', '#A7B19B'], ['Utuisen sininen', '#9FB4C3'],
+  ['Terrakotta', '#B86F52'], ['Syvä vihreä', '#496255'], ['Grafiitti', '#45494B'], ['Musta', '#1D2022'],
+] as const;
+
+const STORAGE_KEY = 'mvv-varikamu-v20-saved';
+
+function hexToRgb(hex: string) {
+  const normalized = hex.replace('#', '');
+  const value = Number.parseInt(normalized, 16);
+  return { r: (value >> 16) & 255, g: (value >> 8) & 255, b: value & 255 };
+}
+
+function rgbToHsl(r: number, g: number, b: number) {
+  const rr = r / 255; const gg = g / 255; const bb = b / 255;
+  const max = Math.max(rr, gg, bb); const min = Math.min(rr, gg, bb);
+  let h = 0; let s = 0; const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === rr) h = (gg - bb) / d + (gg < bb ? 6 : 0);
+    else if (max === gg) h = (bb - rr) / d + 2;
+    else h = (rr - gg) / d + 4;
+    h /= 6;
+  }
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+function analytics(event: string, data: Record<string, unknown> = {}) {
+  const w = window as Window & { dataLayer?: Array<Record<string, unknown>> };
+  w.dataLayer = w.dataLayer || [];
+  w.dataLayer.push({ event, ...data });
+}
+
 export function PaintStudioPage() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { session } = useCustomerAuth();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const layerRefs = useRef<Partial<Record<Surface, HTMLCanvasElement>>>({});
+  const drawingRef = useRef(false);
+  const lastPointRef = useRef<PanPoint | null>(null);
+  const panStartRef = useRef<PanPoint | null>(null);
+
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [tool, setTool] = useState<ToolType>('brush');
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
+  const [advanced, setAdvanced] = useState(false);
+  const [surface, setSurface] = useState<Surface>('walls');
+  const [tool, setTool] = useState<Tool>('brush');
   const [color, setColor] = useState('#D8C9B5');
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [layers, setLayers] = useState<Layer[]>([]);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [opacity, setOpacity] = useState(0.34);
+  const [brushSize, setBrushSize] = useState(34);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState<PanPoint>({ x: 0, y: 0 });
+  const [layerVisible, setLayerVisible] = useState<Record<Surface, boolean>>({ walls: true, ceiling: true, doors: true, trim: true });
+  const [history, setHistory] = useState<HistoryFrame[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [before, setBefore] = useState(false);
-  const [opacity, setOpacity] = useState(0.28);
-  const [brushSize, setBrushSize] = useState(24);
-  const [hardness, setHardness] = useState(0.65);
-  const [surface, setSurface] = useState('Seinät');
-  const [finish, setFinish] = useState('Matta');
-  const [width, setWidth] = useState(5);
-  const [length, setLength] = useState(7);
-  const [height, setHeight] = useState(2.7);
-  const [coats, setCoats] = useState(2);
+  const [compare, setCompare] = useState(false);
+  const [compareAt, setCompareAt] = useState(50);
   const [snapshots, setSnapshots] = useState<string[]>([]);
-  const area = Math.max(5, Math.round(width * length * 2 + width * length * 0.7));
-  const liters = Math.ceil((area * coats) / 8);
-  const estimate = Math.round(area * (18 + coats * 3) + 190);
+  const [exportType, setExportType] = useState<'png' | 'jpg'>('png');
+  const [savedMessage, setSavedMessage] = useState('');
+  const [quote, setQuote] = useState<QuoteForm>({ name: '', phone: '', city: '', message: '' });
+  const [quoteState, setQuoteState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  const rgb = useMemo(() => hexToRgb(color), [color]);
+  const hsl = useMemo(() => rgbToHsl(rgb.r, rgb.g, rgb.b), [rgb]);
 
   useEffect(() => {
-    if (!canvasRef.current || !imageUrl) return;
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
+    analytics('paint_planner_open', { app: 'varikamu' });
+    return () => { if (imageUrl?.startsWith('blob:')) URL.revokeObjectURL(imageUrl); };
+  }, [imageUrl]);
+
+  const snapshotLayers = () => {
+    const frame = {} as HistoryFrame;
+    surfaces.forEach(({ id }) => { frame[id] = layerRefs.current[id]?.toDataURL('image/png') || ''; });
+    return frame;
+  };
+
+  const pushHistory = () => {
+    const next = history.slice(0, historyIndex + 1);
+    next.push(snapshotLayers());
+    const bounded = next.slice(-20);
+    setHistory(bounded);
+    setHistoryIndex(bounded.length - 1);
+  };
+
+  const restoreFrame = async (frame: HistoryFrame) => {
+    await Promise.all(surfaces.map(({ id }) => new Promise<void>((resolve) => {
+      const canvas = layerRefs.current[id];
+      if (!canvas) return resolve();
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0);
-      if (layers.length === 0) {
-        setLayers([
-          { id: '1', name: 'Seinät', color: '#D8C9B5', opacity: 0.28, visible: true, data: null },
-          { id: '2', name: 'Katto', color: '#FFFFFF', opacity: 0.25, visible: true, data: null },
-          { id: '3', name: 'Ovet/listat', color: '#FFFFFF', opacity: 0.3, visible: true, data: null },
-        ]);
-        setHistory([{ layers: [] }]);
-        setHistoryIndex(0);
-      }
+      if (!ctx) return resolve();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!frame[id]) return resolve();
+      const img = new Image();
+      img.onload = () => { ctx.drawImage(img, 0, 0); resolve(); };
+      img.onerror = () => resolve();
+      img.src = frame[id];
+    })));
+  };
+
+  const undo = async () => {
+    if (historyIndex <= 0) return;
+    const nextIndex = historyIndex - 1;
+    setHistoryIndex(nextIndex);
+    await restoreFrame(history[nextIndex]);
+    analytics('paint_undo');
+  };
+
+  const redo = async () => {
+    if (historyIndex >= history.length - 1) return;
+    const nextIndex = historyIndex + 1;
+    setHistoryIndex(nextIndex);
+    await restoreFrame(history[nextIndex]);
+    analytics('paint_redo');
+  };
+
+  const initializeLayers = (width: number, height: number) => {
+    surfaces.forEach(({ id }) => {
+      const canvas = layerRefs.current[id];
+      if (!canvas) return;
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d')?.clearRect(0, 0, width, height);
+    });
+    window.requestAnimationFrame(() => {
+      const frame = snapshotLayers();
+      setHistory([frame]);
+      setHistoryIndex(0);
+    });
+  };
+
+  const loadFile = (file?: File) => {
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024) return;
+    if (imageUrl?.startsWith('blob:')) URL.revokeObjectURL(imageUrl);
+    setImageUrl(URL.createObjectURL(file));
+    setHistory([]); setHistoryIndex(-1); setSnapshots([]); setZoom(1); setPan({ x: 0, y: 0 });
+    analytics('paint_photo_uploaded', { type: file.type, size: file.size });
+  };
+
+  const onImageLoad = () => {
+    const img = imageRef.current;
+    if (!img) return;
+    const maxWidth = 1800;
+    const scale = Math.min(1, maxWidth / img.naturalWidth);
+    const width = Math.max(1, Math.round(img.naturalWidth * scale));
+    const height = Math.max(1, Math.round(img.naturalHeight * scale));
+    setImageSize({ width, height });
+    window.requestAnimationFrame(() => initializeLayers(width, height));
+  };
+
+  const pointFromEvent = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const stage = stageRef.current;
+    if (!stage || !imageSize.width || !imageSize.height) return null;
+    const rect = stage.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(imageSize.width, ((event.clientX - rect.left) / rect.width) * imageSize.width)),
+      y: Math.max(0, Math.min(imageSize.height, ((event.clientY - rect.top) / rect.height) * imageSize.height)),
     };
-    img.src = imageUrl;
-  }, [imageUrl, layers.length]);
-
-  const saveToHistory = () => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push({ layers: JSON.parse(JSON.stringify(layers)) });
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
   };
 
-  const handleUndo = () => {
-    if (historyIndex > 0) setHistoryIndex(historyIndex - 1);
-  };
-
-  const handleRedo = () => {
-    if (historyIndex < history.length - 1) setHistoryIndex(historyIndex + 1);
-  };
-
-  const loadImageUrl = (url: string) => {
-    setImageUrl(url);
-    setLayers([]);
-    setHistory([]);
-    setHistoryIndex(-1);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return;
-    if (file.size > 10 * 1024 * 1024) return;
-    const url = URL.createObjectURL(file);
-    setImageUrl(url);
-    setLayers([]);
-    setHistory([]);
-    setHistoryIndex(-1);
-  };
-
-  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!canvasRef.current || tool === 'selector' || before) return;
-    setIsDrawing(true);
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvasRef.current.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvasRef.current.height / rect.height);
-    draw(x, y);
-  };
-
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !canvasRef.current || before) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvasRef.current.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvasRef.current.height / rect.height);
-    draw(x, y);
-  };
-
-  const handleCanvasMouseUp = () => {
-    if (isDrawing) {
-      setIsDrawing(false);
-      saveToHistory();
-    }
-  };
-
-  const draw = (x: number, y: number) => {
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const size = tool === 'eraser' ? brushSize : tool === 'roller' ? brushSize * 2.5 : brushSize;
+  const drawLine = (from: PanPoint, to: PanPoint) => {
+    const canvas = layerRefs.current[surface];
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    ctx.save();
     ctx.globalAlpha = tool === 'eraser' ? 1 : opacity;
-    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : finish === 'Kiiltävä' ? 'screen' : 'multiply';
-    ctx.fillStyle = tool === 'eraser' ? 'rgba(0,0,0,1)' : color;
-    if (tool === 'roller') {
-      ctx.fillRect(x - size, y - size / 2, size * 2, size);
-    } else {
-      const gradient = ctx.createRadialGradient(x, y, size * hardness * 0.2, x, y, size / 2);
-      gradient.addColorStop(0, tool === 'eraser' ? 'rgba(0,0,0,1)' : color);
-      gradient.addColorStop(1, tool === 'eraser' ? 'rgba(0,0,0,0)' : `${color}00`);
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+    ctx.strokeStyle = tool === 'eraser' ? '#000000' : color;
+    ctx.fillStyle = tool === 'eraser' ? '#000000' : color;
+    ctx.lineCap = tool === 'roller' ? 'square' : 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = tool === 'roller' ? brushSize * 2.6 : brushSize;
+    ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+    ctx.restore();
+  };
+
+  const pointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!imageUrl || before || compare) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    if (tool === 'pan') {
+      panStartRef.current = { x: event.clientX - pan.x, y: event.clientY - pan.y };
+      return;
     }
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
+    const point = pointFromEvent(event);
+    if (!point) return;
+    drawingRef.current = true;
+    lastPointRef.current = point;
+    drawLine(point, point);
   };
 
-  const downloadDesign = () => {
-    if (!canvasRef.current) return;
+  const pointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (tool === 'pan' && panStartRef.current) {
+      setPan({ x: event.clientX - panStartRef.current.x, y: event.clientY - panStartRef.current.y });
+      return;
+    }
+    if (!drawingRef.current || !lastPointRef.current) return;
+    const point = pointFromEvent(event);
+    if (!point) return;
+    drawLine(lastPointRef.current, point);
+    lastPointRef.current = point;
+  };
+
+  const pointerUp = () => {
+    if (drawingRef.current) {
+      drawingRef.current = false;
+      lastPointRef.current = null;
+      pushHistory();
+      analytics(tool === 'roller' ? 'paint_roller_used' : tool === 'eraser' ? 'paint_eraser_used' : 'paint_brush_used', { surface, color });
+    }
+    panStartRef.current = null;
+  };
+
+  const reset = () => {
+    surfaces.forEach(({ id }) => {
+      const canvas = layerRefs.current[id];
+      canvas?.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
+    });
+    setZoom(1); setPan({ x: 0, y: 0 });
+    window.requestAnimationFrame(pushHistory);
+    analytics('paint_reset');
+  };
+
+  const composite = async () => {
+    if (!imageRef.current || !imageSize.width) return null;
+    const out = document.createElement('canvas');
+    out.width = imageSize.width; out.height = imageSize.height;
+    const ctx = out.getContext('2d');
+    if (!ctx) return null;
+    ctx.drawImage(imageRef.current, 0, 0, imageSize.width, imageSize.height);
+    surfaces.forEach(({ id }) => { const layer = layerRefs.current[id]; if (layer && layerVisible[id]) ctx.drawImage(layer, 0, 0); });
+    return out;
+  };
+
+  const createSnapshot = async () => {
+    const out = await composite(); if (!out) return;
+    const url = out.toDataURL('image/jpeg', 0.78);
+    setSnapshots((current) => [...current.slice(-3), url]);
+    analytics('paint_design_saved', { kind: 'snapshot' });
+  };
+
+  const saveDesign = async () => {
+    const out = await composite(); if (!out) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ image: out.toDataURL('image/jpeg', 0.7), surface, color, savedAt: Date.now() }));
+      setSavedMessage('Suunnitelma tallennettu tähän selaimeen.');
+      analytics('paint_design_saved', { kind: 'local' });
+    } catch { setSavedMessage('Tallennus ei onnistunut selaimen tallennustilan vuoksi.'); }
+  };
+
+  const restoreDesign = () => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY); if (!raw) return setSavedMessage('Tallennettua suunnitelmaa ei löytynyt.');
+      const saved = JSON.parse(raw) as { image?: string; color?: string };
+      if (saved.image) { setImageUrl(saved.image); setColor(saved.color || color); setSavedMessage('Tallennettu suunnitelma palautettu litistettynä kuvana.'); }
+    } catch { setSavedMessage('Tallennetun suunnitelman palautus epäonnistui.'); }
+  };
+
+  const exportDesign = async () => {
+    const out = await composite(); if (!out) return;
     const link = document.createElement('a');
-    link.href = canvasRef.current.toDataURL('image/png');
-    link.download = `maalaus-design-${Date.now()}.png`;
+    link.download = `varikamu-${Date.now()}.${exportType === 'jpg' ? 'jpg' : 'png'}`;
+    link.href = exportType === 'jpg' ? out.toDataURL('image/jpeg', 0.9) : out.toDataURL('image/png');
     link.click();
+    analytics('paint_export', { type: exportType });
   };
 
-  const createSnapshot = () => {
-    if (!canvasRef.current) return;
-    setSnapshots((current) => [...current.slice(-3), canvasRef.current!.toDataURL('image/jpeg', 0.75)]);
-  };
-
-  const resetCanvas = () => {
-    if (!canvasRef.current || !imageUrl) return;
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const ctx = canvasRef.current?.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(img, 0, 0);
-      setLayers(layers.map(l => ({ ...l, data: null })));
-      saveToHistory();
-    };
-    img.src = imageUrl;
+  const submitQuote = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!quote.name.trim() || !quote.phone.trim() || !quote.city.trim()) return;
+    setQuoteState('sending');
+    try {
+      const response = await fetch(QUOTE_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        name: quote.name.trim(), phone: quote.phone.trim(), email: session?.user.email || '', city: quote.city.trim(), address: '', propertyType: 'VäriKamu', service: 'sisamaalaus', surfaceArea: '', timeline: 'Joustava', budget: 'Arvio pyydetään',
+        message: `VäriKamu-suunnitelma. Aktiivinen pinta: ${surfaces.find((item) => item.id === surface)?.label}. Sävy: ${color}. ${quote.message}`,
+        website: '', formType: 'quote',
+      }) });
+      if (!response.ok) throw new Error('send failed');
+      setQuoteState('sent'); analytics('painting_quote_submitted', { city: quote.city });
+    } catch { setQuoteState('error'); }
   };
 
   return (
-    <>
-      <Seo
-        title="Maalausstudio | Maalaus Multiväri"
-        description="Suunnittele huoneen värit interaktiivisen maalisuunnittelijoiden avulla. Lataa kuva, maalaa värit ja näe suuntaa-antava lopputulos."
-        path="/paint-studio"
-        breadcrumbs={[{ name: 'Etusivu', path: '/' }, { name: 'Maalausstudio', path: '/paint-studio' }]}
-      />
-
-      <main className="min-h-screen bg-navy-50">
-        <header className="sticky top-0 z-40 border-b border-navy-100 bg-white shadow-soft">
-          <div className="container-base flex items-center justify-between px-5 py-4 sm:px-7">
-            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-navy-600 hover:text-navy-800">
-              <ArrowLeft className="h-4 w-4" />Takaisin
-            </Link>
-            <div className="flex items-center gap-4"><h1 className="font-display text-lg font-bold text-navy-950">Maalausstudio</h1><Link to="/cleaning-studio" className="hidden text-xs font-bold text-navy-500 hover:text-orange-600 sm:inline">Siivousstudio</Link></div>
-            <button type="button" onClick={downloadDesign} className="btn-primary !px-4 !py-2">
-              <Download className="h-4 w-4" />Lataa
-            </button>
-          </div>
-        </header>
-
-        <div className="container-base px-5 py-6 sm:px-7">
-          <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-            {!imageUrl ? (
-              <div className="rounded-2xl border-2 border-dashed border-navy-200 bg-navy-50/50 p-12 text-center">
-                <ImagePlus className="mx-auto h-12 w-12 text-navy-300" />
-                <p className="mt-4 text-lg font-bold text-navy-900">Lataa kuva huoneestasi</p>
-                <p className="mt-2 text-sm text-navy-600">JPG, PNG tai WebP, enintään 10 Mt</p>
-                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="btn-primary"
-                  >
-                    <ImagePlus className="h-5 w-5" />Valitse kuva
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => loadImageUrl(images.projects['project-05'])}
-                    className="btn-outline"
-                  >
-                    Kokeile esimerkkihuonetta
-                  </button>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  capture="environment"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="relative overflow-hidden rounded-2xl bg-navy-900">
-                  <canvas
-                    ref={canvasRef}
-                    onMouseDown={handleCanvasMouseDown}
-                    onMouseMove={handleCanvasMouseMove}
-                    onMouseUp={handleCanvasMouseUp}
-                    onMouseLeave={handleCanvasMouseUp}
-                    className="block w-full cursor-crosshair"
-                    style={{ display: before ? 'none' : 'block' }}
-                  />
-                  {before && imageUrl && (
-                    <img
-                      src={imageUrl}
-                      alt="Alkuperäinen kuva"
-                      className="block w-full"
-                      crossOrigin="anonymous"
-                    />
-                  )}
-                  <div className="absolute bottom-3 left-3 rounded-full bg-navy-950/75 px-3 py-1.5 text-xs font-bold text-white">
-                    {before ? 'Ennen' : 'Jälkeen'}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setBefore(!before)}
-                    className="absolute bottom-3 right-3 flex items-center gap-2 rounded-full bg-navy-950/75 px-3 py-1.5 text-xs font-bold text-white hover:bg-navy-950"
-                  >
-                    {before ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={handleUndo}
-                    disabled={historyIndex <= 0}
-                    className="btn-outline !px-3 !py-2 disabled:opacity-40"
-                  >
-                    <Undo2 className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRedo}
-                    disabled={historyIndex >= history.length - 1}
-                    className="btn-outline !px-3 !py-2 disabled:opacity-40"
-                  >
-                    <Redo2 className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetCanvas}
-                    className="btn-outline !px-3 !py-2"
-                  >
-                    <RotateCcw className="h-4 w-4" />Tyhjennä
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageUrl(null);
-                      setLayers([]);
-                      setHistory([]);
-                    }}
-                    className="btn-outline !px-3 !py-2 ml-auto"
-                  >
-                    Lataa uusi kuva
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {imageUrl && (
-              <div className="space-y-5 h-fit">
-                <div className="card space-y-3 p-5">
-                  <p className="text-xs font-bold uppercase text-navy-700">Välineet</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { id: 'brush', icon: Paintbrush, label: 'Sivellin' },
-                      { id: 'roller', icon: PaintRoller, label: 'Rulla' },
-                      { id: 'eraser', icon: Eraser, label: 'Pyyhekumi' },
-                    ].map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => setTool(t.id as ToolType)}
-                        className={`rounded-lg border px-3 py-2 text-sm font-bold transition ${
-                          tool === t.id
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-navy-200 text-navy-700'
-                        }`}
-                      >
-                        <t.icon className="mx-auto h-4 w-4" />
-                        <span className="sr-only">{t.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="card space-y-3 p-5">
-                  <p className="text-xs font-bold uppercase text-navy-700">Maalauspinta</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {['Seinät', 'Katto', 'Ovet', 'Listat', 'Ikkunat', 'Oma alue'].map((item) => (
-                      <button key={item} type="button" onClick={() => setSurface(item)} className={`rounded-lg border px-2 py-2 text-xs font-bold ${surface === item ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-navy-200 text-navy-600'}`}>{item}</button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="card space-y-3 p-5">
-                  <p className="text-xs font-bold uppercase text-navy-700">Väri</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {COLORS.map((c) => (
-                      <button
-                        key={c.hex}
-                        type="button"
-                        onClick={() => setColor(c.hex)}
-                        className={`h-10 rounded-lg border-2 transition ${
-                          color === c.hex ? 'border-orange-500' : 'border-white shadow-sm'
-                        }`}
-                        style={{ backgroundColor: c.hex }}
-                        title={c.name}
-                        aria-label={c.name}
-                      />
-                    ))}
-                  </div>
-                  <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-10 w-full cursor-pointer rounded-lg border border-navy-200 p-1" aria-label="Valitse väri" />
-                  <label className="block text-xs font-bold text-navy-600">HEX-väri<input value={color} onChange={(e) => /^#[0-9A-Fa-f]{0,6}$/.test(e.target.value) && setColor(e.target.value)} className="mt-1 w-full rounded-lg border border-navy-200 px-3 py-2 font-mono text-sm" aria-label="HEX-väri" /></label>
-                  <div className="flex flex-wrap gap-2 pt-1"><span className="text-xs font-bold text-navy-500">Väri-ideat:</span>{[color, '#E8D8C3', '#5D7564', '#293746'].map((hex) => <button key={hex} type="button" onClick={() => setColor(hex)} className="h-6 w-6 rounded-full border border-white shadow" style={{ backgroundColor: hex }} aria-label={`Valitse väri ${hex}`} />)}</div>
-                </div>
-
-                <div className="card space-y-3 p-5">
-                  <label className="text-xs font-bold uppercase text-navy-700">Työkalun asetukset</label>
-                  <label className="block text-xs font-bold text-navy-600">Koko: {brushSize}px<input type="range" min="8" max="80" value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} className="w-full" /></label>
-                  <label className="block text-xs font-bold text-navy-600">Pehmeys: {Math.round(hardness * 100)}%<input type="range" min="0.15" max="1" step="0.05" value={hardness} onChange={(e) => setHardness(Number(e.target.value))} className="w-full" /></label>
-                </div>
-
-                <div className="card space-y-3 p-5">
-                  <label className="text-xs font-bold uppercase text-navy-700">
-                    Läpinäkyvyys: {Math.round(opacity * 100)}%
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={opacity}
-                    onChange={(e) => setOpacity(parseFloat(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="card space-y-3 p-5">
-                  <div className="flex items-center justify-between"><p className="text-xs font-bold uppercase text-navy-700">Inspiraatio</p><span className="text-xs text-navy-400">Valitse tyyli</span></div>
-                  <div className="grid grid-cols-2 gap-2">{[{ name: 'Nordic', hex: '#D8C9B5' }, { name: 'Luonnollinen', hex: '#A8B39E' }, { name: 'Moderni', hex: '#8A8E8B' }, { name: 'Rohkea', hex: '#B86F52' }].map((style) => <button key={style.name} type="button" onClick={() => setColor(style.hex)} className="flex items-center gap-2 rounded-lg border border-navy-200 px-2 py-2 text-left text-xs font-bold text-navy-700"><span className="h-5 w-5 rounded-full" style={{ backgroundColor: style.hex }} />{style.name}</button>)}</div>
-                  <button type="button" onClick={() => setColor(COLORS[Math.floor(Math.random() * COLORS.length)].hex)} className="w-full rounded-lg bg-orange-50 px-3 py-2 text-xs font-bold text-orange-700 hover:bg-orange-100">Yllätä minut</button>
-                </div>
-
-                <div className="card space-y-3 p-5"><div className="flex items-center justify-between"><p className="text-xs font-bold uppercase text-navy-700">Tilannekuvat</p><button type="button" onClick={createSnapshot} className="text-xs font-bold text-orange-600">Ota kuva</button></div>{snapshots.length === 0 ? <p className="text-xs text-navy-500">Tallenna vertailua varten suunnitelman eri versioita.</p> : <div className="grid grid-cols-4 gap-2">{snapshots.map((shot, index) => <img key={`${shot}-${index}`} src={shot} alt={`Suunnitelman versio ${index + 1}`} className="aspect-square rounded object-cover" />)}</div>}</div>
-
-                <div className="card space-y-3 p-5">
-                  <p className="text-xs font-bold uppercase text-navy-700">Tasot</p>
-                  <div className="space-y-2">
-                    {layers.map((layer) => (
-                      <div key={layer.id} className="flex items-center gap-2 rounded-lg border border-navy-100 bg-navy-50 p-2">
-                        <span className="h-6 w-6 rounded border" style={{ backgroundColor: layer.color }} />
-                        <span className="flex-1 text-sm font-medium text-navy-700">{layer.name}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setLayers(layers.map((l) => (l.id === layer.id ? { ...l, visible: !l.visible } : l)))
-                          }
-                          className="text-navy-400 hover:text-navy-600"
-                        >
-                          {layer.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="card space-y-4 bg-navy-950 p-5 text-white">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-orange-300">Suunnittelun arvio</p>
-                      <p className="mt-2 text-3xl font-bold">{estimate.toLocaleString('fi-FI')} €</p>
-                    </div>
-                    <Palette className="h-5 w-5 text-orange-300" />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs"><label>Leveys (m)<input type="number" min="1" max="30" step="0.1" value={width} onChange={(e) => setWidth(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white" /></label><label>Pituus (m)<input type="number" min="1" max="30" step="0.1" value={length} onChange={(e) => setLength(Math.max(1, Number(e.target.value) || 1))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white" /></label><label>Korkeus (m)<input type="number" min="2" max="6" step="0.1" value={height} onChange={(e) => setHeight(Math.max(2, Number(e.target.value) || 2))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white" /></label></div>
-                  <div className="flex items-center justify-between text-sm"><span>Arvioitu pinta-ala</span><strong>{area} m²</strong></div>
-                  <div className="flex items-center justify-between text-sm"><span>Arvioitu maalimäärä</span><strong>{liters} l</strong></div>
-                  <div className="grid grid-cols-2 gap-3 text-xs"><label>Maalauskertoja<select value={coats} onChange={(e) => setCoats(Number(e.target.value))} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white"><option value="1">1 kerros</option><option value="2">2 kerrosta</option><option value="3">3 kerrosta</option></select></label><label>Viimeistely<select value={finish} onChange={(e) => setFinish(e.target.value)} className="mt-1 w-full rounded-lg bg-white/10 px-2 py-2 text-white"><option>Matta</option><option>Silkki</option><option>Satiini</option><option>Kiiltävä</option></select></label></div>
-                  <p className="text-xs leading-5 text-navy-200">Suuntaa-antava arvio sisältää työn ja perustarvikkeet. Lopullinen hinta varmistetaan kohteen mukaan.</p>
-                </div>
-
-                <Link
-                  to="/yhteystiedot"
-                  className="btn-primary w-full justify-center"
-                >
-                  <Palette className="h-4 w-4" />Pyydä tarjous
-                </Link>
-              </div>
-            )}
-          </div>
+    <section className="min-h-[calc(100vh-64px)] bg-navy-50 px-3 py-4 sm:px-5 sm:py-6">
+      <div className="container-base">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3"><Link to="/varikamu" className="flex size-10 items-center justify-center rounded-xl border border-navy-200 bg-white" aria-label="Takaisin VäriKamun esittelyyn"><ArrowLeft className="size-4" /></Link><div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">VäriKamu</p><h1 className="font-display text-xl font-extrabold text-navy-950">Maalisuunnittelija</h1></div></div>
+          <div className="flex items-center gap-2"><span className="text-xs font-semibold text-navy-500">{advanced ? 'Advanced Mode' : 'Simple Mode'}</span><button type="button" onClick={() => setAdvanced((value) => !value)} className="btn-outline !px-3 !py-2"><SlidersHorizontal className="size-4" />{advanced ? 'Yksinkertainen' : 'Lisätyökalut'}</button></div>
         </div>
-      </main>
-    </>
+
+        {!imageUrl ? (
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_.8fr]">
+            <div className="rounded-3xl border-2 border-dashed border-navy-200 bg-white p-8 text-center sm:p-14">
+              <span className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-orange-50 text-orange-600"><ImagePlus className="size-8" /></span>
+              <h2 className="mt-5 font-display text-3xl font-bold text-navy-950">Lataa kuva huoneestasi</h2>
+              <p className="mx-auto mt-3 max-w-xl text-navy-600">Aloita omalla kuvalla. VäriKamu pienentää työkuvan selaimessa enintään noin 1800 pikselin leveyteen, jotta editori pysyy nopeana myös puhelimella.</p>
+              <button type="button" onClick={() => fileRef.current?.click()} className="btn-primary mt-6"><Camera className="size-5" />Valitse tai ota kuva</button>
+              <input ref={fileRef} type="file" className="hidden" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={(event) => loadFile(event.target.files?.[0])} />
+              <p className="mt-3 text-xs text-navy-500">JPG, PNG tai WebP · enintään 10 Mt</p>
+            </div>
+            <div className="card p-6"><h2 className="font-display text-xl font-bold text-navy-950">Näin Simple Mode toimii</h2><div className="mt-5 space-y-4 text-sm text-navy-700">{['Valitse pinta: seinä, katto, ovi tai lista.', 'Valitse sävy paletista tai oma HEX-väri.', 'Maalaa kuvassa siveltimellä. Rulla ja pyyhekumi löytyvät Advanced Modesta.', 'Vertaa ennen/jälkeen ja pyydä tarjous.'].map((item, index) => <div key={item} className="flex gap-3"><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-orange-100 font-bold text-orange-700">{index + 1}</span><p>{item}</p></div>)}</div></div>
+          </div>
+        ) : (
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+            <div className="space-y-4">
+              <div className="overflow-hidden rounded-3xl bg-navy-950 p-2 sm:p-3">
+                <div className="relative overflow-hidden rounded-2xl bg-black/20" style={{ minHeight: 240 }}>
+                  <div className="flex items-center justify-center overflow-hidden p-2 sm:p-4" style={{ minHeight: 240 }}>
+                    <div
+                      ref={stageRef}
+                      onPointerDown={pointerDown}
+                      onPointerMove={pointerMove}
+                      onPointerUp={pointerUp}
+                      onPointerCancel={pointerUp}
+                      className={`relative max-w-full touch-none select-none ${tool === 'pan' ? 'cursor-grab' : 'cursor-crosshair'}`}
+                      style={{ width: imageSize.width ? `${imageSize.width}px` : undefined, maxWidth: '100%', transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: 'center center' }}
+                    >
+                      <img ref={imageRef} src={imageUrl} onLoad={onImageLoad} alt="VäriKamu työkuva" className="block h-auto w-full select-none" draggable={false} />
+                      {surfaces.map(({ id }) => <canvas key={id} ref={(node) => { if (node) layerRefs.current[id] = node; }} className={`pointer-events-none absolute inset-0 h-full w-full ${layerVisible[id] ? '' : 'hidden'}`} aria-hidden="true" />)}
+                      {before && <img src={imageUrl} alt="Alkuperäinen kuva" className="pointer-events-none absolute inset-0 h-full w-full object-contain" draggable={false} />}
+                      {compare && <div className="pointer-events-none absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${compareAt}%` }}><img src={imageUrl} alt="Ennen vertailussa" className="h-full max-w-none object-contain" style={{ width: stageRef.current?.clientWidth || '100%' }} /></div>}
+                    </div>
+                  </div>
+                  <div className="absolute bottom-3 left-3 rounded-full bg-navy-950/80 px-3 py-1.5 text-xs font-bold text-white">{before ? 'Ennen' : compare ? 'Vertailu' : 'Suunnitelma'}</div>
+                </div>
+                {compare && <label className="mt-3 flex items-center gap-3 px-2 text-xs font-bold text-white"><span>Ennen</span><input className="w-full accent-orange-500" type="range" min="5" max="95" value={compareAt} onChange={(event) => setCompareAt(Number(event.target.value))} /><span>Jälkeen</span></label>}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => setBefore((value) => !value)} className="btn-outline !px-3 !py-2">{before ? <Eye className="size-4" /> : <EyeOff className="size-4" />}Ennen</button>
+                <button type="button" onClick={() => { setCompare((value) => !value); setBefore(false); }} className="btn-outline !px-3 !py-2">Vertailuliukusäädin</button>
+                <button type="button" onClick={() => void undo()} disabled={historyIndex <= 0} className="btn-outline !px-3 !py-2 disabled:opacity-40"><Undo2 className="size-4" />Kumoa</button>
+                <button type="button" onClick={() => void redo()} disabled={historyIndex >= history.length - 1} className="btn-outline !px-3 !py-2 disabled:opacity-40"><Redo2 className="size-4" />Tee uudelleen</button>
+                <button type="button" onClick={reset} className="btn-outline !px-3 !py-2"><RotateCcw className="size-4" />Nollaa</button>
+                <button type="button" onClick={() => { if (imageUrl.startsWith('blob:')) URL.revokeObjectURL(imageUrl); setImageUrl(null); }} className="btn-outline !px-3 !py-2 sm:ml-auto"><Upload className="size-4" />Uusi kuva</button>
+              </div>
+
+              {snapshots.length > 0 && <div className="card p-4"><div className="flex items-center justify-between"><h2 className="font-bold text-navy-950">Snapshotit</h2><span className="text-xs text-navy-500">Viimeiset {snapshots.length}</span></div><div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">{snapshots.map((url, index) => <img key={`${url.slice(-20)}-${index}`} src={url} alt={`Snapshot ${index + 1}`} className="aspect-[4/3] w-full rounded-xl object-cover" />)}</div></div>}
+            </div>
+
+            <aside className="space-y-4">
+              <div className="card p-5"><p className="text-xs font-bold uppercase tracking-wider text-navy-500">1. Valitse pinta</p><div className="mt-3 grid grid-cols-2 gap-2">{surfaces.map((item) => <button key={item.id} type="button" onClick={() => { setSurface(item.id); analytics('paint_surface_selected', { surface: item.id }); }} className={`rounded-xl border px-3 py-3 text-sm font-bold ${surface === item.id ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-navy-200 text-navy-700'}`}>{item.label}</button>)}</div></div>
+
+              <div className="card p-5"><p className="text-xs font-bold uppercase tracking-wider text-navy-500">2. Valitse väri</p><div className="mt-3 grid grid-cols-5 gap-2">{palette.map(([name, hex]) => <button key={hex} type="button" title={name} aria-label={name} onClick={() => { setColor(hex); analytics('paint_color_selected', { color: hex, surface }); }} className={`relative aspect-square rounded-full border-2 ${color === hex ? 'border-orange-500 ring-2 ring-orange-200' : 'border-white ring-1 ring-navy-200'}`} style={{ backgroundColor: hex }}>{color === hex && <Check className="absolute inset-0 m-auto size-4 text-navy-950" />}</button>)}</div><div className="mt-4 grid grid-cols-[52px_1fr] gap-2"><input type="color" value={color} onChange={(event) => setColor(event.target.value.toUpperCase())} className="h-11 w-full rounded-xl border border-navy-200 p-1" aria-label="Värivalitsin" /><input value={color} onChange={(event) => /^#[0-9A-Fa-f]{6}$/.test(event.target.value) && setColor(event.target.value.toUpperCase())} className="rounded-xl border border-navy-200 px-3 text-sm font-semibold uppercase" aria-label="HEX-väri" /></div><div className="mt-3 rounded-xl bg-navy-50 p-3 text-xs text-navy-600"><p><strong>RGB:</strong> {rgb.r}, {rgb.g}, {rgb.b}</p><p className="mt-1"><strong>HSL:</strong> {hsl.h}°, {hsl.s}%, {hsl.l}%</p></div></div>
+
+              <div className="card p-5"><p className="text-xs font-bold uppercase tracking-wider text-navy-500">3. Maalaa</p><div className="mt-3 grid grid-cols-3 gap-2">{([{ id: 'brush', label: 'Sivellin', icon: Paintbrush }, { id: 'roller', label: 'Rulla', icon: PaintRoller }, { id: 'eraser', label: 'Pyyhe', icon: Eraser }] as const).map((item) => <button key={item.id} type="button" onClick={() => setTool(item.id)} className={`rounded-xl border p-3 text-xs font-bold ${tool === item.id ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-navy-200 text-navy-700'} ${!advanced && item.id !== 'brush' ? 'hidden' : ''}`}><item.icon className="mx-auto mb-1 size-5" />{item.label}</button>)}</div></div>
+
+              {advanced && <div className="card space-y-4 p-5"><div className="flex items-center justify-between"><p className="text-xs font-bold uppercase tracking-wider text-navy-500">Advanced Mode</p><Layers3 className="size-4 text-navy-500" /></div><label className="block text-xs font-bold text-navy-700">Siveltimen koko: {brushSize}px<input className="mt-2 w-full accent-orange-500" type="range" min="6" max="120" value={brushSize} onChange={(event) => setBrushSize(Number(event.target.value))} /></label><label className="block text-xs font-bold text-navy-700">Peittävyys: {Math.round(opacity * 100)}%<input className="mt-2 w-full accent-orange-500" type="range" min="0.08" max="0.9" step="0.02" value={opacity} onChange={(event) => setOpacity(Number(event.target.value))} /></label><div><p className="text-xs font-bold text-navy-700">Kerrokset / maskit</p><div className="mt-2 grid grid-cols-2 gap-2">{surfaces.map((item) => <label key={item.id} className="flex items-center gap-2 rounded-xl bg-navy-50 px-3 py-2 text-xs font-semibold text-navy-700"><input type="checkbox" checked={layerVisible[item.id]} onChange={() => setLayerVisible((current) => ({ ...current, [item.id]: !current[item.id] }))} />{item.label}</label>)}</div></div><div className="grid grid-cols-3 gap-2"><button type="button" onClick={() => setZoom((value) => Math.min(2.5, value + 0.15))} className="btn-outline !px-2 !py-2"><ZoomIn className="size-4" /></button><button type="button" onClick={() => setZoom((value) => Math.max(0.6, value - 0.15))} className="btn-outline !px-2 !py-2"><ZoomOut className="size-4" /></button><button type="button" onClick={() => setTool(tool === 'pan' ? 'brush' : 'pan')} className={`btn-outline !px-2 !py-2 ${tool === 'pan' ? '!border-orange-500 !text-orange-700' : ''}`}><Move className="size-4" /></button></div></div>}
+
+              <div className="card space-y-3 p-5"><div className="grid grid-cols-2 gap-2"><button type="button" onClick={() => void createSnapshot()} className="btn-outline !px-3 !py-2"><Camera className="size-4" />Snapshot</button><button type="button" onClick={() => void saveDesign()} className="btn-outline !px-3 !py-2"><Save className="size-4" />Tallenna</button></div><button type="button" onClick={restoreDesign} className="w-full text-xs font-bold text-navy-600 hover:text-orange-600">Palauta selaimeen tallennettu suunnitelma</button>{savedMessage && <p className="text-xs leading-5 text-navy-500">{savedMessage}</p>}<div className="flex gap-2"><select value={exportType} onChange={(event) => setExportType(event.target.value as 'png' | 'jpg')} className="rounded-xl border border-navy-200 px-3 text-sm"><option value="png">PNG</option><option value="jpg">JPG</option></select><button type="button" onClick={() => void exportDesign()} className="btn-primary flex-1"><Download className="size-4" />Vie kuva</button></div></div>
+
+              <form onSubmit={submitQuote} className="card p-5"><p className="text-xs font-bold uppercase tracking-wider text-orange-600">Pyydä maalaustarjous</p><h2 className="mt-2 font-display text-xl font-bold text-navy-950">Valmis suunnitelma? Ota maalari mukaan.</h2><div className="mt-4 grid gap-3"><input required placeholder="Nimi" value={quote.name} onChange={(event) => setQuote({ ...quote, name: event.target.value })} className="rounded-xl border border-navy-200 px-3 py-3 text-sm" /><input required placeholder="Puhelin" type="tel" value={quote.phone} onChange={(event) => setQuote({ ...quote, phone: event.target.value })} className="rounded-xl border border-navy-200 px-3 py-3 text-sm" /><input required placeholder="Kaupunki" value={quote.city} onChange={(event) => setQuote({ ...quote, city: event.target.value })} className="rounded-xl border border-navy-200 px-3 py-3 text-sm" /><textarea placeholder="Lisätiedot" rows={2} value={quote.message} onChange={(event) => setQuote({ ...quote, message: event.target.value })} className="rounded-xl border border-navy-200 px-3 py-3 text-sm" /></div><button disabled={quoteState === 'sending' || quoteState === 'sent'} className="btn-primary mt-3 w-full disabled:opacity-60">{quoteState === 'sending' ? 'Lähetetään…' : quoteState === 'sent' ? 'Tarjouspyyntö lähetetty' : 'Pyydä maalaustarjous'}</button>{quoteState === 'error' && <p className="mt-2 text-xs text-red-600">Lähetys epäonnistui. Voit myös käyttää yhteydenottosivua.</p>}</form>
+            </aside>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
