@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://maalausmultivari.fi/palvelut/toimistosiivous/helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/toimistosiivous/espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/toimistosiivous/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/yrityssiivous/helsinki</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/yrityssiivous/espoo</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/yrityssiivous/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/muuttosiivous/helsinki</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/muuttosiivous/espoo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/muuttosiivous/vantaa</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+</urlset>
