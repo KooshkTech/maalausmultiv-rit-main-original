@@ -1,0 +1,1 @@
+Production verification is performed by the V20 GitHub Actions workflow before merge. The workflow validates TypeScript, linting, the Vite production build, deployment essentials and the flat production ZIP layout.
