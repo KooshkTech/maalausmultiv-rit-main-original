@@ -15,8 +15,8 @@ export function PaintPlannerPromo() {
                 <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight sm:text-4xl">Muuta tilasi ennen kuin päätät</h2>
                 <p className="mt-4 max-w-2xl leading-relaxed text-navy-100">Lataa kuva tilastasi, kokeile värejä tai merkitse puhdistettavat alueet. Suunnittele rauhassa ja pyydä ammattilainen toteuttamaan hyvältä tuntuva lopputulos.</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <Link to="/paint-studio" className="btn-primary">Aloita maalausstudio <ArrowRight className="h-4 w-4" /></Link>
-                  <Link to="/cleaning-studio" className="btn-ghost-light">Aloita siivousstudio <ArrowRight className="h-4 w-4" /></Link>
+                  <Link to="/varikamu" className="btn-primary">Aloita maalausstudio <ArrowRight className="h-4 w-4" /></Link>
+                  <Link to="/siivouskamu" className="btn-ghost-light">Aloita siivousstudio <ArrowRight className="h-4 w-4" /></Link>
                 </div>
               </div>
               <div className="lg:col-span-5">
