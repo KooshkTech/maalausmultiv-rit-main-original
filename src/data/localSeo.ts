@@ -4,6 +4,9 @@ export const priorityLocalServiceSlugs = [
   'sisamaalaus',
   'julkisivumaalaus',
   'kattomaalaus',
+  'toimistosiivous',
+  'yrityssiivous',
+  'muuttosiivous',
 ] as const;
 
 export const priorityLocalCitySlugs = ['helsinki', 'espoo', 'vantaa'] as const;
