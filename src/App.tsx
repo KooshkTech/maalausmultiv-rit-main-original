@@ -59,15 +59,15 @@ export default function App() {
           <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
 
-          {/* Primary public, no-login conversion tools. */}
-          <Route path="maalauslaskuri" element={suspense(<PaintStudioPage />)} />
-          <Route path="siivoussuunnittelija" element={suspense(<CleaningStudioPage />)} />
-
-          {/* Existing campaign names remain available without competing canonicals. */}
+          {/* Crawlable public landing pages. Interactive editors live behind the existing auth guard. */}
           <Route path="varikamu" element={suspense(<VarikamuLanding />)} />
           <Route path="siivouskamu" element={suspense(<SiivouskamuLanding />)} />
-          <Route path="paint-studio" element={<Navigate to="/maalauslaskuri" replace />} />
-          <Route path="cleaning-studio" element={<Navigate to="/siivoussuunnittelija" replace />} />
+
+          {/* Legacy public URLs retain a single canonical destination. Server-side 301 rules mirror these aliases. */}
+          <Route path="maalauslaskuri" element={<Navigate to="/varikamu" replace />} />
+          <Route path="paint-studio" element={<Navigate to="/varikamu" replace />} />
+          <Route path="siivoussuunnittelija" element={<Navigate to="/siivouskamu" replace />} />
+          <Route path="cleaning-studio" element={<Navigate to="/siivouskamu" replace />} />
 
           <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
           <Route path="projektit" element={suspense(<ProjectsPage />)} />
