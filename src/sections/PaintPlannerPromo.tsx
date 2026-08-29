@@ -1,32 +1,44 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Calculator, ImagePlus, Palette } from 'lucide-react';
+import { ArrowRight, ImagePlus, Palette, type LucideIcon } from 'lucide-react';
 import { Reveal } from '@/components/Reveal';
 
 export function PaintPlannerPromo() {
   return (
-    <section className="section-pad bg-white">
+    <section className="section-pad bg-white" aria-labelledby="studio-promo-title">
       <div className="container-base">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-navy-950 p-7 text-white shadow-lift sm:p-10 lg:p-12">
-            <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-orange-500/15" aria-hidden="true" />
-            <div className="relative grid gap-10 lg:grid-cols-12 lg:items-center">
-              <div className="lg:col-span-7">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-orange-300"><Palette className="h-4 w-4" />Uusi asiakastyökalu</span>
-                <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight sm:text-4xl">Muuta tilasi ennen kuin päätät</h2>
-                <p className="mt-4 max-w-2xl leading-relaxed text-navy-100">Lataa kuva tilastasi, kokeile värejä tai merkitse puhdistettavat alueet. Suunnittele rauhassa ja pyydä ammattilainen toteuttamaan hyvältä tuntuva lopputulos.</p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <Link to="/varikamu" className="btn-primary">Aloita maalausstudio <ArrowRight className="h-4 w-4" /></Link>
-                  <Link to="/siivouskamu" className="btn-ghost-light">Aloita siivousstudio <ArrowRight className="h-4 w-4" /></Link>
-                </div>
-              </div>
-              <div className="lg:col-span-5">
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <PromoItem icon={ImagePlus} title="Lataa kuva" text="Käytä omaa talo-, huone- tai kattokuvaa." />
-                  <PromoItem icon={Palette} title="Suunnittele värit" text="Anna eri pinnoille omat sävyt." />
-                  <PromoItem icon={Calculator} title="Näe hinta-arvio" text="Saat valintoihin perustuvan alustavan hintahaarukan." />
-                </div>
-              </div>
-            </div>
+          <div className="mb-10 max-w-3xl">
+            <span className="eyebrow-orange"><Palette className="h-4 w-4" />Ilmaiset suunnittelutyökalut</span>
+            <h2 id="studio-promo-title" className="mt-4 font-display text-3xl font-extrabold leading-tight text-navy-950 sm:text-4xl">Suunnittele ennen kuin aloitat</h2>
+            <p className="mt-4 text-lg leading-relaxed text-navy-600">Kokeile, suunnittele ja arvioi projektisi helposti ennen kuin pyydät tarjouksen.</p>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <StudioCard
+              icon={Palette}
+              iconLabel="VäriKamu"
+              category="Maalaussuunnittelija"
+              title="Suunnittele maalaus ennen kuin aloitat"
+              description="VäriKamu auttaa sinua hahmottamaan, miltä uusi väri näyttää tilassasi, suunnittelemaan maalauksen ja arvioimaan projektin laajuuden helposti."
+              detail="Valitse tila, kokeile värejä ja tee oma suunnitelmasi ennen kuin pyydät tarjousta."
+              primaryHref="/paint-studio"
+              primaryLabel="Aloita maalaussuunnittelu"
+              secondaryHref="/varikamu"
+              secondaryLabel="Tutustu VäriKamuun"
+              tone="orange"
+            />
+            <StudioCard
+              icon={ImagePlus}
+              iconLabel="SiivousKamu"
+              category="Siivoussuunnittelija"
+              title="Suunnittele siivous helposti etukäteen"
+              description="SiivousKamu auttaa määrittämään, mitä tiloja ja pintoja haluat puhdistaa, kuinka perusteellinen siivous tarvitaan ja millainen työ kokonaisuudesta muodostuu."
+              detail="Valitse tila, määritä siivouksen laajuus ja tarkista arvio ennen tarjouspyyntöä."
+              primaryHref="/cleaning-studio"
+              primaryLabel="Aloita siivoussuunnittelu"
+              secondaryHref="/siivouskamu"
+              secondaryLabel="Tutustu SiivousKamuun"
+              tone="navy"
+            />
           </div>
         </Reveal>
       </div>
@@ -34,6 +46,33 @@ export function PaintPlannerPromo() {
   );
 }
 
-function PromoItem({ icon: Icon, title, text }: { icon: React.ComponentType<{ className?: string }>; title: string; text: string }) {
-  return <div className="flex gap-3 rounded-2xl border border-white/10 bg-white/5 p-4"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/15 text-orange-300"><Icon className="h-5 w-5" /></span><div><h3 className="font-bold">{title}</h3><p className="mt-1 text-xs leading-relaxed text-navy-200">{text}</p></div></div>;
+function StudioCard({ icon: Icon, iconLabel, category, title, description, detail, primaryHref, primaryLabel, secondaryHref, secondaryLabel, tone }: {
+  icon: LucideIcon;
+  iconLabel: string;
+  category: string;
+  title: string;
+  description: string;
+  detail: string;
+  primaryHref: string;
+  primaryLabel: string;
+  secondaryHref: string;
+  secondaryLabel: string;
+  tone: 'orange' | 'navy';
+}) {
+  return (
+    <article className="card group flex h-full flex-col overflow-hidden p-6 shadow-card sm:p-8">
+      <div className={`mb-8 flex min-h-28 items-end justify-between rounded-2xl p-5 ${tone === 'orange' ? 'bg-orange-50' : 'bg-navy-50'}`}>
+        <div className={`flex size-14 items-center justify-center rounded-2xl ${tone === 'orange' ? 'bg-orange-500 text-white' : 'bg-navy-900 text-white'}`} aria-hidden="true"><Icon className="h-7 w-7" /></div>
+        <span className={`text-4xl font-display font-extrabold ${tone === 'orange' ? 'text-orange-200' : 'text-navy-200'}`} aria-hidden="true">{tone === 'orange' ? '01' : '02'}</span>
+      </div>
+      <div className="flex items-center gap-2 text-sm font-bold text-navy-700"><Icon className="h-4 w-4 text-orange-500" aria-hidden="true" />{iconLabel}<span className="text-navy-300">·</span><span className="font-medium text-navy-500">{category}</span></div>
+      <h3 className="mt-4 text-2xl font-extrabold leading-tight text-navy-950">{title}</h3>
+      <p className="mt-4 leading-relaxed text-navy-600">{description}</p>
+      <p className="mt-3 leading-relaxed text-navy-600">{detail}</p>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Link to={primaryHref} className="btn-primary flex-1">{primaryLabel} <ArrowRight className="h-4 w-4" /></Link>
+        <Link to={secondaryHref} className="text-center text-sm font-bold text-navy-700 underline decoration-orange-300 underline-offset-4 transition hover:text-orange-600">{secondaryLabel}</Link>
+      </div>
+    </article>
+  );
 }
