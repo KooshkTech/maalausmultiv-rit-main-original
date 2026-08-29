@@ -8,6 +8,7 @@ const HomePage = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m
 const ServicesPage = lazy(() => import('@/pages/ServicesPage').then((m) => ({ default: m.ServicesPage })));
 const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage').then((m) => ({ default: m.ServiceDetailPage })));
 const ServiceLocationPage = lazy(() => import('@/pages/ServiceLocationPage').then((m) => ({ default: m.ServiceLocationPage })));
+const CleaningLocationSeoPage = lazy(() => import('@/pages/CleaningLocationSeoPage').then((m) => ({ default: m.CleaningLocationSeoPage })));
 const CleaningServicesPage = lazy(() => import('@/pages/CleaningServicesPage').then((m) => ({ default: m.CleaningServicesPage })));
 const AboutPage = lazy(() => import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })));
 const ProjectsPage = lazy(() => import('@/pages/ProjectsPage').then((m) => ({ default: m.ProjectsPage })));
@@ -51,6 +52,9 @@ export default function App() {
           <Route index element={suspense(<HomePage />)} />
           <Route path="palvelut" element={suspense(<ServicesPage />)} />
           <Route path="palvelut/siivous" element={suspense(<CleaningServicesPage />)} />
+          <Route path="palvelut/toimistosiivous/:citySlug" element={suspense(<CleaningLocationSeoPage />)} />
+          <Route path="palvelut/yrityssiivous/:citySlug" element={suspense(<CleaningLocationSeoPage />)} />
+          <Route path="palvelut/muuttosiivous/:citySlug" element={suspense(<CleaningLocationSeoPage />)} />
           <Route path="palvelut/:serviceSlug/:citySlug" element={suspense(<ServiceLocationPage />)} />
           <Route path="palvelut/:slug" element={suspense(<ServiceDetailPage />)} />
           <Route path="palvelualueet" element={suspense(<CitiesIndexPage />)} />
@@ -59,11 +63,9 @@ export default function App() {
           <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
 
-          {/* Crawlable public landing pages. Interactive editors live behind the existing auth guard. */}
           <Route path="varikamu" element={suspense(<VarikamuLanding />)} />
           <Route path="siivouskamu" element={suspense(<SiivouskamuLanding />)} />
 
-          {/* Legacy public URLs retain a single canonical destination. Server-side 301 rules mirror these aliases. */}
           <Route path="maalauslaskuri" element={<Navigate to="/varikamu" replace />} />
           <Route path="paint-studio" element={<Navigate to="/varikamu" replace />} />
           <Route path="siivoussuunnittelija" element={<Navigate to="/siivouskamu" replace />} />
