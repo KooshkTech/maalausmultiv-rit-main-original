@@ -15,25 +15,27 @@ import { MobileStickyCTA } from '@/components/MobileStickyCTA';
 import { LocalSeoLinks } from '@/sections/LocalSeoLinks';
 import { LocalProjectProof } from '@/sections/LocalProjectProof';
 import { PaintPlannerPromo } from '@/sections/PaintPlannerPromo';
+import { PaintingJourney } from '@/sections/PaintingJourney';
 import { StudioIntroPopup } from '@/components/StudioIntroPopup';
 
 export function HomePage() {
   return (
     <>
       <Seo
-        title="Maalaus Uusimaa – talon maalaus, ulkomaalaus ja siivous"
-        description="Maalaus Multiväri tarjoaa talon maalausta, ulkomaalausta, sisämaalausta, julkisivu- ja kattomaalausta Helsingissä, Espoossa, Vantaalla ja Uudellamaalla. Pyydä maksuton arvio."
+        title="Maalaus Helsinki, Espoo ja Vantaa | Maalaus Multiväri"
+        description="Maalaus Multiväri tarjoaa sisä- ja ulkomaalausta, talon maalausta, julkisivu- ja kattomaalausta Helsingissä, Espoossa ja Vantaalla. Kokeile VäriKamua tai pyydä maksuton arvio."
         path="/"
         faqSchema={faqs.slice(0, 6).map((f) => ({ q: f.q, a: f.a }))}
       />
       <Hero />
+      <PaintingJourney />
       <ServiceFinder />
       <QuickQuote />
-      <PaintPlannerPromo />
-      <Stats />
       <ServicesOverview />
       <BeforeAfterGallery />
       <LocalProjectProof />
+      <PaintPlannerPromo />
+      <Stats />
       <Testimonials />
       <Process />
       <ServiceAreas />
