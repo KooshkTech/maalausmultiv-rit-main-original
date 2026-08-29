@@ -1,10 +1,9 @@
-name: V17 Paint Planner CI
+name: V20 Production Verification
 
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [v17-paint-planner-app]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,29 +11,58 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - name: Install dependencies
         run: npm ci
-      - name: Typecheck
+
+      - name: TypeScript validation
         run: npm run typecheck
+
       - name: Lint
         run: npm run lint
+
       - name: Production build
         run: npm run build
-      - name: Package latest V17 source
-        run: git archive --format=zip --output=maalausmultivari-V17-latest.zip HEAD
-      - name: Upload V17 project ZIP
+
+      - name: Verify deployment essentials
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+          test -f dist/sitemap.xml
+          test -f dist/robots.txt
+          test -f dist/.htaccess
+          test -f CPANEL-DEPLOYMENT.md
+          test -f TOOLS-AUDIT-REPORT.md
+
+      - name: Package production dist contents
+        run: |
+          rm -f maalausmultivari-production-dist.zip
+          cd dist
+          zip -r ../maalausmultivari-production-dist.zip .
+          cd ..
+          unzip -l maalausmultivari-production-dist.zip | grep -q "index.html"
+          if unzip -l maalausmultivari-production-dist.zip | grep -q "dist/index.html"; then
+            echo "Nested dist directory detected" >&2
+            exit 1
+          fi
+
+      - name: Upload production package
         uses: actions/upload-artifact@v4
         with:
-          name: maalausmultivari-V17-latest
-          path: maalausmultivari-V17-latest.zip
+          name: maalausmultivari-production-dist
+          path: |
+            maalausmultivari-production-dist.zip
+            CPANEL-DEPLOYMENT.md
+            TOOLS-AUDIT-REPORT.md
           if-no-files-found: error
           retention-days: 30
