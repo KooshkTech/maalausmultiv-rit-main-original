@@ -38,11 +38,7 @@ const CustomerProfilePage = lazy(() => import('@/pages/CustomerDashboardPages').
 const DesignWizardPage = lazy(() => import('@/pages/DesignWizardPage').then((m) => ({ default: m.DesignWizardPage })));
 
 function PageLoader() {
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-navy-200 border-t-orange-500" />
-    </div>
-  );
+  return <div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-navy-200 border-t-orange-500" /></div>;
 }
 
 const suspense = (node: React.ReactNode) => <Suspense fallback={<PageLoader />}>{node}</Suspense>;
@@ -62,11 +58,17 @@ export default function App() {
           <Route path="toimialat" element={suspense(<IndustriesIndexPage />)} />
           <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
+
+          {/* Primary public, no-login conversion tools. */}
+          <Route path="maalauslaskuri" element={suspense(<PaintStudioPage />)} />
+          <Route path="siivoussuunnittelija" element={suspense(<CleaningStudioPage />)} />
+
+          {/* Existing campaign names remain available without competing canonicals. */}
           <Route path="varikamu" element={suspense(<VarikamuLanding />)} />
           <Route path="siivouskamu" element={suspense(<SiivouskamuLanding />)} />
-          <Route path="paint-studio" element={<Navigate to="/varikamu" replace />} />
-          <Route path="cleaning-studio" element={<Navigate to="/siivouskamu" replace />} />
-          <Route path="maalauslaskuri" element={<Navigate to="/paint-studio" replace />} />
+          <Route path="paint-studio" element={<Navigate to="/maalauslaskuri" replace />} />
+          <Route path="cleaning-studio" element={<Navigate to="/siivoussuunnittelija" replace />} />
+
           <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
           <Route path="projektit" element={suspense(<ProjectsPage />)} />
           <Route path="arvostelut" element={suspense(<ReviewsPage />)} />
