@@ -1,10 +1,5 @@
-# Block direct access to the SMTP config file (credentials live there).
-<FilesMatch "send-mail\.config\.php$">
-    Require all denied
-</FilesMatch>
-
-# Block access to the example config too — keeps the public surface clean.
-<FilesMatch "send-mail\.config\.example\.php$">
+# Block direct access to SMTP configuration files.
+<FilesMatch "send-mail\.config(\.example)?\.php$">
     Require all denied
 </FilesMatch>
 
@@ -16,19 +11,22 @@
     Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 </IfModule>
 
-# SPA fallback: let React Router handle all routes that aren't real files.
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
 
-    # Force HTTPS.
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    # One-hop canonical host: HTTPS + non-www.
+    RewriteCond %{HTTPS} !=on [OR]
+    RewriteCond %{HTTP_HOST} !^maalausmultivari\.fi$ [NC]
+    RewriteRule ^ https://maalausmultivari.fi%{REQUEST_URI} [L,R=301]
 
-    # Force non-www (canonical host used throughout the site's metadata).
-    RewriteCond %{HTTP_HOST} ^www\.maalausmultivari\.fi$ [NC]
-    RewriteRule ^(.*)$ https://maalausmultivari.fi/$1 [L,R=301]
+    # V20 permanent URL migration. Keep old indexed planner URLs out of the sitemap.
+    RewriteRule ^maalauslaskuri/?$ /varikamu [L,R=301,NE]
+    RewriteRule ^paint-studio/?$ /varikamu [L,R=301,NE]
+    RewriteRule ^siivoussuunnittelija/?$ /siivouskamu [L,R=301,NE]
+    RewriteRule ^cleaning-studio/?$ /siivouskamu [L,R=301,NE]
 
+    # SPA fallback: real files/directories bypass React Router.
     RewriteRule ^index\.html$ - [L]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
