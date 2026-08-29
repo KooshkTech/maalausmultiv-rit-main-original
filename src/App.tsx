@@ -64,8 +64,8 @@ export default function App() {
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
           <Route path="varikamu" element={suspense(<VarikamuLanding />)} />
           <Route path="siivouskamu" element={suspense(<SiivouskamuLanding />)} />
-          <Route path="paint-studio" element={<Navigate to="/varikamu" replace />} />
-          <Route path="cleaning-studio" element={<Navigate to="/siivouskamu" replace />} />
+          <Route path="paint-studio" element={suspense(<PaintStudioPage />)} />
+          <Route path="cleaning-studio" element={suspense(<CleaningStudioPage />)} />
           <Route path="maalauslaskuri" element={<Navigate to="/paint-studio" replace />} />
           <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
           <Route path="projektit" element={suspense(<ProjectsPage />)} />
