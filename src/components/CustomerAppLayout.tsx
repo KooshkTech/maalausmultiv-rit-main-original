@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { LogOut, PaintRoller, Palette, Sparkles, UserRound } from 'lucide-react';
 import { Seo } from '@/components/Seo';
@@ -7,6 +8,27 @@ export function CustomerAppLayout() {
   const { session, signOut } = useCustomerAuth();
   const location = useLocation();
   const authenticated = Boolean(session);
+
+  useEffect(() => {
+    // `capture="environment"` can force the camera on mobile browsers.
+    // Removing it keeps camera access available while also letting users
+    // choose an existing image from Photos/Files.
+    const enableImagePickerChoices = () => {
+      document.querySelectorAll<HTMLInputElement>('input[type="file"][capture]').forEach((input) => {
+        input.removeAttribute('capture');
+      });
+    };
+
+    enableImagePickerChoices();
+    const frame = window.requestAnimationFrame(enableImagePickerChoices);
+    const observer = new MutationObserver(enableImagePickerChoices);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-navy-50/60">
