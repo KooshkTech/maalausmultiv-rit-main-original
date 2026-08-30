@@ -6,8 +6,8 @@ import {
   Clock,
   Sparkles,
   Paintbrush,
-  ThumbsUp,
-  Wrench,
+  MapPin,
+  Camera,
 } from 'lucide-react';
 import { company } from '@/data/company';
 import { trackPhoneClick, trackCtaClick } from '@/lib/analytics';
@@ -15,12 +15,12 @@ import { Reveal } from '@/components/Reveal';
 import { images } from '@/config/images';
 
 const trustBadges = [
-  { icon: Paintbrush, label: 'Ammattilaismaalareita' },
-  { icon: Sparkles, label: 'Ilmainen arvio' },
-  { icon: Wrench, label: 'Laatumateriaalit' },
-  { icon: Clock, label: 'Luotettava aikataulu' },
-  { icon: ThumbsUp, label: 'Asiakastyytyväisyys' },
-  { icon: ShieldCheck, label: 'Siisti työjälki' },
+  { icon: Paintbrush, label: 'Sisä- ja ulkomaalaus' },
+  { icon: MapPin, label: 'Helsinki · Espoo · Vantaa' },
+  { icon: ShieldCheck, label: '2 vuoden takuu työjäljelle' },
+  { icon: Sparkles, label: 'Maksuton arvio' },
+  { icon: Camera, label: 'VäriKamu-kuvasuunnittelu' },
+  { icon: Clock, label: 'Selkeä aikataulu' },
 ];
 
 export function Hero() {
@@ -45,30 +45,33 @@ export function Hero() {
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm">
               <span className="flex h-2 w-2 rounded-full bg-orange-400" />
-              Helsinki · Espoo · Vantaa · Uusimaa
+              Maalauspalvelut · Helsinki · Espoo · Vantaa
             </span>
           </Reveal>
 
           <Reveal delay={100}>
             <h1 className="mt-5 font-display text-3xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
-              Ammattimaista maalausta
-              <span className="block text-orange-400">Uudellamaalla</span>
+              Maalauspalvelut
+              <span className="block text-orange-400">Helsingissä, Espoossa ja Vantaalla</span>
             </h1>
           </Reveal>
 
           <Reveal delay={200}>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-navy-100 sm:mt-6 sm:text-lg">
-              {company.name} tarjoaa laadukkaita maalaus- ja siivouspalveluja
-              yksityisille ja yrityksille. Ulkomaalausta, sisämaalausta,
-              toimistomaalausta ja ammattimaista siivoustyötä — yhdestä paikasta.
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-navy-100 sm:mt-6 sm:text-lg">
+              {company.name} toteuttaa sisä- ja ulkomaalaukset koteihin, taloyhtiöille ja yrityksille.
+              Pyydä maksuton tarjous tai kokeile värejä omaan kuvaasi VäriKamulla ennen työn aloitusta.
             </p>
           </Reveal>
 
           <Reveal delay={300}>
-            <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:items-center">
-              <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä ilmainen tarjous', 'homepage_hero')} className="btn-primary text-base">
-                Pyydä ilmainen tarjous
+            <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center">
+              <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä maksuton tarjous', 'homepage_hero')} className="btn-primary text-base">
+                Pyydä maksuton tarjous
                 <ArrowRight className="h-5 w-5" />
+              </Link>
+              <Link to="/varikamu" onClick={() => trackCtaClick('Kokeile VäriKamua', 'homepage_hero')} className="btn-ghost-light text-base">
+                <Sparkles className="h-5 w-5" />
+                Kokeile VäriKamua
               </Link>
               <a href={company.phoneHref} onClick={() => trackPhoneClick('homepage_hero')} className="btn-ghost-light text-base">
                 <Phone className="h-5 w-5" />
@@ -96,30 +99,28 @@ export function Hero() {
                 <Sparkles className="h-6 w-6" />
               </span>
               <div>
-                <p className="font-display text-lg font-bold text-white">
-                  Ilmainen arvio
-                </p>
-                <p className="text-xs text-navy-200">Sitoutumaton tarjous 24 h sisällä</p>
+                <p className="font-display text-lg font-bold text-white">Suunnittele → arvioi → pyydä tarjous</p>
+                <p className="text-xs text-navy-200">Selkeä polku ideasta toteutukseen</p>
               </div>
             </div>
 
-            <p className="mt-5 text-sm leading-relaxed text-white/90">
-              Soita tai täytä tarjouspyyntö, niin käymme paikan päällä tutkimassa
-              kohteen ja laadimme tarkan aikataulun ja hinta-arvion. Kilpailukykyiset
-              hinnat ja takuu työjäljestä 2 vuotta.
-            </p>
+            <ol className="mt-6 space-y-4 text-sm text-white/90">
+              <li className="flex gap-3"><span className="font-bold text-orange-400">01</span><span>Kerro mitä haluat maalata ja missä kohde sijaitsee.</span></li>
+              <li className="flex gap-3"><span className="font-bold text-orange-400">02</span><span>Lisää kuvia tai kokeile värejä VäriKamulla.</span></li>
+              <li className="flex gap-3"><span className="font-bold text-orange-400">03</span><span>Pyydä maksuton arvio ja saat kohteeseen sopivan tarjouksen.</span></li>
+            </ol>
 
-            <div className="mt-6 grid grid-cols-3 gap-3 border-t border-white/15 pt-6">
+            <div className="mt-6 grid grid-cols-3 gap-3 border-t border-white/15 pt-6 text-center">
               <div>
-                <p className="font-display text-2xl font-extrabold text-orange-400">15+</p>
-                <p className="text-[11px] text-navy-200">Vuotta alalla</p>
+                <p className="font-display text-lg font-extrabold text-orange-400">Helsinki</p>
+                <p className="text-[11px] text-navy-200">Palvelualue</p>
               </div>
               <div>
-                <p className="font-display text-2xl font-extrabold text-orange-400">2 v</p>
-                <p className="text-[11px] text-navy-200">Takuu</p>
+                <p className="font-display text-lg font-extrabold text-orange-400">Espoo</p>
+                <p className="text-[11px] text-navy-200">Palvelualue</p>
               </div>
               <div>
-                <p className="font-display text-2xl font-extrabold text-orange-400">200 km</p>
+                <p className="font-display text-lg font-extrabold text-orange-400">Vantaa</p>
                 <p className="text-[11px] text-navy-200">Palvelualue</p>
               </div>
             </div>

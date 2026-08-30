@@ -18,6 +18,7 @@ const BlogPostPage = lazy(() => import('@/pages/BlogPostPage').then((m) => ({ de
 const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then((m) => ({ default: m.CostCalculatorPage })));
+const PricingHubPage = lazy(() => import('@/pages/PricingHubPage').then((m) => ({ default: m.PricingHubPage })));
 const PaintStudioPage = lazy(() => import('@/pages/PaintStudioPage').then((m) => ({ default: m.PaintStudioPage })));
 const CleaningStudioPage = lazy(() => import('@/pages/CleaningStudioPage').then((m) => ({ default: m.CleaningStudioPage })));
 const VarikamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.VarikamuLanding })));
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="palvelualueet/:slug" element={suspense(<CityPage />)} />
           <Route path="toimialat" element={suspense(<IndustriesIndexPage />)} />
           <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
+          <Route path="hinnat" element={suspense(<PricingHubPage />)} />
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
 
           <Route path="varikamu" element={suspense(<VarikamuLanding />)} />
