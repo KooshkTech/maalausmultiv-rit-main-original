@@ -27,7 +27,13 @@ if (!$token || str_contains($token, 'REPLACE_')) {
     failJson(503, 'AI-kuvapalvelu ei ole vielä käytössä. Ylläpitäjän tulee lisätä Hugging Face -tunnus.', 'AI_NOT_CONFIGURED');
 }
 $model = getenv('HF_IMAGE_MODEL') ?: (defined('HF_IMAGE_MODEL') ? HF_IMAGE_MODEL : 'black-forest-labs/FLUX.1-Kontext-dev');
-$endpoint = getenv('HF_IMAGE_ENDPOINT') ?: (defined('HF_IMAGE_ENDPOINT') ? HF_IMAGE_ENDPOINT : 'https://router.huggingface.co/hf-inference/models/' . $model);
+$providerModel = getenv('HF_IMAGE_PROVIDER_MODEL') ?: (defined('HF_IMAGE_PROVIDER_MODEL') ? HF_IMAGE_PROVIDER_MODEL : 'fal-ai/flux-kontext/dev');
+$endpoint = getenv('HF_IMAGE_ENDPOINT') ?: (defined('HF_IMAGE_ENDPOINT') ? HF_IMAGE_ENDPOINT : 'https://router.huggingface.co/fal-ai/' . $providerModel . '?_subdomain=queue');
+// Existing deployments preserve ai-image.config.php. Transparently migrate the
+// former unsupported Kontext + hf-inference combination without touching token.
+if (str_contains(strtolower($model), 'kontext') && str_contains($endpoint, '/hf-inference/')) {
+    $endpoint = 'https://router.huggingface.co/fal-ai/' . $providerModel . '?_subdomain=queue';
+}
 
 // Protect the free monthly inference allowance from accidental abuse.
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -71,15 +77,14 @@ if ($mode === 'paint') {
 $imageBytes = @file_get_contents($tmpName);
 if ($imageBytes === false) failJson(422, 'Kuvaa ei voitu lukea.');
 
-// Hugging Face image-to-image request format: base64 input image + prompt parameters.
+// FLUX Kontext is served through Hugging Face's Fal AI provider, not hf-inference.
+$imageDataUrl = 'data:' . $mime . ';base64,' . base64_encode($imageBytes);
 $request = json_encode([
-    'inputs' => base64_encode($imageBytes),
-    'parameters' => [
-        'prompt' => $prompt,
-        'negative_prompt' => 'cartoon, illustration, redesigned room, changed camera angle, new furniture, missing furniture, flat color overlay, global brightness filter, global contrast filter, oversaturated, unrealistic lighting',
-        'guidance_scale' => 3.5,
-        'num_inference_steps' => 28,
-    ],
+    'prompt' => $prompt,
+    'image_url' => $imageDataUrl,
+    'image_urls' => [$imageDataUrl],
+    'num_images' => 1,
+    'output_format' => 'jpeg',
 ], JSON_UNESCAPED_SLASHES);
 if ($request === false) failJson(500, 'AI-pyynnön muodostaminen epäonnistui.');
 
@@ -117,6 +122,68 @@ if ($status < 200 || $status >= 300) {
     failJson(502, $providerMessage !== '' ? 'AI-kuvan luonti epäonnistui: ' . mb_substr($providerMessage, 0, 240) : 'AI-kuvan luonti epäonnistui.');
 }
 
+// Fal AI uses a queue. The first successful response contains a request ID and
+// provider URLs; poll the corresponding routed status URL and then fetch result.
+$queuePayload = json_decode($body, true);
+if (is_array($queuePayload) && isset($queuePayload['request_id'], $queuePayload['response_url'])) {
+    $responsePath = (string) parse_url((string) $queuePayload['response_url'], PHP_URL_PATH);
+    if ($responsePath === '' || !str_starts_with($responsePath, '/')) {
+        error_log('Fal AI queue response contained an invalid response_url');
+        failJson(502, 'AI-kuvapalvelu palautti virheellisen jonovastauksen.', 'HF_PROVIDER_RESPONSE');
+    }
+    $query = (string) parse_url($endpoint, PHP_URL_QUERY);
+    $querySuffix = $query !== '' ? '?' . $query : '';
+    $routerBase = 'https://router.huggingface.co/fal-ai';
+    $statusUrl = $routerBase . $responsePath . '/status' . $querySuffix;
+    $resultUrl = $routerBase . $responsePath . $querySuffix;
+    $deadline = time() + 170;
+    $queueStatus = strtoupper((string) ($queuePayload['status'] ?? 'IN_QUEUE'));
+
+    while ($queueStatus !== 'COMPLETED' && time() < $deadline) {
+        usleep(500000);
+        $poll = curl_init($statusUrl);
+        curl_setopt_array($poll, [
+            CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token, 'Accept: application/json'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 20,
+            CURLOPT_TIMEOUT => 30,
+        ]);
+        $pollBody = curl_exec($poll);
+        $pollStatus = (int) curl_getinfo($poll, CURLINFO_RESPONSE_CODE);
+        $pollError = curl_error($poll);
+        curl_close($poll);
+        if ($pollBody === false || $pollError !== '' || $pollStatus < 200 || $pollStatus >= 300) {
+            error_log('Fal AI status polling failed HTTP ' . $pollStatus . ': ' . $pollError);
+            failJson(502, 'AI-kuvan käsittelyn tilaa ei voitu tarkistaa. Yritä uudelleen.', 'HF_QUEUE_STATUS');
+        }
+        $statusPayload = json_decode((string) $pollBody, true);
+        $queueStatus = strtoupper((string) ($statusPayload['status'] ?? ''));
+        if (in_array($queueStatus, ['FAILED', 'CANCELLED'], true)) {
+            error_log('Fal AI queue ended with status ' . $queueStatus . ': ' . substr((string) $pollBody, 0, 1000));
+            failJson(502, 'AI-kuvan käsittely epäonnistui palveluntarjoajalla.', 'HF_QUEUE_FAILED');
+        }
+    }
+    if ($queueStatus !== 'COMPLETED') failJson(504, 'AI-kuvan käsittely kesti liian kauan. Yritä uudelleen.', 'HF_QUEUE_TIMEOUT');
+
+    $result = curl_init($resultUrl);
+    curl_setopt_array($result, [
+        CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token, 'Accept: application/json'],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CONNECTTIMEOUT => 20,
+        CURLOPT_TIMEOUT => 60,
+    ]);
+    $resultBody = curl_exec($result);
+    $resultStatus = (int) curl_getinfo($result, CURLINFO_RESPONSE_CODE);
+    $resultError = curl_error($result);
+    curl_close($result);
+    if ($resultBody === false || $resultError !== '' || $resultStatus < 200 || $resultStatus >= 300) {
+        error_log('Fal AI result fetch failed HTTP ' . $resultStatus . ': ' . $resultError);
+        failJson(502, 'Valmista AI-kuvaa ei voitu hakea. Yritä uudelleen.', 'HF_QUEUE_RESULT');
+    }
+    $body = (string) $resultBody;
+    $contentType = 'application/json';
+}
+
 if (str_starts_with(strtolower($contentType), 'image/')) {
     $hits[] = $now;
     @file_put_contents($rateFile, json_encode($hits), LOCK_EX);
@@ -128,14 +195,14 @@ if (str_starts_with(strtolower($contentType), 'image/')) {
 $payload = json_decode($body, true);
 if (is_array($payload)) {
     $b64 = $payload['image'] ?? $payload['data'][0]['b64_json'] ?? null;
-    $url = $payload['image_url'] ?? $payload['url'] ?? $payload['data'][0]['url'] ?? null;
+    $url = $payload['images'][0]['url'] ?? $payload['image_url'] ?? $payload['url'] ?? $payload['data'][0]['url'] ?? null;
     if (is_string($b64) && $b64 !== '') {
         $hits[] = $now; @file_put_contents($rateFile, json_encode($hits), LOCK_EX);
         echo json_encode(['image' => str_starts_with($b64, 'data:') ? $b64 : 'data:image/jpeg;base64,' . $b64, 'provider' => 'huggingface', 'model' => $model], JSON_UNESCAPED_SLASHES); exit;
     }
     if (is_string($url) && $url !== '') {
         $hits[] = $now; @file_put_contents($rateFile, json_encode($hits), LOCK_EX);
-        echo json_encode(['imageUrl' => $url, 'provider' => 'huggingface', 'model' => $model], JSON_UNESCAPED_SLASHES); exit;
+        echo json_encode(['imageUrl' => $url, 'provider' => 'fal-ai-via-huggingface', 'model' => $model], JSON_UNESCAPED_SLASHES); exit;
     }
 }
 
