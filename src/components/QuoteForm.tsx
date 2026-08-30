@@ -17,7 +17,7 @@ type FormValues = {
   timeline: string;
   budget: string;
   message: string;
-  website: string; // honeypot
+  website: string;
 };
 
 type Errors = Partial<Record<keyof Omit<FormValues, 'website'>, string>>;
@@ -39,14 +39,23 @@ const budgets = [
   'Alle 500 €', '500–1 500 €', '1 500–5 000 €', '5 000–10 000 €', 'Yli 10 000 €', 'En tiedä',
 ];
 
+const MAX_FILES = 5;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_TOTAL_FILE_BYTES = 12 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+]);
+
 const initialValues: FormValues = {
   name: '', phone: '', email: '', address: '', city: '',
   propertyType: '', service: '', surfaceArea: '', timeline: '', budget: '',
   message: '', website: '',
 };
 
-// PHP endpoint on the same origin (HostGator). Vite dev server proxies /send-mail.php
-// via the proxy config in vite.config.ts so local dev hits the same origin too.
 const QUOTE_ENDPOINT = '/send-mail.php';
 
 export function QuoteForm() {
@@ -65,7 +74,6 @@ export function QuoteForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  // Server-side error shown above the submit button when delivery fails.
   const [serverError, setServerError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [showInactivityPrompt, setShowInactivityPrompt] = useState(false);
@@ -124,49 +132,48 @@ export function QuoteForm() {
     setStep((current) => Math.max(1, current - 1));
   };
 
-  // Submit handler: validates, then POSTs to the edge function. The success
-  // screen is only shown after the server confirms both emails were sent.
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setServerError(null);
-    if (values.website) return; // honeypot triggered — silently ignore bot
+    if (values.website) return;
     if (!validate()) return;
     setSubmitting(true);
 
     try {
+      const payload = new FormData();
+      Object.entries({ ...values, formType: 'quote' }).forEach(([key, value]) => {
+        payload.append(key, value);
+      });
+      files.forEach((file) => payload.append('files[]', file, file.name));
+
       const res = await fetch(QUOTE_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, formType: 'quote' }),
+        body: payload,
       });
 
-      // 400 = server-side validation errors. Map them onto the fields.
-      if (res.status === 400) {
+      if (res.status === 400 || res.status === 413) {
         const body = await res.json().catch(() => ({}));
         if (body.errors) {
           setErrors(body.errors as Errors);
           setServerError('Tarkista lomakkeen tiedot.');
         } else {
-          setServerError(body.message ?? 'Tarkista lomakkeen tiedot.');
+          setServerError(body.message ?? 'Tarkista lomakkeen tiedot ja kuvat.');
         }
         return;
       }
 
-      // 429 = rate limited.
       if (res.status === 429) {
         const body = await res.json().catch(() => ({}));
         setServerError(body.message ?? 'Liikaa pyyntöjä. Yritä myöhemmin uudelleen.');
         return;
       }
 
-      // 500 or other failure — keep form data so the customer can retry.
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setServerError(body.message ?? 'Viestin lähetys epäonnistui. Yritä uudelleen.');
         return;
       }
 
-      // Success — emails were sent. Now safe to show confirmation and clear.
       trackGenerateLead('quote_form', values.service, {
         city: values.city,
         budget: values.budget,
@@ -177,7 +184,6 @@ export function QuoteForm() {
       setStep(1);
       setFiles([]);
     } catch (err) {
-      // Network error / server unreachable.
       if (import.meta.env.DEV) console.error('QuoteForm submit error:', err);
       setServerError('Yhteysvirhe. Tarkista internet-yhteys ja yritä uudelleen.');
     } finally {
@@ -189,9 +195,7 @@ export function QuoteForm() {
     setValues((s) => ({ ...s, [key]: v }));
     if (errors[key as keyof Errors]) setErrors((s) => ({ ...s, [key]: undefined }));
     if (serverError) setServerError(null);
-    if (!formStartedRef.current) {
-      formStartedRef.current = true;
-    }
+    if (!formStartedRef.current) formStartedRef.current = true;
     setShowInactivityPrompt(false);
     if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
     inactivityTimerRef.current = setTimeout(() => {
@@ -200,12 +204,49 @@ export function QuoteForm() {
   }, [errors, submitted, serverError]);
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setFiles((prev) => [...prev, ...Array.from(e.target.files!).slice(0, 5 - prev.length)]);
+    const selected = Array.from(e.target.files ?? []);
+    e.target.value = '';
+    if (selected.length === 0) return;
+
+    const remainingSlots = MAX_FILES - files.length;
+    if (remainingSlots <= 0) {
+      setServerError(`Voit lisätä enintään ${MAX_FILES} kuvaa.`);
+      return;
     }
+
+    const accepted: File[] = [];
+    let totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+
+    for (const file of selected.slice(0, remainingSlots)) {
+      if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+        setServerError('Sallitut kuvatyypit ovat JPG, PNG, WebP, HEIC ja HEIF.');
+        continue;
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        setServerError(`Yksi kuva saa olla enintään ${Math.floor(MAX_FILE_BYTES / 1024 / 1024)} Mt.`);
+        continue;
+      }
+      if (totalBytes + file.size > MAX_TOTAL_FILE_BYTES) {
+        setServerError(`Kuvien yhteiskoko saa olla enintään ${Math.floor(MAX_TOTAL_FILE_BYTES / 1024 / 1024)} Mt.`);
+        break;
+      }
+      accepted.push(file);
+      totalBytes += file.size;
+    }
+
+    if (selected.length > remainingSlots) {
+      setServerError(`Voit lisätä enintään ${MAX_FILES} kuvaa.`);
+    } else if (accepted.length > 0 && accepted.length === selected.length) {
+      setServerError(null);
+    }
+
+    if (accepted.length > 0) setFiles((prev) => [...prev, ...accepted]);
   };
 
-  const removeFile = (idx: number) => setFiles((prev) => prev.filter((_, i) => i !== idx));
+  const removeFile = (idx: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== idx));
+    setServerError(null);
+  };
 
   useEffect(() => {
     return () => {
@@ -221,7 +262,7 @@ export function QuoteForm() {
         </span>
         <h3 className="font-display text-2xl font-bold text-navy-900">Kiitos tarjouspyynnöstä!</h3>
         <p className="max-w-md text-navy-600">
-          Olemme vastaanottaneet tarjouspyyntösi ja palaamme asiaan 24 tunnin sisällä.
+          Olemme vastaanottaneet tarjouspyyntösi ja mahdolliset kuvat. Palaamme asiaan 24 tunnin sisällä.
           Tarjoamme ilmaisen, sitouttamattoman tarkastuskäynnin kohteeseesi.
         </p>
         <button type="button" onClick={() => setSubmitted(false)} className="btn-outline mt-2">
@@ -344,14 +385,16 @@ export function QuoteForm() {
             <div onClick={() => fileInputRef.current?.click()}
               className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-navy-200 bg-navy-50/30 px-4 py-6 text-center transition hover:border-orange-300 hover:bg-orange-50/30">
               <Upload className="h-6 w-6 text-navy-400" />
-              <span className="text-sm text-navy-500">Klikkaa lisätäksesi kuvia (max 5)</span>
+              <span className="text-sm text-navy-500">Lisää kuvia (max 5 · yhteensä max 12 Mt)</span>
+              <span className="text-xs text-navy-400">JPG, PNG, WebP, HEIC tai HEIF</span>
             </div>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple className="hidden" onChange={handleFiles} />
             {files.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {files.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2 rounded-lg bg-navy-50 px-3 py-1.5 text-xs text-navy-700">
-                    <span className="max-w-[120px] truncate">{f.name}</span>
+                  <div key={`${f.name}-${f.lastModified}-${i}`} className="flex items-center gap-2 rounded-lg bg-navy-50 px-3 py-1.5 text-xs text-navy-700">
+                    <span className="max-w-[150px] truncate">{f.name}</span>
+                    <span className="text-navy-400">{(f.size / 1024 / 1024).toFixed(1)} Mt</span>
                     <button type="button" onClick={() => removeFile(i)} className="text-navy-400 hover:text-red-500" aria-label={`Poista ${f.name}`}>
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -394,6 +437,7 @@ export function QuoteForm() {
           <div className="rounded-xl bg-navy-50/50 px-4 py-3">
             <p className="text-sm font-semibold text-navy-800">Valmis lähettämään?</p>
             <p className="mt-1 text-xs leading-relaxed text-navy-500">Tarkista yhteystietosi. Vastaamme 24 tunnin sisällä.</p>
+            {files.length > 0 && <p className="mt-1 text-xs font-semibold text-orange-700">{files.length} kuvaa liitetään tarjouspyyntöön.</p>}
           </div>
         </>
       )}
@@ -410,7 +454,7 @@ export function QuoteForm() {
         )}
       </div>
 
-      <p className="text-center text-xs text-navy-500">Tietosi käsitellään luottamuksellisesti. Voit pyytää tarjouksen ilman sitoutumista.</p>
+      <p className="text-center text-xs text-navy-500">Tietosi ja mahdolliset kuvat käsitellään luottamuksellisesti. Voit pyytää tarjouksen ilman sitoutumista.</p>
     </form>
   );
 }
