@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { selectSurfaceFromCanvas } from '@/lib/smartSurfaceFill';
 import { Camera, Download, Eraser, Maximize2, Paintbrush, PaintRoller, Redo2, RotateCcw, Sparkles, Undo2, Upload, ZoomIn, ZoomOut } from 'lucide-react';
 
 type Tool = 'brush' | 'roller' | 'eraser' | 'smart';
@@ -101,6 +102,9 @@ export function UniversalPaintStudioPage() {
     const source=sourceRef.current,target=paintRef.current;
     const sourceCtx=source?.getContext('2d'),targetCtx=target?.getContext('2d');
     if(!source||!target||!sourceCtx||!targetCtx||rawSeeds.length===0)return;
+    const sharedSelection = selectSurfaceFromCanvas(source, rawSeeds, { tolerance, edgeLock });
+    if (!sharedSelection) return;
+    if (sharedSelection.stopped) { setMessage('Täyttö pysäytettiin turvallisuussyistä. Lisää Rajojen suojausta ja kokeile pienempää aluetta.'); return; }
 
     const w=source.width,h=source.height,image=sourceCtx.getImageData(0,0,w,h),data=image.data,total=w*h;
     const stride=Math.max(1,Math.floor(rawSeeds.length/28));
