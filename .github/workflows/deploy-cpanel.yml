@@ -49,7 +49,9 @@ jobs:
           test -d dist/assets
           test -f dist/.htaccess
           test -f dist/send-mail.php
+          test -f dist/ai-image-transform.php
           test ! -f dist/send-mail.config.php
+          test ! -f dist/ai-image.config.php
           test ! -f dist/.env
           test ! -f dist/.env.local
 
@@ -70,4 +72,5 @@ jobs:
             **/.git*/**
             **/node_modules/**
             send-mail.config.php
+            ai-image.config.php
             PHPMailer/**
