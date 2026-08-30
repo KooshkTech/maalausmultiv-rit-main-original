@@ -3,6 +3,11 @@ import type { SegmentationProvider, SegmentationRequest, SegmentationResult } fr
 const MODEL_ID = 'Xenova/slimsam-77-uniform';
 
 type Runtime = typeof import('@huggingface/transformers');
+type SamModelInstance = Awaited<ReturnType<Runtime['SamModel']['from_pretrained']>>;
+type SamProcessorInstance = Awaited<ReturnType<Runtime['AutoProcessor']['from_pretrained']>>;
+type ProcessedSamInput = Awaited<ReturnType<SamProcessorInstance>>;
+type SamEmbeddings = Awaited<ReturnType<SamModelInstance['get_image_embeddings']>>;
+type SamLoadOptions = Parameters<Runtime['SamModel']['from_pretrained']>[1];
 
 /**
  * Browser-only promptable segmentation provider.
@@ -14,11 +19,11 @@ export class SlimSamProvider implements SegmentationProvider {
   readonly label = 'AI-pintatunnistus';
 
   private runtime: Runtime | null = null;
-  private model: any = null;
-  private processor: any = null;
+  private model: SamModelInstance | null = null;
+  private processor: SamProcessorInstance | null = null;
   private sourceKey = '';
-  private processed: any = null;
-  private embeddings: any = null;
+  private processed: ProcessedSamInput | null = null;
+  private embeddings: SamEmbeddings | null = null;
 
   async isAvailable() {
     return typeof window !== 'undefined' && typeof WebAssembly !== 'undefined';
@@ -35,34 +40,31 @@ export class SlimSamProvider implements SegmentationProvider {
     const { SamModel, AutoProcessor } = this.runtime!;
     const webgpu = typeof navigator !== 'undefined' && 'gpu' in navigator;
     try {
-      this.model = await SamModel.from_pretrained(MODEL_ID, {
+      const options = {
         device: webgpu ? 'webgpu' : 'wasm',
         dtype: webgpu ? 'fp16' : 'q8',
-      } as any);
+      } as SamLoadOptions;
+      this.model = await SamModel.from_pretrained(MODEL_ID, options);
     } catch (error) {
       if (!webgpu) throw error;
       // WebGPU varies by browser/GPU. Retry on WASM rather than breaking the editor.
-      this.model = await SamModel.from_pretrained(MODEL_ID, {
-        device: 'wasm',
-        dtype: 'q8',
-      } as any);
+      const fallbackOptions = { device: 'wasm', dtype: 'q8' } as SamLoadOptions;
+      this.model = await SamModel.from_pretrained(MODEL_ID, fallbackOptions);
     }
     this.processor = await AutoProcessor.from_pretrained(MODEL_ID);
   }
 
   private async ensureEmbedding(request: SegmentationRequest) {
     await this.ensureModel();
-    const image = (request as any).image;
+    const image = request.image;
     if (!image) throw new Error('SlimSAM requires the source image in the segmentation request.');
-    const key = (request as any).imageKey ?? `${request.width}x${request.height}`;
+    const key = `${request.width}x${request.height}:${image.data.length}`;
     if (key === this.sourceKey && this.embeddings && this.processed) return;
 
     const { RawImage } = this.runtime!;
-    const raw = image instanceof ImageData
-      ? new RawImage(new Uint8ClampedArray(image.data), image.width, image.height, 4)
-      : image;
-    this.processed = await this.processor(raw);
-    this.embeddings = await this.model.get_image_embeddings(this.processed);
+    const raw = new RawImage(new Uint8ClampedArray(image.data), image.width, image.height, 4);
+    this.processed = await this.processor!(raw);
+    this.embeddings = await this.model!.get_image_embeddings(this.processed);
     this.sourceKey = key;
   }
 
@@ -73,7 +75,10 @@ export class SlimSamProvider implements SegmentationProvider {
 
     await this.ensureEmbedding(request);
     const { Tensor } = this.runtime!;
-    const reshaped = this.processed.reshaped_input_sizes[0];
+    const processed = this.processed!;
+    const model = this.model!;
+    const embeddings = this.embeddings!;
+    const reshaped = processed.reshaped_input_sizes[0];
     const points = request.points.flatMap((point) => [
       (point.x / request.width) * reshaped[1],
       (point.y / request.height) * reshaped[0],
@@ -82,11 +87,11 @@ export class SlimSamProvider implements SegmentationProvider {
     const count = request.points.length;
     const input_points = new Tensor('float32', points, [1, 1, count, 2]);
     const input_labels = new Tensor('int64', labels, [1, 1, count]);
-    const { pred_masks, iou_scores } = await this.model({ ...this.embeddings, input_points, input_labels });
-    const masks = await this.processor.post_process_masks(
+    const { pred_masks, iou_scores } = await model({ ...embeddings, input_points, input_labels });
+    const masks = await this.processor!.post_process_masks(
       pred_masks,
-      this.processed.original_sizes,
-      this.processed.reshaped_input_sizes,
+      processed.original_sizes,
+      processed.reshaped_input_sizes,
     );
 
     const scores = Array.from(iou_scores.data as ArrayLike<number>);
@@ -108,6 +113,6 @@ export class SlimSamProvider implements SegmentationProvider {
       }
     }
 
-    return { mask, width: request.width, height: request.height, provider: this.id };
+    return { mask, width: request.width, height: request.height, confidence: scores[best], provider: this.id };
   }
 }
