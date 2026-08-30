@@ -1,104 +1,112 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Palette, Sparkles } from 'lucide-react';
 import { Seo } from '@/components/Seo';
 import { PageHero } from '@/sections/PageHero';
 import { images } from '@/config/images';
 import { SectionHeading } from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
 import { ContactCTA } from '@/sections/ContactCTA';
-import { serviceCategories, getServicesByCategory } from '@/data/services';
+import { getPaintingServices } from '@/data/services';
 
 export function ServicesPage() {
+  const services = getPaintingServices();
+
   return (
     <>
       <Seo
-        title="Palvelut — maalaus ja siivous"
-        description="Maalauspalvelut ja siivouspalvelut Uudellamaalla: ulkomaalaus, sisämaalaus, julkisivumaalaus, kattomaalaus, kotisiivous, toimistosiivous, rakennussiivous, muuttosiivous ja ikkunanpesu. Pyydä ilmainen arvio."
+        title="Maalauspalvelut Helsinki, Espoo ja Vantaa | Maalaus Multiväri"
+        description="Maalauspalvelut Helsingissä, Espoossa, Vantaalla ja Uudellamaalla: sisämaalaus, talon maalaus, ulkomaalaus, julkisivumaalaus, kattomaalaus ja muut maalaustyöt. Pyydä maksuton arvio."
         path="/palvelut"
         breadcrumbs={[
           { name: 'Etusivu', path: '/' },
-          { name: 'Palvelut', path: '/palvelut' },
+          { name: 'Maalauspalvelut', path: '/palvelut' },
         ]}
       />
       <PageHero
-        eyebrow="Palvelut"
-        crumb="Palvelut"
-        title="Maalaus ja siivous yhdestä paikasta"
-        description="Tarjoamme kodin ja yrityksen maalaustyöt, kunnostuksen, hoidon ja siivoustyöt kokonaisvaltaisesti — tarjouspyynnöstä takuuaikaan asti."
+        eyebrow="Maalauspalvelut"
+        crumb="Maalauspalvelut"
+        title="Maalauspalvelut koteihin, taloyhtiöille ja yrityksille"
+        description="Sisä- ja ulkomaalaus, talon maalaus, julkisivut, katot ja muut maalaustyöt Helsingissä, Espoossa, Vantaalla ja muualla Uudellamaalla."
         image={images.pages.services}
       />
+
+      <section className="relative z-20 -mt-9 px-5">
+        <div className="container-base grid gap-4 md:grid-cols-2">
+          <div className="card p-6 sm:p-8">
+            <span className="eyebrow-orange">VäriKamu</span>
+            <h2 className="mt-3 font-display text-2xl font-bold text-navy-950">Näe uusi ilme ennen maalausta</h2>
+            <p className="mt-2 leading-relaxed text-navy-600">Kokeile värejä omassa kuvassasi ja jatka suunnitelmasta tarjouspyyntöön.</p>
+            <Link to="/varikamu" className="btn-primary mt-5">Kokeile VäriKamua <Palette className="h-4 w-4" /></Link>
+          </div>
+          <div className="card p-6 sm:p-8">
+            <span className="eyebrow-orange">Etsitkö siivousta?</span>
+            <h2 className="mt-3 font-display text-2xl font-bold text-navy-950">Siivouspalvelut ovat omalla sivullaan</h2>
+            <p className="mt-2 leading-relaxed text-navy-600">Maalaus ja siivous on erotettu selkeiksi palvelupoluiksi, jotta löydät oikean palvelun nopeasti.</p>
+            <Link to="/palvelut/siivous" className="btn-outline mt-5">Siivouspalvelut <Sparkles className="h-4 w-4" /></Link>
+          </div>
+        </div>
+      </section>
 
       <section className="section-pad bg-white">
         <div className="container-base">
           <SectionHeading
             align="left"
-            title="Valitse oikea palvelu"
-            description="Klikkaa palvelua saadaksesi yksityiskohtaisen kuvauksen ja sisältyvät työvaiheet. Hinta-arvio aina ilmaisena ja sitouttamattomana."
+            eyebrow="Maalaus"
+            eyebrowOrange
+            title="Valitse maalauspalvelu"
+            description="Tutustu työvaiheisiin, kohteisiin ja palvelusisältöön. Hinta määräytyy kohteen kunnon, pinta-alan, pohjatöiden ja toteutuksen mukaan."
           />
 
-          <div className="mt-12 flex flex-col gap-12">
-            {serviceCategories.map((cat) => (
-              <div key={cat.id}>
-                <div className="flex items-center gap-3">
-                  <h2 className="font-display text-2xl font-bold text-navy-900 sm:text-3xl">{cat.label}</h2>
-                  <span className="h-px flex-1 bg-navy-100" />
-                </div>
-                <div className="mt-6 flex flex-col gap-8">
-                  {getServicesByCategory(cat.id).map((service, i) => (
-                    <Reveal key={service.slug} delay={i * 60}>
-                      <div
-                        className={`card grid gap-8 overflow-hidden p-4 sm:p-6 lg:grid-cols-12 lg:items-center ${
-                          i % 2 === 1 ? 'lg:[&>div:first-child]:order-2' : ''
-                        }`
-                      }
-                      >
-                        <div className="lg:col-span-5">
-                          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
-                            <img
-                              src={service.image}
-                              alt={service.title}
-                              className="h-full w-full object-cover"
-                              loading="lazy"
-                            />
-                            <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-navy-800">
-                              Pyydä tarjous
-                            </span>
-                          </div>
-                        </div>
-                        <div className="lg:col-span-7">
-                          <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
-                            {cat.shortLabel} · Palvelu
-                          </span>
-                    <h3 className="mt-2 font-display text-2xl font-bold text-navy-900 sm:text-3xl">
-                      {service.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-navy-600 sm:text-base">
-                      {service.description}
-                    </p>
-                    <ul className="mt-5 grid gap-2 sm:grid-cols-2">
-                      {service.bullets.map((b) => (
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {services.map((service, i) => (
+              <Reveal key={service.slug} delay={i * 60}>
+                <article className="card group flex h-full flex-col overflow-hidden p-4 sm:p-5">
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-2xl">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                      width="800"
+                      height="500"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col px-2 pb-2 pt-5">
+                    <span className="text-xs font-bold uppercase tracking-wider text-orange-600">Maalauspalvelu</span>
+                    <h2 className="mt-2 font-display text-2xl font-bold text-navy-900">{service.title}</h2>
+                    <p className="mt-3 text-sm leading-relaxed text-navy-600">{service.description}</p>
+                    <ul className="mt-5 grid gap-2">
+                      {service.bullets.slice(0, 4).map((b) => (
                         <li key={b} className="flex items-start gap-2 text-sm text-navy-700">
                           <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" />
                           {b}
                         </li>
                       ))}
                     </ul>
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="mt-auto flex flex-wrap gap-3 pt-6">
                       <Link to={`/palvelut/${service.slug}`} className="btn-primary">
-                        Lue lisää
-                        <ArrowRight className="h-4 w-4" />
+                        Lue lisää <ArrowRight className="h-4 w-4" />
                       </Link>
-                      <Link to="/yhteystiedot" className="btn-outline">
-                        Pyydä tarjous
-                      </Link>
+                      <Link to={`/yhteystiedot?service=${service.slug}`} className="btn-outline">Pyydä tarjous</Link>
                     </div>
-                        </div>
-                      </div>
-                    </Reveal>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                </article>
+              </Reveal>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-pad bg-navy-50">
+        <div className="container-base grid gap-6 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
+          <div>
+            <span className="eyebrow-orange">Hinta ja arvio</span>
+            <h2 className="mt-3 font-display text-3xl font-bold text-navy-950">Selvitä mistä maalaustyön hinta muodostuu</h2>
+            <p className="mt-4 max-w-2xl leading-relaxed text-navy-600">Emme kopioi kilpailijoiden hintoja tai lupaa yhtä neliöhintaa kaikille kohteille. Katso hinnan tärkeimmät tekijät ja tee alustava arvio omilla tiedoillasi.</p>
+          </div>
+          <div className="flex flex-wrap gap-3 lg:justify-end">
+            <Link to="/hinnat" className="btn-primary">Maalausten hinnat <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/kustannuslaskuri" className="btn-outline">Alustava hinta-arvio</Link>
           </div>
         </div>
       </section>
