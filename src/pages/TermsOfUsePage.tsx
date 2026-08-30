@@ -3,71 +3,17 @@ import { company } from '@/data/company';
 import { trackEmailClick } from '@/lib/analytics';
 
 export function TermsOfUsePage() {
-  return (
-    <>
-      <Seo
-        title="Käyttöehdot"
-        description="Maalaus Multivärin verkkosivuston, maalaussuunnittelijan ja palveluiden yleiset käyttöehdot."
-        path="/kayttoehdot"
-      />
-      <section className="bg-navy-50/60 px-5 py-16 sm:py-20">
-        <div className="mx-auto max-w-3xl">
-          <h1 className="font-display text-3xl font-bold text-navy-900 sm:text-4xl">Käyttöehdot</h1>
-          <p className="mt-3 text-sm text-navy-500">Päivitetty viimeksi: 25.8.2026</p>
-
-          <div className="prose prose-navy mt-8 max-w-none space-y-8 text-navy-700">
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">1. Yleistä</h2>
-              <p className="mt-2 leading-relaxed">Näitä käyttöehtoja sovelletaan {company.name}n (&quot;{company.name}&quot;, &quot;me&quot;) verkkosivuston <span className="whitespace-nowrap">maalausmultivari.fi</span>, maalauslaskurin ja kirjautumista vaativan asiakassovelluksen käyttöön. Käyttämällä palvelua hyväksyt nämä ehdot.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">2. Sivuston sisältö ja suunnitteluvisualisointi</h2>
-              <p className="mt-2 leading-relaxed">Sivuston tekstit, kuvat, värisuunnitelmat ja hinta-arviot ovat suunnittelua ja yleistä tiedonsaantia varten. Värisuunnittelijan näytöllä esittämä väri ei ole värintarkka lupaus lopullisesta maalipinnasta, koska näyttö, valaistus, valokuva, alusta, kiiltoaste ja maalituote vaikuttavat havaittuun sävyyn. Lopullinen väri tulee varmistaa soveltuvasta fyysisestä värimallista ja tarvittaessa koemaalauksella.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">3. Hinta-arviot</h2>
-              <p className="mt-2 leading-relaxed">Maalauslaskurin antama hintahaarukka on alustava arvio eikä sitova tarjous. Arvio muodostuu käyttäjän antamista pinta-aloista, kappalemääristä, pintojen kunnosta, esikäsittelyistä, maalauskerroista, laatutasosta ja muista valinnoista. Lopulliseen hintaan voivat vaikuttaa esimerkiksi todelliset mitat, materiaalit, suojaustarve, telineet tai henkilönostimet, työskentelykorkeus, korjaukset, sääolosuhteet, saavutettavuus ja muut kohdekohtaiset tekijät.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">4. Käyttäjätili ja käyttäjän vastuu</h2>
-              <p className="mt-2 leading-relaxed">Käyttäjä vastaa antamiensa tietojen oikeellisuudesta, käyttäjätilinsä tunnusten suojaamisesta sekä siitä, että hänellä on oikeus ladata sovellukseen toimittamansa kuvat ja muut aineistot. Palveluun ei tule ladata tarpeettomia henkilötietoja, arkaluonteista sisältöä tai kuvia tunnistettavista henkilöistä ilman asianmukaista oikeutta.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">5. Tarjouspyynnöt ja sopimukset</h2>
-              <p className="mt-2 leading-relaxed">Verkkosivuston tai maalaussuunnittelijan kautta lähetetty tarjous- tai yhteydenottopyyntö ei ole sitova tilaus, vaan pyyntö saada tarkempi tarjous. Sitova sopimus syntyy vasta, kun osapuolet ovat hyväksyneet tarjouksen ehdot sovitulla tavalla.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">6. Soveltuvuus ja turvallisuus</h2>
-              <p className="mt-2 leading-relaxed">Kaikkia pintoja tai materiaaleja ei voida maalata samalla menetelmällä. Erityisesti kattojen, märkätilojen, vanhojen pinnoitteiden ja vaurioituneiden pintojen soveltuvuus tulee tarkistaa ennen työn tilaamista. Sovellus ei korvaa ammattilaisen kuntotarkastusta, turvallisuussuunnittelua tai materiaalivalmistajan ohjeita.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">7. Vastuunrajoitus</h2>
-              <p className="mt-2 leading-relaxed">Pyrimme pitämään sivuston ja sovelluksen toimivina ja tiedot ajantasaisina, mutta emme takaa keskeytyksetöntä toimintaa tai sitä, että automaattinen suunnittelu- tai hinta-arvio vastaisi täsmälleen kohteen lopullista toteutusta. Pakottavasta lainsäädännöstä johtuvia oikeuksia ei rajoiteta näillä ehdoilla.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">8. Tekijänoikeudet</h2>
-              <p className="mt-2 leading-relaxed">Sivuston oma sisältö, ohjelmiston käyttöliittymä ja Maalaus Multivärin aineisto ovat {company.name}n tai sen yhteistyökumppaneiden omaisuutta. Käyttäjä säilyttää oikeutensa itse lataamaansa aineistoon ja antaa meille oikeuden käsitellä sitä vain palvelun ja siihen liittyvän tarjousprosessin toteuttamiseksi tietosuojaselosteen mukaisesti.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">9. Sovellettava laki</h2>
-              <p className="mt-2 leading-relaxed">Näihin käyttöehtoihin sovelletaan Suomen lakia. Mahdolliset erimielisyydet pyritään ensisijaisesti ratkaisemaan neuvottelemalla.</p>
-            </div>
-
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy-900">10. Yhteystiedot</h2>
-              <p className="mt-2 leading-relaxed">Kysymyksissä käyttöehdoista ota yhteyttä: <a href={company.emailHref} onClick={() => trackEmailClick('terms_of_use')} className="text-orange-600 underline">{company.email}</a>.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </>
-  );
+  return <><Seo title="Käyttöehdot" description="Maalaus Multivärin verkkosivuston, VäriKamun, SiivousKamun ja palveluiden yleiset käyttöehdot." path="/kayttoehdot" /><section className="bg-navy-50/60 px-5 py-16 sm:py-20"><div className="mx-auto max-w-3xl"><h1 className="font-display text-3xl font-bold text-navy-900 sm:text-4xl">Käyttöehdot</h1><p className="mt-3 text-sm text-navy-500">Päivitetty viimeksi: 30.8.2026</p><div className="prose prose-navy mt-8 max-w-none space-y-8 text-navy-700">
+    <div><h2 className="font-display text-xl font-bold text-navy-900">1. Yleistä</h2><p className="mt-2 leading-relaxed">Näitä käyttöehtoja sovelletaan {company.name}n verkkosivuston maalausmultivari.fi sekä VäriKamu-, SiivousKamu-, laskuri- ja asiakassovellusten käyttöön. Käyttämällä palvelua hyväksyt nämä ehdot.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">2. Suunnitteluvisualisointi</h2><p className="mt-2 leading-relaxed">Sovellusten visualisoinnit ja hinta-arviot ovat suunnittelua varten. Näytöllä esitetty väri ei ole värintarkka lupaus lopullisesta maalipinnasta, koska näyttö, valaistus, valokuva, alusta, kiiltoaste ja maalituote vaikuttavat havaittuun sävyyn. Lopullinen väri tulee varmistaa soveltuvasta fyysisestä värimallista ja tarvittaessa koemaalauksella.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">3. Hinta-arviot</h2><p className="mt-2 leading-relaxed">Sovellusten mahdollinen hintahaarukka on alustava arvio eikä sitova tarjous. Lopulliseen hintaan vaikuttavat muun muassa todelliset mitat, materiaalit, pintojen kunto, esikäsittely, suojaus, työskentelyolosuhteet ja työn todellinen laajuus.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">4. Käyttäjätili ja käyttäjän aineisto</h2><p className="mt-2 leading-relaxed">Käyttäjä vastaa antamiensa tietojen oikeellisuudesta, tunnustensa suojaamisesta sekä siitä, että hänellä on oikeus ladata palveluun toimittamansa kuvat ja muut aineistot. Käyttäjä säilyttää oikeutensa omaan aineistoonsa ja antaa meille oikeuden käsitellä sitä palvelun, tallennuksen ja siihen liittyvän tarjousprosessin toteuttamiseksi tietosuojaselosteen mukaisesti.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">5. Tarjouspyynnöt ja sopimukset</h2><p className="mt-2 leading-relaxed">Verkkosivuston, VäriKamun tai SiivousKamun kautta lähetetty tarjous- tai yhteydenottopyyntö ei ole sitova tilaus. Sitova sopimus syntyy vasta, kun osapuolet ovat hyväksyneet tarjouksen ehdot sovitulla tavalla.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">6. VäriKamu, SiivousKamu ja immateriaalioikeudet</h2><p className="mt-2 leading-relaxed">VäriKamu, SiivousKamu, sivuston oma sisältö, ohjelmistokoodi, käyttöliittymät, ulkoasu, grafiikka, tekstit, työnkulut, visualisoinnit ja muut {company.name}n tuottamat aineistot ovat {company.name}n ja/tai sen lisenssinantajien omaisuutta ja niitä suojaavat soveltuvat immateriaalioikeudet.</p><p className="mt-3 leading-relaxed">Ellei pakottavasta laista muuta johdu, palvelun tai sen olennaisen osan kopiointi, jäljentäminen, uudelleenjulkaisu, edelleenjakelu, myynti, jälleenmyynti, kaupallinen hyödyntäminen, muuntelu, johdannaisteoksen valmistaminen, peilaaminen, automatisoitu kerääminen, lähdekoodin tai toimintalogiikan luvaton purkaminen tai palvelun tarjoaminen omana tuotteena on kielletty ilman oikeudenhaltijan etukäteistä kirjallista lupaa.</p><p className="mt-3 leading-relaxed">Palvelun käyttäminen asiakkaana ei siirrä käyttäjälle omistus-, tekijänoikeus-, tavaramerkki- tai lisenssioikeutta palvelun teknologiaan tai brändiaineistoon. VäriKamu- ja SiivousKamu-nimien käyttäminen ei tässä yhteydessä tarkoita väitettä rekisteröidystä tavaramerkistä, ellei rekisteröintiä ole erikseen tehty.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">7. Soveltuvuus ja turvallisuus</h2><p className="mt-2 leading-relaxed">Kaikkia pintoja tai materiaaleja ei voida maalata tai käsitellä samalla menetelmällä. Sovellus ei korvaa ammattilaisen kuntotarkastusta, turvallisuussuunnittelua tai materiaalivalmistajan ohjeita.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">8. Vastuunrajoitus</h2><p className="mt-2 leading-relaxed">Pyrimme pitämään sivuston ja sovellukset toimivina ja tiedot ajantasaisina, mutta emme takaa keskeytyksetöntä toimintaa tai sitä, että automaattinen visualisointi tai arvio vastaisi täsmälleen lopullista toteutusta. Pakottavasta lainsäädännöstä johtuvia oikeuksia ei rajoiteta näillä ehdoilla.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">9. Oikeuksien loukkaukset</h2><p className="mt-2 leading-relaxed">Jos havaitset VäriKamun, SiivousKamun tai muun {company.name}n aineiston luvattoman kopion tai kaupallisen käytön, pyydämme ilmoittamaan siitä yhteystietojemme kautta. Pidätämme oikeuden ryhtyä sovellettavan lain sallimiin toimenpiteisiin oikeuksiemme suojaamiseksi.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">10. Sovellettava laki</h2><p className="mt-2 leading-relaxed">Näihin käyttöehtoihin sovelletaan Suomen lakia. Mahdolliset erimielisyydet pyritään ensisijaisesti ratkaisemaan neuvottelemalla.</p></div>
+    <div><h2 className="font-display text-xl font-bold text-navy-900">11. Yhteystiedot</h2><p className="mt-2 leading-relaxed">Kysymyksissä käyttöehdoista tai lisensoinnista ota yhteyttä: <a href={company.emailHref} onClick={() => trackEmailClick('terms_of_use')} className="text-orange-600 underline">{company.email}</a>.</p></div>
+  </div></div></section></>;
 }
