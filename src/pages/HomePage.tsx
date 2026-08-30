@@ -16,6 +16,7 @@ import { LocalSeoLinks } from '@/sections/LocalSeoLinks';
 import { LocalProjectProof } from '@/sections/LocalProjectProof';
 import { PaintPlannerPromo } from '@/sections/PaintPlannerPromo';
 import { PaintingJourney } from '@/sections/PaintingJourney';
+import { AssessmentCTA } from '@/sections/AssessmentCTA';
 import { StudioIntroPopup } from '@/components/StudioIntroPopup';
 
 export function HomePage() {
@@ -35,6 +36,7 @@ export function HomePage() {
       <BeforeAfterGallery />
       <LocalProjectProof />
       <PaintPlannerPromo />
+      <AssessmentCTA />
       <Stats />
       <Testimonials />
       <Process />
