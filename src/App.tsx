@@ -19,8 +19,8 @@ const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ defa
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then((m) => ({ default: m.CostCalculatorPage })));
 const PricingHubPage = lazy(() => import('@/pages/PricingHubPage').then((m) => ({ default: m.PricingHubPage })));
-const PaintStudioAiPage = lazy(() => import('@/pages/PaintStudioAiPage').then((m) => ({ default: m.PaintStudioAiPage })));
-const CleaningStudioAiPage = lazy(() => import('@/pages/CleaningStudioAiPage').then((m) => ({ default: m.CleaningStudioAiPage })));
+const PaintStudioPage = lazy(() => import('@/pages/PaintStudioPage').then((m) => ({ default: m.PaintStudioPage })));
+const CleaningStudioPage = lazy(() => import('@/pages/CleaningStudioPage').then((m) => ({ default: m.CleaningStudioPage })));
 const VarikamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.VarikamuLanding })));
 const SiivouskamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.SiivouskamuLanding })));
 const CitiesIndexPage = lazy(() => import('@/pages/CitiesIndexPage').then((m) => ({ default: m.CitiesIndexPage })));
@@ -39,10 +39,7 @@ const CustomerQuotesPage = lazy(() => import('@/pages/CustomerDashboardPages').t
 const CustomerProfilePage = lazy(() => import('@/pages/CustomerDashboardPages').then((m) => ({ default: m.CustomerProfilePage })));
 const DesignWizardPage = lazy(() => import('@/pages/DesignWizardPage').then((m) => ({ default: m.DesignWizardPage })));
 
-function PageLoader() {
-  return <div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-navy-200 border-t-orange-500" /></div>;
-}
-
+function PageLoader() { return <div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-navy-200 border-t-orange-500" /></div>; }
 const suspense = (node: React.ReactNode) => <Suspense fallback={<PageLoader />}>{node}</Suspense>;
 
 export default function App() {
@@ -64,10 +61,8 @@ export default function App() {
           <Route path="toimialat/:slug" element={suspense(<IndustryPage />)} />
           <Route path="hinnat" element={suspense(<PricingHubPage />)} />
           <Route path="kustannuslaskuri" element={suspense(<CostCalculatorPage />)} />
-
           <Route path="varikamu" element={suspense(<VarikamuLanding />)} />
           <Route path="siivouskamu" element={suspense(<SiivouskamuLanding />)} />
-
           <Route path="maalauslaskuri" element={<Navigate to="/varikamu" replace />} />
           <Route path="paint-studio" element={<Navigate to="/varikamu" replace />} />
           <Route path="siivoussuunnittelija" element={<Navigate to="/siivouskamu" replace />} />
@@ -78,7 +73,6 @@ export default function App() {
           <Route path="varikamu/ai" element={<Navigate to="/app/varikamu" replace />} />
           <Route path="varikamu/app" element={<Navigate to="/app/varikamu" replace />} />
           <Route path="varikamu-ai" element={<Navigate to="/app/varikamu" replace />} />
-
           <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
           <Route path="projektit" element={suspense(<ProjectsPage />)} />
           <Route path="arvostelut" element={suspense(<ReviewsPage />)} />
@@ -90,7 +84,6 @@ export default function App() {
           <Route path="kayttoehdot" element={suspense(<TermsOfUsePage />)} />
           <Route path="*" element={suspense(<NotFoundPage />)} />
         </Route>
-
         <Route path="app" element={<CustomerAppLayout />}>
           <Route path="login" element={suspense(<AppLoginPage />)} />
           <Route path="register" element={suspense(<AppRegisterPage />)} />
@@ -98,8 +91,8 @@ export default function App() {
           <Route element={<CustomerAppGuard />}>
             <Route index element={suspense(<CustomerDashboardPage />)} />
             <Route path="dashboard" element={suspense(<CustomerDashboardPage />)} />
-            <Route path="varikamu" element={suspense(<PaintStudioAiPage />)} />
-            <Route path="siivouskamu" element={suspense(<CleaningStudioAiPage />)} />
+            <Route path="varikamu" element={suspense(<PaintStudioPage />)} />
+            <Route path="siivouskamu" element={suspense(<CleaningStudioPage />)} />
             <Route path="design/new" element={suspense(<DesignWizardPage />)} />
             <Route path="design/:id" element={suspense(<DesignWizardPage />)} />
             <Route path="estimates" element={suspense(<CustomerEstimatesPage />)} />
