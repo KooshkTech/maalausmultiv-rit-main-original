@@ -20,7 +20,7 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ de
 const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then((m) => ({ default: m.CostCalculatorPage })));
 const PricingHubPage = lazy(() => import('@/pages/PricingHubPage').then((m) => ({ default: m.PricingHubPage })));
 const PaintStudioPage = lazy(() => import('@/pages/UniversalPaintStudioPage').then((m) => ({ default: m.UniversalPaintStudioPage })));
-const CleaningStudioPage = lazy(() => import('@/pages/CleaningStudioPage').then((m) => ({ default: m.CleaningStudioPage })));
+const CleaningStudioPage = lazy(() => import('@/pages/UniversalCleaningStudioPage').then((m) => ({ default: m.UniversalCleaningStudioPage })));
 const VarikamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.VarikamuLanding })));
 const SiivouskamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.SiivouskamuLanding })));
 const CitiesIndexPage = lazy(() => import('@/pages/CitiesIndexPage').then((m) => ({ default: m.CitiesIndexPage })));
