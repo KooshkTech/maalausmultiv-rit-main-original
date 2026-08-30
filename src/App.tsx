@@ -19,8 +19,8 @@ const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ defa
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then((m) => ({ default: m.CostCalculatorPage })));
 const PricingHubPage = lazy(() => import('@/pages/PricingHubPage').then((m) => ({ default: m.PricingHubPage })));
-const PaintStudioPage = lazy(() => import('@/pages/PaintStudioPage').then((m) => ({ default: m.PaintStudioPage })));
-const CleaningStudioPage = lazy(() => import('@/pages/CleaningStudioPage').then((m) => ({ default: m.CleaningStudioPage })));
+const PaintStudioAiPage = lazy(() => import('@/pages/PaintStudioAiPage').then((m) => ({ default: m.PaintStudioAiPage })));
+const CleaningStudioAiPage = lazy(() => import('@/pages/CleaningStudioAiPage').then((m) => ({ default: m.CleaningStudioAiPage })));
 const VarikamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.VarikamuLanding })));
 const SiivouskamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.SiivouskamuLanding })));
 const CitiesIndexPage = lazy(() => import('@/pages/CitiesIndexPage').then((m) => ({ default: m.CitiesIndexPage })));
@@ -92,8 +92,8 @@ export default function App() {
           <Route element={<CustomerAppGuard />}>
             <Route index element={suspense(<CustomerDashboardPage />)} />
             <Route path="dashboard" element={suspense(<CustomerDashboardPage />)} />
-            <Route path="varikamu" element={suspense(<PaintStudioPage />)} />
-            <Route path="siivouskamu" element={suspense(<CleaningStudioPage />)} />
+            <Route path="varikamu" element={suspense(<PaintStudioAiPage />)} />
+            <Route path="siivouskamu" element={suspense(<CleaningStudioAiPage />)} />
             <Route path="design/new" element={suspense(<DesignWizardPage />)} />
             <Route path="design/:id" element={suspense(<DesignWizardPage />)} />
             <Route path="estimates" element={suspense(<CustomerEstimatesPage />)} />
