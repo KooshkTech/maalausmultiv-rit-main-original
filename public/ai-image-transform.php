@@ -5,178 +5,139 @@ declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
+function failJson(int $status, string $message, string $code = ''): never {
+    http_response_code($status);
+    $payload = ['error' => $message];
+    if ($code !== '') $payload['code'] = $code;
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-$allowedOrigins = [
-    'https://maalausmultivari.fi',
-    'https://www.maalausmultivari.fi',
-];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') failJson(405, 'Method not allowed');
+
+$allowedOrigins = ['https://maalausmultivari.fi', 'https://www.maalausmultivari.fi'];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin !== '' && !in_array($origin, $allowedOrigins, true)) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Origin not allowed']);
-    exit;
-}
+if ($origin !== '' && !in_array($origin, $allowedOrigins, true)) failJson(403, 'Origin not allowed');
 
 $configPath = __DIR__ . '/ai-image.config.php';
-if (is_file($configPath)) {
-    require_once $configPath;
-}
+if (is_file($configPath)) require_once $configPath;
 
-$apiKey = getenv('OPENAI_API_KEY') ?: (defined('OPENAI_API_KEY') ? OPENAI_API_KEY : '');
-if (!$apiKey || str_contains($apiKey, 'REPLACE_')) {
-    http_response_code(503);
-    echo json_encode([
-        'error' => 'AI image service is not configured',
-        'code' => 'AI_NOT_CONFIGURED',
-    ]);
-    exit;
+$token = getenv('HF_TOKEN') ?: (defined('HF_TOKEN') ? HF_TOKEN : '');
+if (!$token || str_contains($token, 'REPLACE_')) {
+    failJson(503, 'AI-kuvapalvelu ei ole vielä käytössä. Ylläpitäjän tulee lisätä Hugging Face -tunnus.', 'AI_NOT_CONFIGURED');
 }
+$model = getenv('HF_IMAGE_MODEL') ?: (defined('HF_IMAGE_MODEL') ? HF_IMAGE_MODEL : 'black-forest-labs/FLUX.1-Kontext-dev');
+$endpoint = getenv('HF_IMAGE_ENDPOINT') ?: (defined('HF_IMAGE_ENDPOINT') ? HF_IMAGE_ENDPOINT : 'https://router.huggingface.co/hf-inference/models/' . $model);
 
-// Small per-IP cost guard. This is intentionally conservative because each
-// request invokes a paid image-edit model.
+// Protect the free monthly inference allowance from accidental abuse.
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$windowSeconds = 1800;
-$maxRequests = 8;
+$windowSeconds = 3600;
+$maxRequests = 3;
 $rateFile = sys_get_temp_dir() . '/mvv-ai-' . hash('sha256', $ip) . '.json';
 $now = time();
 $hits = [];
 if (is_file($rateFile)) {
     $decoded = json_decode((string) @file_get_contents($rateFile), true);
-    if (is_array($decoded)) {
-        $hits = array_values(array_filter($decoded, static fn($timestamp) => is_int($timestamp) && $timestamp > $now - $windowSeconds));
-    }
+    if (is_array($decoded)) $hits = array_values(array_filter($decoded, static fn($t) => is_int($t) && $t > $now - $windowSeconds));
 }
-if (count($hits) >= $maxRequests) {
-    http_response_code(429);
-    echo json_encode(['error' => 'Liian monta AI-kuvapyyntöä. Yritä hetken kuluttua uudelleen.', 'code' => 'RATE_LIMIT']);
-    exit;
-}
-$hits[] = $now;
-@file_put_contents($rateFile, json_encode($hits), LOCK_EX);
+if (count($hits) >= $maxRequests) failJson(429, 'AI-kuvien tuntiraja täyttyi. Yritä myöhemmin uudelleen.', 'RATE_LIMIT');
 
-if (!isset($_FILES['image']) || !is_array($_FILES['image'])) {
-    http_response_code(422);
-    echo json_encode(['error' => 'Kuva puuttuu.']);
-    exit;
-}
-
+if (!isset($_FILES['image']) || !is_array($_FILES['image'])) failJson(422, 'Kuva puuttuu.');
 $upload = $_FILES['image'];
-if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-    http_response_code(422);
-    echo json_encode(['error' => 'Kuvan lataus epäonnistui.']);
-    exit;
-}
-
+if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) failJson(422, 'Kuvan lataus epäonnistui.');
 $tmpName = (string) ($upload['tmp_name'] ?? '');
 $fileSize = (int) ($upload['size'] ?? 0);
-if ($fileSize <= 0 || $fileSize > 12 * 1024 * 1024 || !is_uploaded_file($tmpName)) {
-    http_response_code(422);
-    echo json_encode(['error' => 'Kuvan koko ei kelpaa. Enimmäiskoko on 12 Mt.']);
-    exit;
-}
-
+if ($fileSize <= 0 || $fileSize > 12 * 1024 * 1024 || !is_uploaded_file($tmpName)) failJson(422, 'Kuvan koko ei kelpaa. Enimmäiskoko on 12 Mt.');
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime = (string) $finfo->file($tmpName);
-$allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
-if (!in_array($mime, $allowedMime, true)) {
-    http_response_code(422);
-    echo json_encode(['error' => 'Käytä JPG-, PNG- tai WebP-kuvaa.']);
-    exit;
-}
+if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) failJson(422, 'Käytä JPG-, PNG- tai WebP-kuvaa.');
 
-$mode = $_POST['mode'] ?? '';
-if (!in_array($mode, ['paint', 'clean'], true)) {
-    http_response_code(422);
-    echo json_encode(['error' => 'Tuntematon muokkaustila.']);
-    exit;
-}
+$mode = (string) ($_POST['mode'] ?? '');
+if (!in_array($mode, ['paint', 'clean'], true)) failJson(422, 'Tuntematon muokkaustila.');
 
 if ($mode === 'paint') {
-    $surfaceMap = [
-        'walls' => 'walls',
-        'ceiling' => 'ceiling',
-        'doors' => 'doors',
-        'trim' => 'baseboards, mouldings and trim',
-    ];
+    $surfaceMap = ['walls' => 'walls', 'ceiling' => 'ceiling', 'doors' => 'doors', 'trim' => 'baseboards, mouldings and trim'];
     $surface = $surfaceMap[$_POST['surface'] ?? 'walls'] ?? 'walls';
     $color = strtoupper(trim((string) ($_POST['color'] ?? '#D8C9B5')));
-    if (!preg_match('/^#[0-9A-F]{6}$/', $color)) {
-        $color = '#D8C9B5';
-    }
-    $prompt = "Photorealistically repaint only the {$surface} in the provided property photo using paint color {$color}. "
-        . "Preserve the exact room/building geometry, perspective, furniture, windows, fixtures, flooring, artwork and all non-target surfaces. "
-        . "Keep the original lighting direction, natural shadows, highlights, surface texture and material detail so the result looks physically painted, not like a flat color overlay or filter. "
-        . "Do not redesign, replace, add or remove objects. Do not change exposure, white balance or contrast unless required to make the new paint physically believable. "
-        . "Return a realistic customer preview of the same scene with only the requested paint change.";
+    if (!preg_match('/^#[0-9A-F]{6}$/', $color)) $color = '#D8C9B5';
+    $prompt = "Photorealistically repaint only the {$surface} in this exact property photo using paint color {$color}. Preserve the exact geometry, camera angle, furniture, windows, fixtures, floor, artwork and every non-target surface. Preserve natural lighting, shadows, highlights and material texture. The paint must look physically applied to the target surface, never like a tint, brightness change, contrast filter or flat overlay. Do not add, remove, redesign or replace objects. Return the same scene with only the requested realistic paint change.";
 } else {
     $room = trim((string) ($_POST['room'] ?? 'room'));
     $intensity = trim((string) ($_POST['intensity'] ?? 'standard'));
     $tasks = trim((string) ($_POST['tasks'] ?? 'general surface cleaning'));
-    $prompt = "Create a photorealistic AFTER-cleaning version of this exact {$room}. Cleaning level: {$intensity}. Requested cleaning focus: {$tasks}. "
-        . "Preserve the exact camera angle, architecture, furniture, appliances, fixtures, decorations and personal belongings. "
-        . "Remove realistic visible dirt, dust, grime, fingerprints, soap residue, limescale and ordinary cleanable stains from appropriate surfaces. "
-        . "Make surfaces look professionally cleaned and naturally dry, while preserving material texture, reflections, shadows and lighting. "
-        . "Do not renovate, repaint, replace furniture, remove major objects, invent new decor, change the room layout, or merely brighten/darken the whole image. "
-        . "The result must look like the same room immediately after professional cleaning.";
+    $prompt = "Create a photorealistic AFTER-cleaning version of this exact {$room}. Cleaning level: {$intensity}. Focus: {$tasks}. Preserve the exact camera angle, architecture, furniture, appliances, fixtures, decorations and belongings. Remove only realistic cleanable dirt, dust, grime, fingerprints, soap residue, limescale and ordinary stains. Keep material texture, reflections, shadows and lighting natural. Do not renovate, repaint, replace furniture, remove major objects, invent decor, change layout, or simulate cleaning by changing brightness, contrast or saturation. Return the same room immediately after professional cleaning.";
 }
 
-$postFields = [
-    'model' => 'gpt-image-2',
-    'prompt' => $prompt,
-    'image' => new CURLFile($tmpName, $mime, 'input.jpg'),
-    'quality' => 'medium',
-    'size' => 'auto',
-    'input_fidelity' => 'high',
-    'output_format' => 'jpeg',
-    'n' => '1',
-];
+$imageBytes = @file_get_contents($tmpName);
+if ($imageBytes === false) failJson(422, 'Kuvaa ei voitu lukea.');
 
-$ch = curl_init('https://api.openai.com/v1/images/edits');
+// Hugging Face image-to-image request format: base64 input image + prompt parameters.
+$request = json_encode([
+    'inputs' => base64_encode($imageBytes),
+    'parameters' => [
+        'prompt' => $prompt,
+        'negative_prompt' => 'cartoon, illustration, redesigned room, changed camera angle, new furniture, missing furniture, flat color overlay, global brightness filter, global contrast filter, oversaturated, unrealistic lighting',
+        'guidance_scale' => 3.5,
+        'num_inference_steps' => 28,
+    ],
+], JSON_UNESCAPED_SLASHES);
+if ($request === false) failJson(500, 'AI-pyynnön muodostaminen epäonnistui.');
+
+$ch = curl_init($endpoint);
 curl_setopt_array($ch, [
     CURLOPT_POST => true,
-    CURLOPT_POSTFIELDS => $postFields,
-    CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $apiKey],
+    CURLOPT_POSTFIELDS => $request,
+    CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token, 'Content-Type: application/json', 'Accept: image/*, application/json'],
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_CONNECTTIMEOUT => 15,
-    CURLOPT_TIMEOUT => 150,
+    CURLOPT_HEADER => true,
+    CURLOPT_CONNECTTIMEOUT => 20,
+    CURLOPT_TIMEOUT => 180,
 ]);
-$responseBody = curl_exec($ch);
+$response = curl_exec($ch);
 $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+$headerSize = (int) curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+$contentType = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
 $curlError = curl_error($ch);
 curl_close($ch);
 
-if ($responseBody === false || $curlError !== '') {
-    error_log('AI image cURL error: ' . $curlError);
-    http_response_code(502);
-    echo json_encode(['error' => 'AI-kuvapalveluun ei saatu yhteyttä.']);
+if ($response === false || $curlError !== '') {
+    error_log('HF image cURL error: ' . $curlError);
+    failJson(502, 'AI-kuvapalveluun ei saatu yhteyttä. Yritä uudelleen hetken kuluttua.');
+}
+$body = substr((string) $response, $headerSize);
+
+if ($status < 200 || $status >= 300) {
+    $decoded = json_decode($body, true);
+    $providerMessage = is_array($decoded) ? (string) ($decoded['error'] ?? $decoded['message'] ?? '') : '';
+    error_log('HF image API HTTP ' . $status . ': ' . substr($body, 0, 1200));
+    if ($status === 401 || $status === 403) failJson(503, 'Hugging Face -tunnus ei kelpaa tai sillä ei ole Inference Providers -oikeutta.', 'HF_AUTH');
+    if ($status === 402 || str_contains(strtolower($providerMessage), 'credit')) failJson(429, 'Kuukauden ilmainen AI-kuvakiintiö on käytetty. Kiintiö palautuu Hugging Face -tilin ehtojen mukaisesti.', 'HF_CREDITS');
+    if ($status === 429) failJson(429, 'AI-palvelu on tilapäisesti ruuhkainen tai käyttöraja täyttyi. Yritä myöhemmin.', 'HF_RATE_LIMIT');
+    if ($status === 503) failJson(503, 'AI-kuvamalli ei ole juuri nyt käytettävissä. Yritä hetken kuluttua uudelleen.', 'HF_UNAVAILABLE');
+    failJson(502, $providerMessage !== '' ? 'AI-kuvan luonti epäonnistui: ' . mb_substr($providerMessage, 0, 240) : 'AI-kuvan luonti epäonnistui.');
+}
+
+if (str_starts_with(strtolower($contentType), 'image/')) {
+    $hits[] = $now;
+    @file_put_contents($rateFile, json_encode($hits), LOCK_EX);
+    $outputMime = str_contains(strtolower($contentType), 'png') ? 'image/png' : (str_contains(strtolower($contentType), 'webp') ? 'image/webp' : 'image/jpeg');
+    echo json_encode(['image' => 'data:' . $outputMime . ';base64,' . base64_encode($body), 'provider' => 'huggingface', 'model' => $model], JSON_UNESCAPED_SLASHES);
     exit;
 }
 
-$payload = json_decode((string) $responseBody, true);
-if ($status < 200 || $status >= 300 || !is_array($payload)) {
-    error_log('AI image API error HTTP ' . $status . ': ' . substr((string) $responseBody, 0, 1000));
-    http_response_code(502);
-    $apiMessage = is_array($payload) ? ($payload['error']['message'] ?? null) : null;
-    echo json_encode(['error' => $apiMessage ?: 'AI-kuvan luonti epäonnistui.']);
-    exit;
+$payload = json_decode($body, true);
+if (is_array($payload)) {
+    $b64 = $payload['image'] ?? $payload['data'][0]['b64_json'] ?? null;
+    $url = $payload['image_url'] ?? $payload['url'] ?? $payload['data'][0]['url'] ?? null;
+    if (is_string($b64) && $b64 !== '') {
+        $hits[] = $now; @file_put_contents($rateFile, json_encode($hits), LOCK_EX);
+        echo json_encode(['image' => str_starts_with($b64, 'data:') ? $b64 : 'data:image/jpeg;base64,' . $b64, 'provider' => 'huggingface', 'model' => $model], JSON_UNESCAPED_SLASHES); exit;
+    }
+    if (is_string($url) && $url !== '') {
+        $hits[] = $now; @file_put_contents($rateFile, json_encode($hits), LOCK_EX);
+        echo json_encode(['imageUrl' => $url, 'provider' => 'huggingface', 'model' => $model], JSON_UNESCAPED_SLASHES); exit;
+    }
 }
 
-$b64 = $payload['data'][0]['b64_json'] ?? null;
-$url = $payload['data'][0]['url'] ?? null;
-if (is_string($b64) && $b64 !== '') {
-    echo json_encode(['image' => 'data:image/jpeg;base64,' . $b64]);
-    exit;
-}
-if (is_string($url) && $url !== '') {
-    echo json_encode(['imageUrl' => $url]);
-    exit;
-}
-
-error_log('AI image response missing image payload: ' . substr((string) $responseBody, 0, 1000));
-http_response_code(502);
-echo json_encode(['error' => 'AI-kuvapalvelu ei palauttanut kuvaa.']);
+error_log('HF image response missing image payload: ' . substr($body, 0, 1000));
+failJson(502, 'AI-kuvapalvelu ei palauttanut kuvaa.');
