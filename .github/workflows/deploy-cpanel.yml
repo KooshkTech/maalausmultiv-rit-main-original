@@ -53,6 +53,7 @@ jobs:
           test ! -f dist/.env
           test ! -f dist/.env.local
 
+      # The FTP account is intentionally jailed to the live maalausmultivari.fi document root.
       - name: Deploy dist to cPanel over FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
