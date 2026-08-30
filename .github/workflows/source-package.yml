@@ -1,0 +1,37 @@
+name: Build source ZIP
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create source package
+        run: |
+          mkdir -p package
+          rsync -a ./ package/ \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude 'dist/' \
+            --exclude '.env' \
+            --exclude '.env.local' \
+            --exclude 'send-mail.config.php' \
+            --exclude 'package/'
+          zip -r maalausmultivari-website-source.zip package >/dev/null
+
+      - name: Upload source ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: maalausmultivari-website-source
+          path: maalausmultivari-website-source.zip
+          if-no-files-found: error
+          retention-days: 7
