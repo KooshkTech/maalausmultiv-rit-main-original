@@ -26,6 +26,12 @@
     RewriteRule ^siivoussuunnittelija/?$ /siivouskamu [L,R=301,NE]
     RewriteRule ^cleaning-studio/?$ /siivouskamu [L,R=301,NE]
 
+    # Send common AI-tool URLs to the authenticated customer applications.
+    RewriteRule ^siivouskamu/(ai|app)/?$ /app/siivouskamu [L,R=302,NE]
+    RewriteRule ^siivouskamu-ai/?$ /app/siivouskamu [L,R=302,NE]
+    RewriteRule ^varikamu/(ai|app)/?$ /app/varikamu [L,R=302,NE]
+    RewriteRule ^varikamu-ai/?$ /app/varikamu [L,R=302,NE]
+
     # SPA fallback: real files/directories bypass React Router.
     RewriteRule ^index\.html$ - [L]
     RewriteCond %{REQUEST_FILENAME} !-f
