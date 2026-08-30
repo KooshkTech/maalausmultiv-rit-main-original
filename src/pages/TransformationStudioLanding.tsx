@@ -37,16 +37,16 @@ function Landing({ kind }: { kind: 'paint' | 'cleaning' }) {
         serviceSchema={{ name: paint ? 'VäriKamu maalisuunnittelija' : 'SiivousKamu siivoussuunnittelija', description, areaServed: 'Helsinki, Espoo, Vantaa ja Uusimaa' }}
       />
 
-      <main>
-        <section className="bg-gradient-to-b from-navy-950 to-navy-900 px-5 py-16 text-white sm:py-24">
+      <main className="pb-24 sm:pb-0">
+        <section className="bg-gradient-to-b from-navy-950 to-navy-900 px-5 py-12 text-white sm:py-24">
           <div className="container-base grid gap-10 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-orange-300">Maalaus Multiväri Kamu Studio</p>
-              <h1 className="mt-4 max-w-4xl font-display text-4xl font-extrabold tracking-tight sm:text-6xl">{paint ? 'VäriKamu – suunnittele huoneen värit omalla kuvallasi' : 'SiivousKamu – suunnittele siivous ennen tarjouspyyntöä'}</h1>
+              <h1 className="mt-4 max-w-4xl font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-6xl">{paint ? 'VäriKamu – suunnittele huoneen värit omalla kuvallasi' : 'SiivousKamu – suunnittele siivous ennen tarjouspyyntöä'}</h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-navy-100">{description}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link to={appPath} className="btn-primary">{paint ? 'Kokeile VäriKamua' : 'Kokeile SiivousKamua'} <ArrowRight className="size-5" /></Link>
-                <Link to={paint ? '/palvelut/sisamaalaus' : '/palvelut/siivous'} className="btn-outline border-white/20 text-white hover:bg-white/10">Tutustu palveluihin</Link>
+                <Link to={paint ? '/palvelut/sisamaalaus' : '/palvelut/siivous'} className="btn-ghost-light">Tutustu palveluihin</Link>
               </div>
               <p className="mt-3 text-sm text-navy-300">Editorin käyttö vaatii sähköpostilla ja salasanalla kirjautumisen. Julkinen esittelysivu on avoin kaikille.</p>
             </div>
@@ -97,7 +97,7 @@ function Landing({ kind }: { kind: 'paint' | 'cleaning' }) {
             <p className="mx-auto mt-3 max-w-2xl text-navy-200">Avaa työkalu, kirjaudu sisään ja tee suunnitelma rauhassa. Tarjouspyyntö on vasta viimeinen vaihe.</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link to={appPath} className="btn-primary">Avaa {paint ? 'VäriKamu' : 'SiivousKamu'} <ArrowRight className="size-4" /></Link>
-              <Link to="/yhteystiedot" className="btn-outline border-white/20 text-white hover:bg-white/10">Pyydä tarjous suoraan</Link>
+              <Link to="/yhteystiedot" className="btn-ghost-light">Pyydä tarjous suoraan</Link>
             </div>
           </div>
         </section>
