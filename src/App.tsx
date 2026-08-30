@@ -72,6 +72,12 @@ export default function App() {
           <Route path="paint-studio" element={<Navigate to="/varikamu" replace />} />
           <Route path="siivoussuunnittelija" element={<Navigate to="/siivouskamu" replace />} />
           <Route path="cleaning-studio" element={<Navigate to="/siivouskamu" replace />} />
+          <Route path="siivouskamu/ai" element={<Navigate to="/app/siivouskamu" replace />} />
+          <Route path="siivouskamu/app" element={<Navigate to="/app/siivouskamu" replace />} />
+          <Route path="siivouskamu-ai" element={<Navigate to="/app/siivouskamu" replace />} />
+          <Route path="varikamu/ai" element={<Navigate to="/app/varikamu" replace />} />
+          <Route path="varikamu/app" element={<Navigate to="/app/varikamu" replace />} />
+          <Route path="varikamu-ai" element={<Navigate to="/app/varikamu" replace />} />
 
           <Route path="yhteistyossa" element={suspense(<AboutPage />)} />
           <Route path="projektit" element={suspense(<ProjectsPage />)} />
