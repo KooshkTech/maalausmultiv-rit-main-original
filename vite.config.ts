@@ -13,6 +13,12 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    // Keep production source maps private. This does not make browser code
+    // impossible to inspect, but avoids publishing an easy source-code map.
+    sourcemap: false,
+    minify: 'esbuild',
+  },
   server: {
     allowedHosts: true,
     // Proxy the PHP mail endpoint to a local PHP server during development.
