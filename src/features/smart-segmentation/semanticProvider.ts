@@ -16,7 +16,8 @@ export class LazySemanticProvider implements SegmentationProvider {
     return capability.webGpu && capability.semanticReady;
   }
 
-  async segment(_request: SegmentationRequest): Promise<SegmentationResult> {
+  async segment(request: SegmentationRequest): Promise<SegmentationResult> {
+    void request;
     throw new Error('Semantic provider is not loaded yet; use the safe fallback provider.');
   }
 }
