@@ -30,7 +30,10 @@ export function Layout() {
     <div className="flex min-h-screen flex-col bg-white">
       <Analytics />
       <Navbar />
-      <main className="flex-1">
+      {/* Navbar is fixed, so every public page needs a reliable top offset.
+          On mobile we also reserve space for the sticky call/WhatsApp bar so
+          the last controls and footer links are never hidden underneath it. */}
+      <main className="flex-1 pt-16 pb-20 sm:pb-0 lg:pt-20">
         <Outlet />
       </main>
       <Footer />
