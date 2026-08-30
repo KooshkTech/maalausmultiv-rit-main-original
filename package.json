@@ -16,6 +16,7 @@
     "verify:v17:quality": "node scripts/verify-v17-quality.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "3.8.1",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
