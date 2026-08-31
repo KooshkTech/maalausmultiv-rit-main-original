@@ -21,8 +21,16 @@ import {
 type Tool = 'brush' | 'roller' | 'eraser' | 'smart' | 'polygon';
 type Point = { x: number; y: number };
 type ViewMode = 'after' | 'before' | 'compare';
+type BrushPreset = { id: string; label: string; detail: string; px: number };
 
 const palette = ['#F2EFE6','#D8C9B5','#C9CBC8','#A7B19B','#9FB4C3','#B86F52','#496255','#45494B','#1D2022','#FF6B9D','#6C5CE7','#00B894'];
+const brushPresets: BrushPreset[] = [
+  { id: '2cm', label: '2 cm', detail: 'Tarkka', px: 18 },
+  { id: '3cm', label: '3 cm', detail: 'Reunat', px: 26 },
+  { id: '5cm', label: '5 cm', detail: 'Yleinen', px: 38 },
+  { id: '7cm', label: '7 cm', detail: 'Leveä', px: 54 },
+  { id: '10cm', label: '10 cm', detail: 'Julkisivu', px: 72 },
+];
 const clamp = (value:number,min:number,max:number) => Math.max(min,Math.min(max,value));
 
 function hexRgb(hex:string) {
@@ -36,20 +44,19 @@ export function UniversalPaintStudioPage() {
   const imageRef = useRef<HTMLImageElement>(null);
   const paintRef = useRef<HTMLCanvasElement>(null);
   const sourceRef = useRef<HTMLCanvasElement | null>(null);
-  const preStrokeRef = useRef<HTMLCanvasElement | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const drawingRef = useRef(false);
   const lastRef = useRef<Point | null>(null);
-  const strokePointsRef = useRef<Point[]>([]);
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [tool, setTool] = useState<Tool>('brush');
   const [color, setColor] = useState('#D99518');
-  const [brushSize, setBrushSize] = useState(30);
+  const [brushSize, setBrushSize] = useState(38);
+  const [brushPreset, setBrushPreset] = useState('5cm');
   const [opacity, setOpacity] = useState(0.7);
-  const [tolerance, setTolerance] = useState(58);
-  const [edgeLock, setEdgeLock] = useState(68);
+  const [tolerance, setTolerance] = useState(62);
+  const [edgeLock, setEdgeLock] = useState(62);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [kidsMode, setKidsMode] = useState(false);
@@ -57,14 +64,14 @@ export function UniversalPaintStudioPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('after');
   const [compareAt, setCompareAt] = useState(50);
   const [polygonPoints, setPolygonPoints] = useState<Point[]>([]);
-  const [message, setMessage] = useState('Valitse Sivellin tai Tela ja maalaa suoraan. Automaattinen täyttö on erillinen toiminto, joten maalaus ei enää katoa.');
+  const [message, setMessage] = useState('Valitse sivellin ja maalaa. Kuva pysyy paikallaan maalaamisen aikana.');
 
   const loadFile = (file?: File) => {
     if (!file || !['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 12 * 1024 * 1024) return;
     if (imageUrl?.startsWith('blob:')) URL.revokeObjectURL(imageUrl);
     setImageUrl(URL.createObjectURL(file));
     setHistory([]); setHistoryIndex(-1); setZoom(1); setViewMode('after'); setPolygonPoints([]);
-    setMessage('Kuva valmis. Maalaa suoraan Siveltimellä/Telalla tai käytä Täytä napautus -toimintoa. Jos automaattinen tunnistus epäonnistuu, käytä Rajaa pinta -työkalua.');
+    setMessage('Kuva valmis. Sivellin ja Tela maalaavat suoraan. Täytä automaattisesti yrittää tunnistaa yhtenäisen pinnan yhdellä napautuksella.');
   };
 
   const onImageLoad = () => {
@@ -87,13 +94,10 @@ export function UniversalPaintStudioPage() {
     const stage = stageRef.current;
     if (!stage || !size.width || !size.height) return null;
     const rect = stage.getBoundingClientRect();
-    return { x: clamp(((event.clientX - rect.left) / rect.width) * size.width,0,size.width-1), y: clamp(((event.clientY - rect.top) / rect.height) * size.height,0,size.height-1) };
-  };
-
-  const snapshotCanvas = () => {
-    const canvas = paintRef.current; if (!canvas) return;
-    const copy = document.createElement('canvas'); copy.width = canvas.width; copy.height = canvas.height;
-    copy.getContext('2d')?.drawImage(canvas,0,0); preStrokeRef.current = copy;
+    return {
+      x: clamp(((event.clientX - rect.left) / rect.width) * size.width, 0, size.width - 1),
+      y: clamp(((event.clientY - rect.top) / rect.height) * size.height, 0, size.height - 1),
+    };
   };
 
   const commit = () => {
@@ -102,15 +106,16 @@ export function UniversalPaintStudioPage() {
     setHistory(next); setHistoryIndex(next.length-1);
   };
 
-  const drawGuide = (from: Point,to: Point) => {
+  const drawStroke = (from: Point, to: Point) => {
     const ctx = paintRef.current?.getContext('2d'); if (!ctx) return;
     ctx.save();
-    ctx.globalCompositeOperation = tool==='eraser'?'destination-out':'source-over';
-    ctx.globalAlpha = tool==='eraser'?1:opacity;
-    ctx.strokeStyle = tool==='eraser'?'#000':color;
-    ctx.lineWidth = tool==='roller'?brushSize*2.2:brushSize;
-    ctx.lineCap = tool==='roller'?'square':'round'; ctx.lineJoin='round';
-    ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.stroke();ctx.restore();
+    ctx.globalCompositeOperation = tool==='eraser' ? 'destination-out' : 'source-over';
+    ctx.globalAlpha = tool==='eraser' ? 1 : opacity;
+    ctx.strokeStyle = tool==='eraser' ? '#000' : color;
+    ctx.lineWidth = tool==='roller' ? brushSize * 2.15 : brushSize;
+    ctx.lineCap = tool==='roller' ? 'square' : 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(from.x,from.y); ctx.lineTo(to.x,to.y); ctx.stroke(); ctx.restore();
   };
 
   const renderMask = (mask:Uint8Array) => {
@@ -118,71 +123,76 @@ export function UniversalPaintStudioPage() {
     const sourceCtx=source?.getContext('2d'),targetCtx=target?.getContext('2d');
     if(!source||!target||!sourceCtx||!targetCtx)return;
     const w=source.width,h=source.height,data=sourceCtx.getImageData(0,0,w,h).data;
-    const overlayCanvas=document.createElement('canvas');overlayCanvas.width=w;overlayCanvas.height=h;
-    const overlayCtx=overlayCanvas.getContext('2d');if(!overlayCtx)return;
+    const overlayCanvas=document.createElement('canvas'); overlayCanvas.width=w; overlayCanvas.height=h;
+    const overlayCtx=overlayCanvas.getContext('2d'); if(!overlayCtx)return;
     const overlay=overlayCtx.createImageData(w,h); const rgb=hexRgb(color);
-    for(let i=0;i<mask.length;i++)if(mask[i]){
-      const p=i*4,light=(data[p]*.299+data[p+1]*.587+data[p+2]*.114)/255;
-      const shade=.70+light*.38;
+    for(let i=0;i<mask.length;i++) if(mask[i]) {
+      const p=i*4, light=(data[p]*.299+data[p+1]*.587+data[p+2]*.114)/255;
+      const shade=.66+light*.42;
       overlay.data[p]=clamp(Math.round(rgb.r*shade),0,255);
       overlay.data[p+1]=clamp(Math.round(rgb.g*shade),0,255);
       overlay.data[p+2]=clamp(Math.round(rgb.b*shade),0,255);
       overlay.data[p+3]=Math.round(255*opacity);
     }
-    overlayCtx.putImageData(overlay,0,0);targetCtx.drawImage(overlayCanvas,0,0);commit();
+    overlayCtx.putImageData(overlay,0,0); targetCtx.drawImage(overlayCanvas,0,0); commit();
   };
 
-  const smartFillFromSeeds = (rawSeeds: Point[]) => {
-    const source=sourceRef.current;
-    const sourceCtx=source?.getContext('2d');
-    if(!source||!sourceCtx||rawSeeds.length===0)return false;
-
+  const smartFillAt = (seed: Point) => {
+    const source=sourceRef.current; const sourceCtx=source?.getContext('2d');
+    if(!source||!sourceCtx)return false;
     const w=source.width,h=source.height,image=sourceCtx.getImageData(0,0,w,h),data=image.data,total=w*h;
-    const stride=Math.max(1,Math.floor(rawSeeds.length/24));
-    const seeds=rawSeeds.filter((_,i)=>i%stride===0).slice(0,28);
-    const refs=seeds.map(seed=>{const x=clamp(Math.floor(seed.x),0,w-1),y=clamp(Math.floor(seed.y),0,h-1),i=(y*w+x)*4;return{index:y*w+x,r:data[i],g:data[i+1],b:data[i+2]};});
-    const lum=(idx:number)=>{const p=idx*4;return data[p]*.299+data[p+1]*.587+data[p+2]*.114;};
-    const rgbDistance=(a:number,b:number)=>{const pa=a*4,pb=b*4,dr=data[pa]-data[pb],dg=data[pa+1]-data[pb+1],db=data[pa+2]-data[pb+2];return Math.sqrt(dr*dr+dg*dg+db*db);};
-    const refDistance=(idx:number)=>{const p=idx*4;let best=999;for(const ref of refs){const dr=data[p]-ref.r,dg=data[p+1]-ref.g,db=data[p+2]-ref.b;best=Math.min(best,Math.sqrt(dr*dr+dg*dg+db*db));}return best;};
-    const edgeBetween=(a:number,b:number)=>Math.max(Math.abs(lum(a)-lum(b)),rgbDistance(a,b)*.55);
+    const sx=clamp(Math.floor(seed.x),0,w-1), sy=clamp(Math.floor(seed.y),0,h-1);
 
-    const seen=new Uint8Array(total),mask=new Uint8Array(total),queue=new Int32Array(total);let head=0,tail=0,count=0;
-    refs.forEach(ref=>{if(!seen[ref.index]){seen[ref.index]=1;queue[tail++]=ref.index;}});
-    const edgeThreshold=clamp(76-edgeLock*.66,16,52);
-    const directLimit=tolerance*1.55;
-    const gradualLimit=18+tolerance*.3;
-    const farLimit=tolerance*2.65;
-    const safetyLimit=Math.floor(total*.48);
-    let touchesTop=false,touchesBottom=false,touchesLeft=false,touchesRight=false;
+    // Sample a small neighborhood instead of a single pixel. This is much more stable on textured/dirty walls.
+    const refs:{r:number;g:number;b:number}[]=[];
+    const radius=Math.max(3,Math.round(Math.min(w,h)*.008));
+    for(let oy=-radius;oy<=radius;oy+=Math.max(2,Math.round(radius/2))) for(let ox=-radius;ox<=radius;ox+=Math.max(2,Math.round(radius/2))) {
+      const x=clamp(sx+ox,0,w-1), y=clamp(sy+oy,0,h-1), p=(y*w+x)*4;
+      refs.push({r:data[p],g:data[p+1],b:data[p+2]});
+    }
+    const refDistance=(idx:number)=>{const p=idx*4;let best=999;for(const ref of refs){const dr=data[p]-ref.r,dg=data[p+1]-ref.g,db=data[p+2]-ref.b;best=Math.min(best,Math.sqrt(dr*dr+dg*dg+db*db));}return best;};
+    const localDistance=(a:number,b:number)=>{const pa=a*4,pb=b*4,dr=data[pa]-data[pb],dg=data[pa+1]-data[pb+1],db=data[pa+2]-data[pb+2];return Math.sqrt(dr*dr+dg*dg+db*db);};
+    const luminance=(idx:number)=>{const p=idx*4;return data[p]*.299+data[p+1]*.587+data[p+2]*.114;};
+    const edge=(a:number,b:number)=>Math.max(Math.abs(luminance(a)-luminance(b)),localDistance(a,b)*.48);
+
+    const mask=new Uint8Array(total), seen=new Uint8Array(total), queue=new Int32Array(total);
+    let head=0,tail=0,count=0; const start=sy*w+sx; seen[start]=1; queue[tail++]=start;
+    const edgeThreshold=clamp(88-edgeLock*.62,30,66);
+    const directLimit=tolerance*1.85;
+    const localLimit=24+tolerance*.42;
+    const farLimit=tolerance*3.25;
+    const safetyLimit=Math.floor(total*.64);
 
     while(head<tail&&count<safetyLimit){
-      const idx=queue[head++]; mask[idx]=1; count++;
-      const x=idx%w,y=Math.floor(idx/w);
-      if(y===0)touchesTop=true;if(y===h-1)touchesBottom=true;if(x===0)touchesLeft=true;if(x===w-1)touchesRight=true;
+      const idx=queue[head++]; mask[idx]=1; count++; const x=idx%w,y=Math.floor(idx/w);
       const visit=(n:number)=>{
-        if(seen[n])return;seen[n]=1;
-        if(edgeBetween(idx,n)>edgeThreshold)return;
-        const fromSeed=refDistance(n),local=rgbDistance(idx,n);
-        if(fromSeed<=directLimit || (local<=gradualLimit && fromSeed<=farLimit)) queue[tail++]=n;
+        if(seen[n])return; seen[n]=1;
+        if(edge(idx,n)>edgeThreshold)return;
+        const fromSeed=refDistance(n), local=localDistance(idx,n);
+        if(fromSeed<=directLimit || (local<=localLimit && fromSeed<=farLimit)) queue[tail++]=n;
       };
-      if(x>0)visit(idx-1);if(x<w-1)visit(idx+1);if(y>0)visit(idx-w);if(y<h-1)visit(idx+w);
+      if(x>0)visit(idx-1); if(x<w-1)visit(idx+1); if(y>0)visit(idx-w); if(y<h-1)visit(idx+w);
     }
 
-    const borderTouches=[touchesTop,touchesBottom,touchesLeft,touchesRight].filter(Boolean).length;
-    const minimum=Math.max(160,Math.round(total*.0005));
-    if(count<minimum || count>=safetyLimit || borderTouches>=3){
-      setMessage('Automaattinen tunnistus ei ollut riittävän varma tästä pinnasta. Maalausta ei levitetty väärään paikkaan. Valitse “Rajaa pinta” ja merkitse seinän kulmat.');
+    const minimum=Math.max(600,Math.round(total*.004));
+    if(count<minimum){
+      setMessage('Automaattinen täyttö löysi liian pienen alueen. Napauta seinän keskeltä tai nosta Automaation herkkyyttä.');
+      return false;
+    }
+    if(count>=safetyLimit){
+      setMessage('Automaattinen täyttö olisi levinnyt liian laajalle, joten se pysäytettiin. Käytä Rajaa pinta -työkalua tarkan seinän valintaan.');
       return false;
     }
 
+    // Close small gaps/holes but keep strong object boundaries (windows, AC units, doors) intact.
     const smooth=new Uint8Array(mask);
     for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
       const idx=y*w+x;if(mask[idx])continue;
-      const neighbours=mask[idx-1]+mask[idx+1]+mask[idx-w]+mask[idx+w]+mask[idx-w-1]+mask[idx-w+1]+mask[idx+w-1]+mask[idx+w+1];
-      if(neighbours>=6)smooth[idx]=1;
+      const n=mask[idx-1]+mask[idx+1]+mask[idx-w]+mask[idx+w]+mask[idx-w-1]+mask[idx-w+1]+mask[idx+w-1]+mask[idx+w+1];
+      if(n>=7)smooth[idx]=1;
     }
     renderMask(smooth);
-    setMessage(`Pinta täytettiin automaattisesti (${Math.round(count/1000)}k px). Jos raja ei ole oikea, Kumoa ja käytä Rajaa pinta -työkalua.`);
+    setMessage(`Automaattinen maalaus onnistui (${Math.round(count/1000)}k px). Tarkista Jälkeen/Vertaa. Jos raja ei ole oikea, Kumoa ja käytä Rajaa pinta.`);
     return true;
   };
 
@@ -196,29 +206,34 @@ export function UniversalPaintStudioPage() {
     const pixels=ctx.getImageData(0,0,source.width,source.height).data;
     const mask=new Uint8Array(source.width*source.height);
     for(let i=0;i<mask.length;i++) if(pixels[i*4+3]>0) mask[i]=1;
-    renderMask(mask);setPolygonPoints([]);setTool('brush');setMessage('Rajattu pinta maalattiin. Tekstuuri ja varjot säilytettiin.');
+    renderMask(mask); setPolygonPoints([]); setTool('brush'); setMessage('Rajattu pinta maalattiin. Tekstuuri ja varjot säilytettiin.');
   };
 
   const pointerDown=(event:ReactPointerEvent<HTMLDivElement>)=>{
     if(!imageUrl||viewMode!=='after')return;
-    const p=pointFromEvent(event);if(!p)return;
+    event.preventDefault(); event.stopPropagation();
+    const p=pointFromEvent(event); if(!p)return;
     if(tool==='polygon'){setPolygonPoints(points=>[...points,p]);return;}
-    if(tool==='smart'){smartFillFromSeeds([p]);return;}
+    if(tool==='smart'){smartFillAt(p);return;}
     event.currentTarget.setPointerCapture(event.pointerId);
-    snapshotCanvas();drawingRef.current=true;lastRef.current=p;strokePointsRef.current=[p];drawGuide(p,p);
+    drawingRef.current=true; lastRef.current=p; drawStroke(p,p);
   };
   const pointerMove=(event:ReactPointerEvent<HTMLDivElement>)=>{
-    if(!drawingRef.current||!lastRef.current)return;const p=pointFromEvent(event);if(!p)return;drawGuide(lastRef.current,p);
-    const prev=strokePointsRef.current[strokePointsRef.current.length-1];if(!prev||Math.hypot(p.x-prev.x,p.y-prev.y)>Math.max(6,brushSize*.22))strokePointsRef.current.push(p);lastRef.current=p;
+    if(!drawingRef.current||!lastRef.current)return;
+    event.preventDefault(); event.stopPropagation();
+    const p=pointFromEvent(event); if(!p)return; drawStroke(lastRef.current,p); lastRef.current=p;
   };
-  const pointerUp=()=>{
-    if(!drawingRef.current)return;drawingRef.current=false;lastRef.current=null;strokePointsRef.current=[];commit();
+  const pointerUp=(event?:ReactPointerEvent<HTMLDivElement>)=>{
+    event?.preventDefault(); event?.stopPropagation();
+    if(!drawingRef.current)return; drawingRef.current=false; lastRef.current=null; commit();
   };
 
   const restore=(index:number)=>{const canvas=paintRef.current,frame=history[index];if(!canvas||!frame)return;const ctx=canvas.getContext('2d');if(!ctx)return;const img=new Image();img.onload=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);setHistoryIndex(index);};img.src=frame;};
   const undo=()=>historyIndex>0&&restore(historyIndex-1);
   const redo=()=>historyIndex<history.length-1&&restore(historyIndex+1);
   const reset=()=>{const c=paintRef.current;if(!c)return;c.getContext('2d')?.clearRect(0,0,c.width,c.height);setPolygonPoints([]);commit();};
+
+  const chooseBrush=(preset:BrushPreset)=>{setBrushPreset(preset.id);setBrushSize(preset.px);setTool('brush');setViewMode('after');setPolygonPoints([]);setMessage(`${preset.label} ${preset.detail} -sivellin valittu.`);};
 
   const download=(type:'png'|'jpg')=>{
     const img=imageRef.current,paint=paintRef.current;if(!img||!paint||!size.width)return;
@@ -235,20 +250,23 @@ export function UniversalPaintStudioPage() {
 
   return <section className={`${kidsMode?'bg-orange-50':'bg-navy-50'} min-h-screen w-full overflow-x-hidden px-2 py-3 sm:px-3 sm:py-4`}>
     <div className="container-base w-full max-w-6xl overflow-x-hidden">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">VäriKamu</p><h1 className="font-display text-xl font-extrabold text-navy-950 sm:text-2xl">Maalaa helposti – automatiikka auttaa vain kun se on varma</h1></div><button className="btn-outline" onClick={()=>setKidsMode(v=>!v)}>{kidsMode?'Normaali tila':'🎨 Lasten tila'}</button></div>
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">VäriKamu</p><h1 className="font-display text-xl font-extrabold text-navy-950 sm:text-2xl">Maalaa seinä helposti ja tarkasti</h1></div><button className="btn-outline" onClick={()=>setKidsMode(v=>!v)}>{kidsMode?'Normaali tila':'🎨 Lasten tila'}</button></div>
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="card min-w-0 overflow-hidden p-2 sm:p-4">
           {!imageUrl?<div className="grid min-h-[46vh] place-items-center rounded-2xl border-2 border-dashed border-navy-200 bg-white p-5 text-center"><div><Camera className="mx-auto size-12 text-orange-500"/><h2 className="mt-4 text-xl font-bold">Ota kuva tai lataa kuva</h2><p className="mt-2 text-sm text-navy-600">Seinä, katto, ovi, ikkunan puuosa, kaappi, kaluste, puu tai metalli.</p><div className="mt-5 flex flex-wrap justify-center gap-3"><button className="btn-primary" onClick={()=>cameraRef.current?.click()}><Camera className="size-4"/>Ota kuva</button><button className="btn-outline" onClick={()=>fileRef.current?.click()}><Upload className="size-4"/>Lataa kuva</button></div></div></div>:<>
-            <div className="w-full overflow-auto overscroll-contain rounded-2xl bg-navy-950 p-1" style={{maxHeight:'64dvh'}}><div className="flex min-h-[260px] w-full items-center justify-center"><div ref={stageRef} className="relative shrink-0 overflow-hidden rounded-xl bg-black" style={{width:stageWidth,aspectRatio:`${size.width}/${size.height}`,maxWidth:'100%',transform:`scale(${zoom})`,transformOrigin:'center',touchAction:'none'}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}><img ref={imageRef} src={imageUrl} onLoad={onImageLoad} draggable={false} className="absolute inset-0 h-full w-full select-none object-fill"/><canvas ref={paintRef} className="absolute inset-0 h-full w-full" style={canvasStyle}/>{polygonPoints.length>0&&<svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full"><polyline points={svgPoints} fill="none" stroke="#F97316" strokeWidth="4" vectorEffect="non-scaling-stroke"/>{polygonPoints.map((point,index)=><circle key={index} cx={(point.x/Math.max(1,size.width))*1000} cy={(point.y/Math.max(1,size.height))*1000} r="10" fill="#fff" stroke="#F97316" strokeWidth="4" vectorEffect="non-scaling-stroke"/>)}</svg>}{viewMode==='compare'&&<><div className="pointer-events-none absolute inset-y-0 z-20 w-0.5 bg-white" style={{left:`${compareAt}%`}}/><span className="pointer-events-none absolute left-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Jälkeen</span><span className="pointer-events-none absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Ennen</span></>}</div></div></div>
+            <div className="w-full overflow-hidden rounded-2xl bg-navy-950 p-1" style={{maxHeight:'64dvh'}}><div className="flex min-h-[260px] w-full items-center justify-center overflow-hidden"><div ref={stageRef} className="relative shrink-0 overflow-hidden rounded-xl bg-black select-none" style={{width:stageWidth,aspectRatio:`${size.width}/${size.height}`,maxWidth:'100%',transform:`scale(${zoom})`,transformOrigin:'center',touchAction:'none',userSelect:'none',WebkitUserSelect:'none',cursor:tool==='polygon'?'crosshair':tool==='smart'?'cell':'crosshair'}} onDragStart={e=>e.preventDefault()} onContextMenu={e=>e.preventDefault()} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onLostPointerCapture={pointerUp}><img ref={imageRef} src={imageUrl} onLoad={onImageLoad} draggable={false} onDragStart={e=>e.preventDefault()} className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"/><canvas ref={paintRef} className="pointer-events-none absolute inset-0 h-full w-full select-none" style={canvasStyle}/>{polygonPoints.length>0&&<svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full"><polyline points={svgPoints} fill="none" stroke="#F97316" strokeWidth="4" vectorEffect="non-scaling-stroke"/>{polygonPoints.map((point,index)=><circle key={index} cx={(point.x/Math.max(1,size.width))*1000} cy={(point.y/Math.max(1,size.height))*1000} r="10" fill="#fff" stroke="#F97316" strokeWidth="4" vectorEffect="non-scaling-stroke"/>)}</svg>}{viewMode==='compare'&&<><div className="pointer-events-none absolute inset-y-0 z-20 w-0.5 bg-white" style={{left:`${compareAt}%`}}/><span className="pointer-events-none absolute left-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Jälkeen</span><span className="pointer-events-none absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Ennen</span></>}</div></div></div>
             <div className="mt-2 flex flex-wrap items-center gap-2"><button className="btn-outline" onClick={()=>setZoom(z=>Math.max(1,z-.25))} disabled={zoom<=1}><ZoomOut className="size-4"/>−</button><button className="btn-outline" onClick={()=>setZoom(1)}><Maximize2 className="size-4"/>Sovita</button><button className="btn-outline" onClick={()=>setZoom(z=>Math.min(2.5,z+.25))}><ZoomIn className="size-4"/>+</button><span className="text-xs text-navy-500">{Math.round(zoom*100)}%</span></div>
             <div className="mt-3 grid grid-cols-3 gap-2"><button className={viewMode==='before'?'btn-primary':'btn-outline'} onClick={()=>setViewMode('before')}>Ennen</button><button className={viewMode==='after'?'btn-primary':'btn-outline'} onClick={()=>setViewMode('after')}>Jälkeen</button><button className={viewMode==='compare'?'btn-primary':'btn-outline'} onClick={()=>setViewMode('compare')}>Vertaa</button></div>{viewMode==='compare'&&<input className="mt-3 w-full accent-orange-500" type="range" min="5" max="95" value={compareAt} onChange={e=>setCompareAt(Number(e.target.value))}/>}</>}
           <input ref={fileRef} className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>loadFile(e.target.files?.[0])}/><input ref={cameraRef} className="hidden" type="file" accept="image/*" capture="environment" onChange={e=>loadFile(e.target.files?.[0])}/>
           {imageUrl&&<div className="mt-2 flex flex-wrap gap-2"><button className="btn-outline" onClick={undo} disabled={historyIndex<=0}><Undo2 className="size-4"/>Kumoa</button><button className="btn-outline" onClick={redo} disabled={historyIndex>=history.length-1}><Redo2 className="size-4"/>Tee uudelleen</button><button className="btn-outline" onClick={reset}><RotateCcw className="size-4"/>Tyhjennä maalit</button></div>}
         </div>
         <aside className="min-w-0 space-y-4">
-          <div className="card p-4"><h2 className="font-bold text-navy-950">1. Työkalu</h2><div className="mt-3 grid grid-cols-2 gap-2"><button onClick={()=>{setTool('brush');setViewMode('after');setPolygonPoints([]);}} className={tool==='brush'?'btn-primary':'btn-outline'}><Paintbrush className="size-4"/>Sivellin</button><button onClick={()=>{setTool('roller');setViewMode('after');setPolygonPoints([]);}} className={tool==='roller'?'btn-primary':'btn-outline'}><PaintRoller className="size-4"/>Tela</button><button onClick={()=>{setTool('smart');setViewMode('after');setPolygonPoints([]);setMessage('Napauta kerran maalattavan pinnan keskeltä. VäriKamu täyttää vain jos tunnistus on riittävän varma.');}} className={tool==='smart'?'btn-primary':'btn-outline'}><Sparkles className="size-4"/>Täytä napautus</button><button onClick={()=>{setTool('eraser');setViewMode('after');setPolygonPoints([]);}} className={tool==='eraser'?'btn-primary':'btn-outline'}><Eraser className="size-4"/>Pyyhin</button><button onClick={()=>{setTool('polygon');setViewMode('after');setPolygonPoints([]);setMessage('Klikkaa seinän/pinnan kulmapisteet. Kun olet valmis, paina “Maalaa rajattu pinta”.');}} className={`${tool==='polygon'?'btn-primary':'btn-outline'} col-span-2`}><MousePointer2 className="size-4"/>Rajaa pinta</button></div>{tool==='polygon'&&<div className="mt-3 grid grid-cols-2 gap-2"><button className="btn-primary" disabled={polygonPoints.length<3} onClick={fillPolygon}><Check className="size-4"/>Maalaa rajattu pinta</button><button className="btn-outline" onClick={()=>setPolygonPoints([])}><X className="size-4"/>Tyhjennä rajaus</button></div>}<p className="mt-3 text-xs leading-5 text-navy-600">Sivellin ja Tela maalaavat aina suoraan. Automaattinen täyttö ei enää poista maalausta eikä levitä väriä, jos tunnistus on epävarma.</p></div>
-          <div className="card p-4"><h2 className="font-bold">2. Väri</h2><div className="mt-3 flex flex-wrap gap-2">{palette.map(c=><button key={c} aria-label={c} onClick={()=>setColor(c)} className={`h-9 w-9 rounded-full border-2 ${color===c?'border-orange-500 ring-2 ring-orange-200':'border-white'}`} style={{backgroundColor:c}}/>)}<input aria-label="Oma väri" type="color" value={color} onChange={e=>setColor(e.target.value)} className="h-9 w-12 rounded"/></div></div>
-          <div className="card p-4"><label className="text-sm font-bold">Siveltimen koko {brushSize}px<input className="mt-2 w-full accent-orange-500" type="range" min="8" max="100" value={brushSize} onChange={e=>setBrushSize(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Värin peittävyys {Math.round(opacity*100)}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="90" value={Math.round(opacity*100)} onChange={e=>setOpacity(Number(e.target.value)/100)}/></label><label className="mt-4 block text-sm font-bold">Automaation herkkyys {tolerance}<input className="mt-2 w-full accent-orange-500" type="range" min="30" max="100" value={tolerance} onChange={e=>setTolerance(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Rajojen suojaus {edgeLock}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="85" value={edgeLock} onChange={e=>setEdgeLock(Number(e.target.value))}/></label></div>
+          <div className="card p-4"><h2 className="font-bold text-navy-950">1. Työkalu</h2><div className="mt-3 grid grid-cols-2 gap-2"><button onClick={()=>{setTool('brush');setViewMode('after');setPolygonPoints([]);}} className={tool==='brush'?'btn-primary':'btn-outline'}><Paintbrush className="size-4"/>Sivellin</button><button onClick={()=>{setTool('roller');setViewMode('after');setPolygonPoints([]);}} className={tool==='roller'?'btn-primary':'btn-outline'}><PaintRoller className="size-4"/>Tela</button><button onClick={()=>{setTool('smart');setViewMode('after');setPolygonPoints([]);setMessage('Napauta kerran seinän keskeltä. VäriKamu yrittää maalata yhtenäisen pinnan automaattisesti.');}} className={tool==='smart'?'btn-primary':'btn-outline'}><Sparkles className="size-4"/>Täytä automaattisesti</button><button onClick={()=>{setTool('eraser');setViewMode('after');setPolygonPoints([]);}} className={tool==='eraser'?'btn-primary':'btn-outline'}><Eraser className="size-4"/>Pyyhin</button><button onClick={()=>{setTool('polygon');setViewMode('after');setPolygonPoints([]);setMessage('Klikkaa seinän/pinnan kulmapisteet. Kun olet valmis, paina “Maalaa rajattu pinta”.');}} className={`${tool==='polygon'?'btn-primary':'btn-outline'} col-span-2`}><MousePointer2 className="size-4"/>Rajaa pinta</button></div>{tool==='polygon'&&<div className="mt-3 grid grid-cols-2 gap-2"><button className="btn-primary" disabled={polygonPoints.length<3} onClick={fillPolygon}><Check className="size-4"/>Maalaa rajattu pinta</button><button className="btn-outline" onClick={()=>setPolygonPoints([])}><X className="size-4"/>Tyhjennä rajaus</button></div>}<p className="mt-3 text-xs leading-5 text-navy-600">Sivellin/Tela = suora maalaus. Täytä automaattisesti = napauta seinän keskeltä. Rajaa pinta = tarkka varatapa vaikeille kuville.</p></div>
+
+          <div className="card p-4"><h2 className="font-bold text-navy-950">2. Siveltimen tyyppi</h2><div className="mt-3 grid grid-cols-5 gap-2">{brushPresets.map(preset=><button key={preset.id} onClick={()=>chooseBrush(preset)} className={`rounded-xl border p-2 text-center transition ${brushPreset===preset.id&&tool==='brush'?'border-orange-500 bg-orange-50 ring-2 ring-orange-100':'border-navy-100 bg-white hover:border-orange-300'}`}><span className="mx-auto block rounded-sm bg-navy-900" style={{width:`${Math.max(8,Math.round(preset.px*.35))}px`,height:'28px'}}/><strong className="mt-1 block text-[11px]">{preset.label}</strong><span className="block text-[9px] text-navy-500">{preset.detail}</span></button>)}</div></div>
+
+          <div className="card p-4"><h2 className="font-bold">3. Väri</h2><div className="mt-3 flex flex-wrap gap-2">{palette.map(c=><button key={c} aria-label={c} onClick={()=>setColor(c)} className={`h-9 w-9 rounded-full border-2 ${color===c?'border-orange-500 ring-2 ring-orange-200':'border-white'}`} style={{backgroundColor:c}}/>)}<input aria-label="Oma väri" type="color" value={color} onChange={e=>setColor(e.target.value)} className="h-9 w-12 rounded"/></div></div>
+          <div className="card p-4"><label className="text-sm font-bold">Siveltimen koko {brushSize}px<input className="mt-2 w-full accent-orange-500" type="range" min="8" max="110" value={brushSize} onChange={e=>{setBrushSize(Number(e.target.value));setBrushPreset('custom');}}/></label><label className="mt-4 block text-sm font-bold">Värin peittävyys {Math.round(opacity*100)}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="90" value={Math.round(opacity*100)} onChange={e=>setOpacity(Number(e.target.value)/100)}/></label><label className="mt-4 block text-sm font-bold">Automaation herkkyys {tolerance}<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="100" value={tolerance} onChange={e=>setTolerance(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Rajojen suojaus {edgeLock}%<input className="mt-2 w-full accent-orange-500" type="range" min="30" max="85" value={edgeLock} onChange={e=>setEdgeLock(Number(e.target.value))}/></label></div>
           <div className="card p-4"><p className="text-sm leading-6 text-navy-700">{message}</p><div className="mt-3 grid grid-cols-2 gap-2"><button className="btn-outline" onClick={()=>download('png')} disabled={!imageUrl}><Download className="size-4"/>PNG</button><button className="btn-primary" onClick={()=>download('jpg')} disabled={!imageUrl}><Download className="size-4"/>JPG</button></div></div>
         </aside>
       </div>
