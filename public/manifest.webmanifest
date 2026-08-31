@@ -1,0 +1,32 @@
+{
+  "name": "VäriKamu – Maalaus Multiväri",
+  "short_name": "VäriKamu",
+  "description": "Suunnittele, korjaa ja esikatsele maalausratkaisuja omalla kuvallasi.",
+  "lang": "fi",
+  "start_url": "/app/varikamu",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f8fc",
+  "theme_color": "#0f2e5c",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Avaa VäriKamu",
+      "short_name": "VäriKamu",
+      "url": "/app/varikamu"
+    },
+    {
+      "name": "Avaa SiivousKamu",
+      "short_name": "SiivousKamu",
+      "url": "/app/siivouskamu"
+    }
+  ]
+}
