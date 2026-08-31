@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Maalaus Multiväri | Maalaus- ja siivouspalveluja Uudellamaalla</title>
@@ -11,6 +12,10 @@
     <meta name="author" content="Maalaus Multiväri" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#0f2e5c" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="VäriKamu" />
     <link rel="preload" as="image" href="/images/hero/hero-house-painting.webp" type="image/webp" fetchpriority="high" />
 
     <meta property="og:type" content="website" />
@@ -30,19 +35,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!--
-      Google Analytics 4 (Consent Mode v2).
-      All storage is denied by default until the cookie-consent banner
-      grants it; src/components/Analytics.tsx then calls
-      gtag('consent','update', ...) once the user chooses, and
-      src/lib/analytics.ts gates every event on that same consent state
-      before calling gtag('event', ...).
-    -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){ dataLayer.push(arguments); }
       window.gtag = gtag;
-
       gtag('consent', 'default', {
         analytics_storage: 'denied',
         ad_storage: 'denied',
@@ -50,7 +46,6 @@
         ad_personalization: 'denied',
         wait_for_update: 500,
       });
-
       gtag('js', new Date());
       gtag('config', 'G-J9TBS9HKFD', {
         send_page_view: false,
@@ -62,5 +57,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
   </body>
 </html>
