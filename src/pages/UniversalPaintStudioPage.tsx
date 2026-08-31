@@ -1,12 +1,34 @@
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Camera, Download, Eraser, Maximize2, Paintbrush, PaintRoller, Redo2, RotateCcw, Sparkles, Undo2, Upload, ZoomIn, ZoomOut } from 'lucide-react';
+import {
+  Camera,
+  Check,
+  Download,
+  Eraser,
+  Maximize2,
+  MousePointer2,
+  Paintbrush,
+  PaintRoller,
+  Redo2,
+  RotateCcw,
+  Sparkles,
+  Undo2,
+  Upload,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
 
-type Tool = 'brush' | 'roller' | 'eraser' | 'smart';
+type Tool = 'brush' | 'roller' | 'eraser' | 'smart' | 'polygon';
 type Point = { x: number; y: number };
 type ViewMode = 'after' | 'before' | 'compare';
 
 const palette = ['#F2EFE6','#D8C9B5','#C9CBC8','#A7B19B','#9FB4C3','#B86F52','#496255','#45494B','#1D2022','#FF6B9D','#6C5CE7','#00B894'];
 const clamp = (value:number,min:number,max:number) => Math.max(min,Math.min(max,value));
+
+function hexRgb(hex:string) {
+  const value = parseInt(hex.slice(1), 16);
+  return { r:(value >> 16) & 255, g:(value >> 8) & 255, b:value & 255 };
+}
 
 export function UniversalPaintStudioPage() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -28,21 +50,21 @@ export function UniversalPaintStudioPage() {
   const [opacity, setOpacity] = useState(0.7);
   const [tolerance, setTolerance] = useState(58);
   const [edgeLock, setEdgeLock] = useState(68);
-  const [autoFill, setAutoFill] = useState(true);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [kidsMode, setKidsMode] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>('after');
   const [compareAt, setCompareAt] = useState(50);
-  const [message, setMessage] = useState('Maalaa pieni osa pinnasta. Kun nostat sormen, VäriKamu yrittää täyttää koko saman pinnan rajojen sisällä.');
+  const [polygonPoints, setPolygonPoints] = useState<Point[]>([]);
+  const [message, setMessage] = useState('Valitse Sivellin tai Tela ja maalaa suoraan. Automaattinen täyttö on erillinen toiminto, joten maalaus ei enää katoa.');
 
   const loadFile = (file?: File) => {
     if (!file || !['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 12 * 1024 * 1024) return;
     if (imageUrl?.startsWith('blob:')) URL.revokeObjectURL(imageUrl);
     setImageUrl(URL.createObjectURL(file));
-    setHistory([]); setHistoryIndex(-1); setZoom(1); setViewMode('after');
-    setMessage('Valitse väri ja maalaa pieni viiva keskelle haluamaasi pintaa. Viiva toimii vihjeenä; jos automaattinen tunnistus ei onnistu, oma maaliviivasi jää näkyviin.');
+    setHistory([]); setHistoryIndex(-1); setZoom(1); setViewMode('after'); setPolygonPoints([]);
+    setMessage('Kuva valmis. Maalaa suoraan Siveltimellä/Telalla tai käytä Täytä napautus -toimintoa. Jos automaattinen tunnistus epäonnistuu, käytä Rajaa pinta -työkalua.');
   };
 
   const onImageLoad = () => {
@@ -74,12 +96,6 @@ export function UniversalPaintStudioPage() {
     copy.getContext('2d')?.drawImage(canvas,0,0); preStrokeRef.current = copy;
   };
 
-  const restorePreStroke = () => {
-    const target = paintRef.current, saved = preStrokeRef.current; if (!target || !saved) return;
-    const ctx = target.getContext('2d'); if (!ctx) return;
-    ctx.clearRect(0,0,target.width,target.height); ctx.drawImage(saved,0,0);
-  };
-
   const commit = () => {
     const canvas = paintRef.current; if (!canvas) return;
     const next = [...history.slice(0,historyIndex+1), canvas.toDataURL('image/png')].slice(-30);
@@ -90,21 +106,40 @@ export function UniversalPaintStudioPage() {
     const ctx = paintRef.current?.getContext('2d'); if (!ctx) return;
     ctx.save();
     ctx.globalCompositeOperation = tool==='eraser'?'destination-out':'source-over';
-    ctx.globalAlpha = tool==='eraser'?1:0.9;
+    ctx.globalAlpha = tool==='eraser'?1:opacity;
     ctx.strokeStyle = tool==='eraser'?'#000':color;
     ctx.lineWidth = tool==='roller'?brushSize*2.2:brushSize;
     ctx.lineCap = tool==='roller'?'square':'round'; ctx.lineJoin='round';
     ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.stroke();ctx.restore();
   };
 
-  const smartFillFromSeeds = (rawSeeds: Point[], saveHistory=true): boolean => {
+  const renderMask = (mask:Uint8Array) => {
     const source=sourceRef.current,target=paintRef.current;
     const sourceCtx=source?.getContext('2d'),targetCtx=target?.getContext('2d');
-    if(!source||!target||!sourceCtx||!targetCtx||rawSeeds.length===0)return false;
+    if(!source||!target||!sourceCtx||!targetCtx)return;
+    const w=source.width,h=source.height,data=sourceCtx.getImageData(0,0,w,h).data;
+    const overlayCanvas=document.createElement('canvas');overlayCanvas.width=w;overlayCanvas.height=h;
+    const overlayCtx=overlayCanvas.getContext('2d');if(!overlayCtx)return;
+    const overlay=overlayCtx.createImageData(w,h); const rgb=hexRgb(color);
+    for(let i=0;i<mask.length;i++)if(mask[i]){
+      const p=i*4,light=(data[p]*.299+data[p+1]*.587+data[p+2]*.114)/255;
+      const shade=.70+light*.38;
+      overlay.data[p]=clamp(Math.round(rgb.r*shade),0,255);
+      overlay.data[p+1]=clamp(Math.round(rgb.g*shade),0,255);
+      overlay.data[p+2]=clamp(Math.round(rgb.b*shade),0,255);
+      overlay.data[p+3]=Math.round(255*opacity);
+    }
+    overlayCtx.putImageData(overlay,0,0);targetCtx.drawImage(overlayCanvas,0,0);commit();
+  };
+
+  const smartFillFromSeeds = (rawSeeds: Point[]) => {
+    const source=sourceRef.current;
+    const sourceCtx=source?.getContext('2d');
+    if(!source||!sourceCtx||rawSeeds.length===0)return false;
 
     const w=source.width,h=source.height,image=sourceCtx.getImageData(0,0,w,h),data=image.data,total=w*h;
-    const stride=Math.max(1,Math.floor(rawSeeds.length/28));
-    const seeds=rawSeeds.filter((_,i)=>i%stride===0).slice(0,32);
+    const stride=Math.max(1,Math.floor(rawSeeds.length/24));
+    const seeds=rawSeeds.filter((_,i)=>i%stride===0).slice(0,28);
     const refs=seeds.map(seed=>{const x=clamp(Math.floor(seed.x),0,w-1),y=clamp(Math.floor(seed.y),0,h-1),i=(y*w+x)*4;return{index:y*w+x,r:data[i],g:data[i+1],b:data[i+2]};});
     const lum=(idx:number)=>{const p=idx*4;return data[p]*.299+data[p+1]*.587+data[p+2]*.114;};
     const rgbDistance=(a:number,b:number)=>{const pa=a*4,pb=b*4,dr=data[pa]-data[pb],dg=data[pa+1]-data[pb+1],db=data[pa+2]-data[pb+2];return Math.sqrt(dr*dr+dg*dg+db*db);};
@@ -113,29 +148,31 @@ export function UniversalPaintStudioPage() {
 
     const seen=new Uint8Array(total),mask=new Uint8Array(total),queue=new Int32Array(total);let head=0,tail=0,count=0;
     refs.forEach(ref=>{if(!seen[ref.index]){seen[ref.index]=1;queue[tail++]=ref.index;}});
-    const edgeThreshold=clamp(78-edgeLock*.68,18,55);
-    const directLimit=tolerance*1.65;
-    const gradualLimit=20+tolerance*.34;
-    const farLimit=tolerance*3.1;
-    const safetyLimit=Math.floor(total*.72);
+    const edgeThreshold=clamp(76-edgeLock*.66,16,52);
+    const directLimit=tolerance*1.55;
+    const gradualLimit=18+tolerance*.3;
+    const farLimit=tolerance*2.65;
+    const safetyLimit=Math.floor(total*.48);
+    let touchesTop=false,touchesBottom=false,touchesLeft=false,touchesRight=false;
 
     while(head<tail&&count<safetyLimit){
       const idx=queue[head++]; mask[idx]=1; count++;
       const x=idx%w,y=Math.floor(idx/w);
+      if(y===0)touchesTop=true;if(y===h-1)touchesBottom=true;if(x===0)touchesLeft=true;if(x===w-1)touchesRight=true;
       const visit=(n:number)=>{
         if(seen[n])return;seen[n]=1;
-        const edge=edgeBetween(idx,n); if(edge>edgeThreshold)return;
+        if(edgeBetween(idx,n)>edgeThreshold)return;
         const fromSeed=refDistance(n),local=rgbDistance(idx,n);
         if(fromSeed<=directLimit || (local<=gradualLimit && fromSeed<=farLimit)) queue[tail++]=n;
       };
       if(x>0)visit(idx-1);if(x<w-1)visit(idx+1);if(y>0)visit(idx-w);if(y<h-1)visit(idx+w);
     }
 
-    if(count<Math.max(120,Math.round(total*.0004))){
-      setMessage('Automaattinen täyttö ei löytänyt pintaa varmasti. Oma maaliviivasi säilytetään, jotta maalaus ei katoa.');return false;
-    }
-    if(count>=safetyLimit){
-      setMessage('Automaattinen täyttö oli leviämässä liian suurelle alueelle. Oma maaliviivasi säilytetään; lisää Rajojen suojausta ja yritä uudelleen.');return false;
+    const borderTouches=[touchesTop,touchesBottom,touchesLeft,touchesRight].filter(Boolean).length;
+    const minimum=Math.max(160,Math.round(total*.0005));
+    if(count<minimum || count>=safetyLimit || borderTouches>=3){
+      setMessage('Automaattinen tunnistus ei ollut riittävän varma tästä pinnasta. Maalausta ei levitetty väärään paikkaan. Valitse “Rajaa pinta” ja merkitse seinän kulmat.');
+      return false;
     }
 
     const smooth=new Uint8Array(mask);
@@ -144,25 +181,30 @@ export function UniversalPaintStudioPage() {
       const neighbours=mask[idx-1]+mask[idx+1]+mask[idx-w]+mask[idx+w]+mask[idx-w-1]+mask[idx-w+1]+mask[idx+w-1]+mask[idx+w+1];
       if(neighbours>=6)smooth[idx]=1;
     }
-
-    const overlayCanvas=document.createElement('canvas');overlayCanvas.width=w;overlayCanvas.height=h;
-    const overlayCtx=overlayCanvas.getContext('2d');if(!overlayCtx)return false;
-    const overlay=overlayCtx.createImageData(w,h),rgb=parseInt(color.slice(1),16),r=(rgb>>16)&255,g=(rgb>>8)&255,b=rgb&255;
-    for(let i=0;i<smooth.length;i++)if(smooth[i]){
-      const p=i*4,light=(data[p]*.299+data[p+1]*.587+data[p+2]*.114)/255;
-      const shade=.72+light*.34;
-      overlay.data[p]=clamp(Math.round(r*shade),0,255);overlay.data[p+1]=clamp(Math.round(g*shade),0,255);overlay.data[p+2]=clamp(Math.round(b*shade),0,255);overlay.data[p+3]=Math.round(255*opacity);
-    }
-    overlayCtx.putImageData(overlay,0,0);targetCtx.drawImage(overlayCanvas,0,0);
-    if(saveHistory)commit();
-    setMessage(`Valittu pinta täytettiin automaattisesti (${Math.round(count/1000)}k px). Tarkista Ennen/Jälkeen. Jos reuna on väärä, Kumoa ja säädä Rajojen suojausta.`);
+    renderMask(smooth);
+    setMessage(`Pinta täytettiin automaattisesti (${Math.round(count/1000)}k px). Jos raja ei ole oikea, Kumoa ja käytä Rajaa pinta -työkalua.`);
     return true;
+  };
+
+  const fillPolygon = () => {
+    const source=sourceRef.current;
+    if(!source||polygonPoints.length<3){setMessage('Rajaa pinta vähintään kolmella pisteellä.');return;}
+    const maskCanvas=document.createElement('canvas');maskCanvas.width=source.width;maskCanvas.height=source.height;
+    const ctx=maskCanvas.getContext('2d');if(!ctx)return;
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(polygonPoints[0].x,polygonPoints[0].y);
+    polygonPoints.slice(1).forEach(point=>ctx.lineTo(point.x,point.y));ctx.closePath();ctx.fill();
+    const pixels=ctx.getImageData(0,0,source.width,source.height).data;
+    const mask=new Uint8Array(source.width*source.height);
+    for(let i=0;i<mask.length;i++) if(pixels[i*4+3]>0) mask[i]=1;
+    renderMask(mask);setPolygonPoints([]);setTool('brush');setMessage('Rajattu pinta maalattiin. Tekstuuri ja varjot säilytettiin.');
   };
 
   const pointerDown=(event:ReactPointerEvent<HTMLDivElement>)=>{
     if(!imageUrl||viewMode!=='after')return;
-    event.currentTarget.setPointerCapture(event.pointerId);const p=pointFromEvent(event);if(!p)return;
-    if(tool==='smart'){smartFillFromSeeds([p],true);return;}
+    const p=pointFromEvent(event);if(!p)return;
+    if(tool==='polygon'){setPolygonPoints(points=>[...points,p]);return;}
+    if(tool==='smart'){smartFillFromSeeds([p]);return;}
+    event.currentTarget.setPointerCapture(event.pointerId);
     snapshotCanvas();drawingRef.current=true;lastRef.current=p;strokePointsRef.current=[p];drawGuide(p,p);
   };
   const pointerMove=(event:ReactPointerEvent<HTMLDivElement>)=>{
@@ -170,26 +212,13 @@ export function UniversalPaintStudioPage() {
     const prev=strokePointsRef.current[strokePointsRef.current.length-1];if(!prev||Math.hypot(p.x-prev.x,p.y-prev.y)>Math.max(6,brushSize*.22))strokePointsRef.current.push(p);lastRef.current=p;
   };
   const pointerUp=()=>{
-    if(!drawingRef.current)return;
-    drawingRef.current=false;lastRef.current=null;
-    const seeds=strokePointsRef.current;strokePointsRef.current=[];
-    if((tool==='brush'||tool==='roller')&&autoFill&&seeds.length){
-      const canvas=paintRef.current;
-      const paintedStroke=document.createElement('canvas');
-      if(canvas){paintedStroke.width=canvas.width;paintedStroke.height=canvas.height;paintedStroke.getContext('2d')?.drawImage(canvas,0,0);}
-      restorePreStroke();
-      const filled=smartFillFromSeeds(seeds,true);
-      if(!filled&&canvas){
-        const ctx=canvas.getContext('2d');
-        if(ctx){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(paintedStroke,0,0);commit();}
-      }
-    }else commit();
+    if(!drawingRef.current)return;drawingRef.current=false;lastRef.current=null;strokePointsRef.current=[];commit();
   };
 
   const restore=(index:number)=>{const canvas=paintRef.current,frame=history[index];if(!canvas||!frame)return;const ctx=canvas.getContext('2d');if(!ctx)return;const img=new Image();img.onload=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);setHistoryIndex(index);};img.src=frame;};
   const undo=()=>historyIndex>0&&restore(historyIndex-1);
   const redo=()=>historyIndex<history.length-1&&restore(historyIndex+1);
-  const reset=()=>{const c=paintRef.current;if(!c)return;c.getContext('2d')?.clearRect(0,0,c.width,c.height);commit();};
+  const reset=()=>{const c=paintRef.current;if(!c)return;c.getContext('2d')?.clearRect(0,0,c.width,c.height);setPolygonPoints([]);commit();};
 
   const download=(type:'png'|'jpg')=>{
     const img=imageRef.current,paint=paintRef.current;if(!img||!paint||!size.width)return;
@@ -202,23 +231,24 @@ export function UniversalPaintStudioPage() {
   const ratio=size.width&&size.height?size.width/size.height:4/3;
   const stageWidth=size.width?`min(100%, calc(58dvh * ${ratio}))`:'100%';
   const canvasStyle=useMemo(()=>viewMode==='before'?{display:'none'}:viewMode==='compare'?{clipPath:`inset(0 ${100-compareAt}% 0 0)`}:undefined,[viewMode,compareAt]);
+  const svgPoints=polygonPoints.map(point=>`${(point.x/Math.max(1,size.width))*1000},${(point.y/Math.max(1,size.height))*1000}`).join(' ');
 
   return <section className={`${kidsMode?'bg-orange-50':'bg-navy-50'} min-h-screen w-full overflow-x-hidden px-2 py-3 sm:px-3 sm:py-4`}>
     <div className="container-base w-full max-w-6xl overflow-x-hidden">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">VäriKamu</p><h1 className="font-display text-xl font-extrabold text-navy-950 sm:text-2xl">Maalaa vähän – VäriKamu täyttää pinnan</h1></div><button className="btn-outline" onClick={()=>setKidsMode(v=>!v)}>{kidsMode?'Normaali tila':'🎨 Lasten tila'}</button></div>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">VäriKamu</p><h1 className="font-display text-xl font-extrabold text-navy-950 sm:text-2xl">Maalaa helposti – automatiikka auttaa vain kun se on varma</h1></div><button className="btn-outline" onClick={()=>setKidsMode(v=>!v)}>{kidsMode?'Normaali tila':'🎨 Lasten tila'}</button></div>
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="card min-w-0 overflow-hidden p-2 sm:p-4">
-          {!imageUrl?<div className="grid min-h-[46vh] place-items-center rounded-2xl border-2 border-dashed border-navy-200 bg-white p-5 text-center"><div><Camera className="mx-auto size-12 text-orange-500"/><h2 className="mt-4 text-xl font-bold">Ota kuva tai lataa kuva</h2><p className="mt-2 text-sm text-navy-600">Valitse mikä tahansa maalattava pinta: seinä, katto, ovi, ikkunan puuosa, kaappi, kaluste, puu tai metalli.</p><div className="mt-5 flex flex-wrap justify-center gap-3"><button className="btn-primary" onClick={()=>cameraRef.current?.click()}><Camera className="size-4"/>Ota kuva</button><button className="btn-outline" onClick={()=>fileRef.current?.click()}><Upload className="size-4"/>Lataa kuva</button></div></div></div>:<>
-            <div className="w-full overflow-auto overscroll-contain rounded-2xl bg-navy-950 p-1" style={{maxHeight:'64dvh'}}><div className="flex min-h-[260px] w-full items-center justify-center"><div ref={stageRef} className="relative shrink-0 overflow-hidden rounded-xl bg-black" style={{width:stageWidth,aspectRatio:`${size.width}/${size.height}`,maxWidth:'100%',transform:`scale(${zoom})`,transformOrigin:'center',touchAction:'none'}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}><img ref={imageRef} src={imageUrl} onLoad={onImageLoad} draggable={false} className="absolute inset-0 h-full w-full select-none object-fill"/><canvas ref={paintRef} className="absolute inset-0 h-full w-full" style={canvasStyle}/>{viewMode==='compare'&&<><div className="pointer-events-none absolute inset-y-0 z-20 w-0.5 bg-white" style={{left:`${compareAt}%`}}/><span className="pointer-events-none absolute left-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Jälkeen</span><span className="pointer-events-none absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Ennen</span></>}</div></div></div>
+          {!imageUrl?<div className="grid min-h-[46vh] place-items-center rounded-2xl border-2 border-dashed border-navy-200 bg-white p-5 text-center"><div><Camera className="mx-auto size-12 text-orange-500"/><h2 className="mt-4 text-xl font-bold">Ota kuva tai lataa kuva</h2><p className="mt-2 text-sm text-navy-600">Seinä, katto, ovi, ikkunan puuosa, kaappi, kaluste, puu tai metalli.</p><div className="mt-5 flex flex-wrap justify-center gap-3"><button className="btn-primary" onClick={()=>cameraRef.current?.click()}><Camera className="size-4"/>Ota kuva</button><button className="btn-outline" onClick={()=>fileRef.current?.click()}><Upload className="size-4"/>Lataa kuva</button></div></div></div>:<>
+            <div className="w-full overflow-auto overscroll-contain rounded-2xl bg-navy-950 p-1" style={{maxHeight:'64dvh'}}><div className="flex min-h-[260px] w-full items-center justify-center"><div ref={stageRef} className="relative shrink-0 overflow-hidden rounded-xl bg-black" style={{width:stageWidth,aspectRatio:`${size.width}/${size.height}`,maxWidth:'100%',transform:`scale(${zoom})`,transformOrigin:'center',touchAction:'none'}} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}><img ref={imageRef} src={imageUrl} onLoad={onImageLoad} draggable={false} className="absolute inset-0 h-full w-full select-none object-fill"/><canvas ref={paintRef} className="absolute inset-0 h-full w-full" style={canvasStyle}/>{polygonPoints.length>0&&<svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full"><polyline points={svgPoints} fill="none" stroke="#F97316" strokeWidth="4" vectorEffect="non-scaling-stroke"/>{polygonPoints.map((point,index)=><circle key={index} cx={(point.x/Math.max(1,size.width))*1000} cy={(point.y/Math.max(1,size.height))*1000} r="10" fill="#fff" stroke="#F97316" strokeWidth="4" vectorEffect="non-scaling-stroke"/>)}</svg>}{viewMode==='compare'&&<><div className="pointer-events-none absolute inset-y-0 z-20 w-0.5 bg-white" style={{left:`${compareAt}%`}}/><span className="pointer-events-none absolute left-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Jälkeen</span><span className="pointer-events-none absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-[10px] font-bold text-white">Ennen</span></>}</div></div></div>
             <div className="mt-2 flex flex-wrap items-center gap-2"><button className="btn-outline" onClick={()=>setZoom(z=>Math.max(1,z-.25))} disabled={zoom<=1}><ZoomOut className="size-4"/>−</button><button className="btn-outline" onClick={()=>setZoom(1)}><Maximize2 className="size-4"/>Sovita</button><button className="btn-outline" onClick={()=>setZoom(z=>Math.min(2.5,z+.25))}><ZoomIn className="size-4"/>+</button><span className="text-xs text-navy-500">{Math.round(zoom*100)}%</span></div>
             <div className="mt-3 grid grid-cols-3 gap-2"><button className={viewMode==='before'?'btn-primary':'btn-outline'} onClick={()=>setViewMode('before')}>Ennen</button><button className={viewMode==='after'?'btn-primary':'btn-outline'} onClick={()=>setViewMode('after')}>Jälkeen</button><button className={viewMode==='compare'?'btn-primary':'btn-outline'} onClick={()=>setViewMode('compare')}>Vertaa</button></div>{viewMode==='compare'&&<input className="mt-3 w-full accent-orange-500" type="range" min="5" max="95" value={compareAt} onChange={e=>setCompareAt(Number(e.target.value))}/>}</>}
           <input ref={fileRef} className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>loadFile(e.target.files?.[0])}/><input ref={cameraRef} className="hidden" type="file" accept="image/*" capture="environment" onChange={e=>loadFile(e.target.files?.[0])}/>
           {imageUrl&&<div className="mt-2 flex flex-wrap gap-2"><button className="btn-outline" onClick={undo} disabled={historyIndex<=0}><Undo2 className="size-4"/>Kumoa</button><button className="btn-outline" onClick={redo} disabled={historyIndex>=history.length-1}><Redo2 className="size-4"/>Tee uudelleen</button><button className="btn-outline" onClick={reset}><RotateCcw className="size-4"/>Tyhjennä maalit</button></div>}
         </div>
         <aside className="min-w-0 space-y-4">
-          <div className="card p-4"><h2 className="font-bold text-navy-950">1. Työkalu</h2><div className="mt-3 grid grid-cols-2 gap-2"><button onClick={()=>{setTool('brush');setViewMode('after');}} className={tool==='brush'?'btn-primary':'btn-outline'}><Paintbrush className="size-4"/>Sivellin</button><button onClick={()=>{setTool('roller');setViewMode('after');}} className={tool==='roller'?'btn-primary':'btn-outline'}><PaintRoller className="size-4"/>Tela</button><button onClick={()=>{setTool('smart');setViewMode('after');}} className={tool==='smart'?'btn-primary':'btn-outline'}><Sparkles className="size-4"/>Täytä napautus</button><button onClick={()=>{setTool('eraser');setViewMode('after');}} className={tool==='eraser'?'btn-primary':'btn-outline'}><Eraser className="size-4"/>Pyyhin</button></div><label className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-orange-50 px-3 py-3 text-sm font-bold"><span>✨ Täydennä pinta automaattisesti</span><input type="checkbox" checked={autoFill} onChange={e=>setAutoFill(e.target.checked)} className="size-5 accent-orange-500"/></label><p className="mt-3 text-xs leading-5 text-navy-600">Kun automaattinen täyttö on päällä, VäriKamu yrittää tunnistaa ja täyttää koko pinnan. Jos tunnistus epäonnistuu, siveltimen tai telan maalaus jää näkyviin eikä työsi katoa.</p></div>
+          <div className="card p-4"><h2 className="font-bold text-navy-950">1. Työkalu</h2><div className="mt-3 grid grid-cols-2 gap-2"><button onClick={()=>{setTool('brush');setViewMode('after');setPolygonPoints([]);}} className={tool==='brush'?'btn-primary':'btn-outline'}><Paintbrush className="size-4"/>Sivellin</button><button onClick={()=>{setTool('roller');setViewMode('after');setPolygonPoints([]);}} className={tool==='roller'?'btn-primary':'btn-outline'}><PaintRoller className="size-4"/>Tela</button><button onClick={()=>{setTool('smart');setViewMode('after');setPolygonPoints([]);setMessage('Napauta kerran maalattavan pinnan keskeltä. VäriKamu täyttää vain jos tunnistus on riittävän varma.');}} className={tool==='smart'?'btn-primary':'btn-outline'}><Sparkles className="size-4"/>Täytä napautus</button><button onClick={()=>{setTool('eraser');setViewMode('after');setPolygonPoints([]);}} className={tool==='eraser'?'btn-primary':'btn-outline'}><Eraser className="size-4"/>Pyyhin</button><button onClick={()=>{setTool('polygon');setViewMode('after');setPolygonPoints([]);setMessage('Klikkaa seinän/pinnan kulmapisteet. Kun olet valmis, paina “Maalaa rajattu pinta”.');}} className={`${tool==='polygon'?'btn-primary':'btn-outline'} col-span-2`}><MousePointer2 className="size-4"/>Rajaa pinta</button></div>{tool==='polygon'&&<div className="mt-3 grid grid-cols-2 gap-2"><button className="btn-primary" disabled={polygonPoints.length<3} onClick={fillPolygon}><Check className="size-4"/>Maalaa rajattu pinta</button><button className="btn-outline" onClick={()=>setPolygonPoints([])}><X className="size-4"/>Tyhjennä rajaus</button></div>}<p className="mt-3 text-xs leading-5 text-navy-600">Sivellin ja Tela maalaavat aina suoraan. Automaattinen täyttö ei enää poista maalausta eikä levitä väriä, jos tunnistus on epävarma.</p></div>
           <div className="card p-4"><h2 className="font-bold">2. Väri</h2><div className="mt-3 flex flex-wrap gap-2">{palette.map(c=><button key={c} aria-label={c} onClick={()=>setColor(c)} className={`h-9 w-9 rounded-full border-2 ${color===c?'border-orange-500 ring-2 ring-orange-200':'border-white'}`} style={{backgroundColor:c}}/>)}<input aria-label="Oma väri" type="color" value={color} onChange={e=>setColor(e.target.value)} className="h-9 w-12 rounded"/></div></div>
-          <div className="card p-4"><label className="text-sm font-bold">Siveltimen koko {brushSize}px<input className="mt-2 w-full accent-orange-500" type="range" min="8" max="100" value={brushSize} onChange={e=>setBrushSize(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Värin peittävyys {Math.round(opacity*100)}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="90" value={Math.round(opacity*100)} onChange={e=>setOpacity(Number(e.target.value)/100)}/></label><label className="mt-4 block text-sm font-bold">Pinnan vaihtelu {tolerance}<input className="mt-2 w-full accent-orange-500" type="range" min="30" max="100" value={tolerance} onChange={e=>setTolerance(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Rajojen suojaus {edgeLock}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="85" value={edgeLock} onChange={e=>setEdgeLock(Number(e.target.value))}/></label></div>
+          <div className="card p-4"><label className="text-sm font-bold">Siveltimen koko {brushSize}px<input className="mt-2 w-full accent-orange-500" type="range" min="8" max="100" value={brushSize} onChange={e=>setBrushSize(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Värin peittävyys {Math.round(opacity*100)}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="90" value={Math.round(opacity*100)} onChange={e=>setOpacity(Number(e.target.value)/100)}/></label><label className="mt-4 block text-sm font-bold">Automaation herkkyys {tolerance}<input className="mt-2 w-full accent-orange-500" type="range" min="30" max="100" value={tolerance} onChange={e=>setTolerance(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Rajojen suojaus {edgeLock}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="85" value={edgeLock} onChange={e=>setEdgeLock(Number(e.target.value))}/></label></div>
           <div className="card p-4"><p className="text-sm leading-6 text-navy-700">{message}</p><div className="mt-3 grid grid-cols-2 gap-2"><button className="btn-outline" onClick={()=>download('png')} disabled={!imageUrl}><Download className="size-4"/>PNG</button><button className="btn-primary" onClick={()=>download('jpg')} disabled={!imageUrl}><Download className="size-4"/>JPG</button></div></div>
         </aside>
       </div>
