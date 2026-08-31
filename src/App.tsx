@@ -21,6 +21,7 @@ const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage').then(
 const PricingHubPage = lazy(() => import('@/pages/PricingHubPage').then((m) => ({ default: m.PricingHubPage })));
 const PaintStudioPage = lazy(() => import('@/pages/UniversalPaintStudioPage').then((m) => ({ default: m.UniversalPaintStudioPage })));
 const CleaningStudioPage = lazy(() => import('@/pages/UniversalCleaningStudioPage').then((m) => ({ default: m.UniversalCleaningStudioPage })));
+const VirtualPainterAdminPage = lazy(() => import('@/pages/VirtualPainterAdminPage').then((m) => ({ default: m.VirtualPainterAdminPage })));
 const VarikamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.VarikamuLanding })));
 const SiivouskamuLanding = lazy(() => import('@/pages/TransformationStudioLanding').then((m) => ({ default: m.SiivouskamuLanding })));
 const CitiesIndexPage = lazy(() => import('@/pages/CitiesIndexPage').then((m) => ({ default: m.CitiesIndexPage })));
@@ -98,6 +99,7 @@ export default function App() {
             <Route path="estimates" element={suspense(<CustomerEstimatesPage />)} />
             <Route path="quotes" element={suspense(<CustomerQuotesPage />)} />
             <Route path="profile" element={suspense(<CustomerProfilePage />)} />
+            <Route path="admin/painter-orders" element={suspense(<VirtualPainterAdminPage />)} />
           </Route>
         </Route>
       </Routes>
