@@ -42,7 +42,7 @@ export function UniversalPaintStudioPage() {
     if (imageUrl?.startsWith('blob:')) URL.revokeObjectURL(imageUrl);
     setImageUrl(URL.createObjectURL(file));
     setHistory([]); setHistoryIndex(-1); setZoom(1); setViewMode('after');
-    setMessage('Valitse väri ja maalaa pieni viiva keskelle haluamaasi pintaa. Viiva toimii vain vihjeenä; lopputulos täyttää pinnan.');
+    setMessage('Valitse väri ja maalaa pieni viiva keskelle haluamaasi pintaa. Viiva toimii vihjeenä; jos automaattinen tunnistus ei onnistu, oma maaliviivasi jää näkyviin.');
   };
 
   const onImageLoad = () => {
@@ -97,10 +97,10 @@ export function UniversalPaintStudioPage() {
     ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.stroke();ctx.restore();
   };
 
-  const smartFillFromSeeds = (rawSeeds: Point[], saveHistory=true) => {
+  const smartFillFromSeeds = (rawSeeds: Point[], saveHistory=true): boolean => {
     const source=sourceRef.current,target=paintRef.current;
     const sourceCtx=source?.getContext('2d'),targetCtx=target?.getContext('2d');
-    if(!source||!target||!sourceCtx||!targetCtx||rawSeeds.length===0)return;
+    if(!source||!target||!sourceCtx||!targetCtx||rawSeeds.length===0)return false;
 
     const w=source.width,h=source.height,image=sourceCtx.getImageData(0,0,w,h),data=image.data,total=w*h;
     const stride=Math.max(1,Math.floor(rawSeeds.length/28));
@@ -132,10 +132,10 @@ export function UniversalPaintStudioPage() {
     }
 
     if(count<Math.max(120,Math.round(total*.0004))){
-      setMessage('Pintaa ei löytynyt riittävästi. Maalaa hieman pidempi viiva pinnan keskelle tai vähennä Rajojen suojausta.');return;
+      setMessage('Automaattinen täyttö ei löytänyt pintaa varmasti. Oma maaliviivasi säilytetään, jotta maalaus ei katoa.');return false;
     }
     if(count>=safetyLimit){
-      setMessage('Täyttö oli leviämässä liian suurelle alueelle, joten se pysäytettiin. Lisää Rajojen suojausta ja yritä uudelleen pinnan keskeltä.');return;
+      setMessage('Automaattinen täyttö oli leviämässä liian suurelle alueelle. Oma maaliviivasi säilytetään; lisää Rajojen suojausta ja yritä uudelleen.');return false;
     }
 
     const smooth=new Uint8Array(mask);
@@ -146,7 +146,7 @@ export function UniversalPaintStudioPage() {
     }
 
     const overlayCanvas=document.createElement('canvas');overlayCanvas.width=w;overlayCanvas.height=h;
-    const overlayCtx=overlayCanvas.getContext('2d');if(!overlayCtx)return;
+    const overlayCtx=overlayCanvas.getContext('2d');if(!overlayCtx)return false;
     const overlay=overlayCtx.createImageData(w,h),rgb=parseInt(color.slice(1),16),r=(rgb>>16)&255,g=(rgb>>8)&255,b=rgb&255;
     for(let i=0;i<smooth.length;i++)if(smooth[i]){
       const p=i*4,light=(data[p]*.299+data[p+1]*.587+data[p+2]*.114)/255;
@@ -156,6 +156,7 @@ export function UniversalPaintStudioPage() {
     overlayCtx.putImageData(overlay,0,0);targetCtx.drawImage(overlayCanvas,0,0);
     if(saveHistory)commit();
     setMessage(`Valittu pinta täytettiin automaattisesti (${Math.round(count/1000)}k px). Tarkista Ennen/Jälkeen. Jos reuna on väärä, Kumoa ja säädä Rajojen suojausta.`);
+    return true;
   };
 
   const pointerDown=(event:ReactPointerEvent<HTMLDivElement>)=>{
@@ -169,8 +170,20 @@ export function UniversalPaintStudioPage() {
     const prev=strokePointsRef.current[strokePointsRef.current.length-1];if(!prev||Math.hypot(p.x-prev.x,p.y-prev.y)>Math.max(6,brushSize*.22))strokePointsRef.current.push(p);lastRef.current=p;
   };
   const pointerUp=()=>{
-    if(!drawingRef.current)return;drawingRef.current=false;lastRef.current=null;const seeds=strokePointsRef.current;strokePointsRef.current=[];
-    if((tool==='brush'||tool==='roller')&&autoFill&&seeds.length){restorePreStroke();smartFillFromSeeds(seeds,true);}else commit();
+    if(!drawingRef.current)return;
+    drawingRef.current=false;lastRef.current=null;
+    const seeds=strokePointsRef.current;strokePointsRef.current=[];
+    if((tool==='brush'||tool==='roller')&&autoFill&&seeds.length){
+      const canvas=paintRef.current;
+      const paintedStroke=document.createElement('canvas');
+      if(canvas){paintedStroke.width=canvas.width;paintedStroke.height=canvas.height;paintedStroke.getContext('2d')?.drawImage(canvas,0,0);}
+      restorePreStroke();
+      const filled=smartFillFromSeeds(seeds,true);
+      if(!filled&&canvas){
+        const ctx=canvas.getContext('2d');
+        if(ctx){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(paintedStroke,0,0);commit();}
+      }
+    }else commit();
   };
 
   const restore=(index:number)=>{const canvas=paintRef.current,frame=history[index];if(!canvas||!frame)return;const ctx=canvas.getContext('2d');if(!ctx)return;const img=new Image();img.onload=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0);setHistoryIndex(index);};img.src=frame;};
@@ -203,7 +216,7 @@ export function UniversalPaintStudioPage() {
           {imageUrl&&<div className="mt-2 flex flex-wrap gap-2"><button className="btn-outline" onClick={undo} disabled={historyIndex<=0}><Undo2 className="size-4"/>Kumoa</button><button className="btn-outline" onClick={redo} disabled={historyIndex>=history.length-1}><Redo2 className="size-4"/>Tee uudelleen</button><button className="btn-outline" onClick={reset}><RotateCcw className="size-4"/>Tyhjennä maalit</button></div>}
         </div>
         <aside className="min-w-0 space-y-4">
-          <div className="card p-4"><h2 className="font-bold text-navy-950">1. Työkalu</h2><div className="mt-3 grid grid-cols-2 gap-2"><button onClick={()=>{setTool('brush');setViewMode('after');}} className={tool==='brush'?'btn-primary':'btn-outline'}><Paintbrush className="size-4"/>Sivellin</button><button onClick={()=>{setTool('roller');setViewMode('after');}} className={tool==='roller'?'btn-primary':'btn-outline'}><PaintRoller className="size-4"/>Tela</button><button onClick={()=>{setTool('smart');setViewMode('after');}} className={tool==='smart'?'btn-primary':'btn-outline'}><Sparkles className="size-4"/>Täytä napautus</button><button onClick={()=>{setTool('eraser');setViewMode('after');}} className={tool==='eraser'?'btn-primary':'btn-outline'}><Eraser className="size-4"/>Pyyhin</button></div><label className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-orange-50 px-3 py-3 text-sm font-bold"><span>✨ Täydennä pinta automaattisesti</span><input type="checkbox" checked={autoFill} onChange={e=>setAutoFill(e.target.checked)} className="size-5 accent-orange-500"/></label><p className="mt-3 text-xs leading-5 text-navy-600">Kun automaattinen täyttö on päällä, siveltimen tai telan viiva ei jää reunukseksi. Se toimii vain vihjeenä, ja VäriKamu täyttää tunnistetun pinnan.</p></div>
+          <div className="card p-4"><h2 className="font-bold text-navy-950">1. Työkalu</h2><div className="mt-3 grid grid-cols-2 gap-2"><button onClick={()=>{setTool('brush');setViewMode('after');}} className={tool==='brush'?'btn-primary':'btn-outline'}><Paintbrush className="size-4"/>Sivellin</button><button onClick={()=>{setTool('roller');setViewMode('after');}} className={tool==='roller'?'btn-primary':'btn-outline'}><PaintRoller className="size-4"/>Tela</button><button onClick={()=>{setTool('smart');setViewMode('after');}} className={tool==='smart'?'btn-primary':'btn-outline'}><Sparkles className="size-4"/>Täytä napautus</button><button onClick={()=>{setTool('eraser');setViewMode('after');}} className={tool==='eraser'?'btn-primary':'btn-outline'}><Eraser className="size-4"/>Pyyhin</button></div><label className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-orange-50 px-3 py-3 text-sm font-bold"><span>✨ Täydennä pinta automaattisesti</span><input type="checkbox" checked={autoFill} onChange={e=>setAutoFill(e.target.checked)} className="size-5 accent-orange-500"/></label><p className="mt-3 text-xs leading-5 text-navy-600">Kun automaattinen täyttö on päällä, VäriKamu yrittää tunnistaa ja täyttää koko pinnan. Jos tunnistus epäonnistuu, siveltimen tai telan maalaus jää näkyviin eikä työsi katoa.</p></div>
           <div className="card p-4"><h2 className="font-bold">2. Väri</h2><div className="mt-3 flex flex-wrap gap-2">{palette.map(c=><button key={c} aria-label={c} onClick={()=>setColor(c)} className={`h-9 w-9 rounded-full border-2 ${color===c?'border-orange-500 ring-2 ring-orange-200':'border-white'}`} style={{backgroundColor:c}}/>)}<input aria-label="Oma väri" type="color" value={color} onChange={e=>setColor(e.target.value)} className="h-9 w-12 rounded"/></div></div>
           <div className="card p-4"><label className="text-sm font-bold">Siveltimen koko {brushSize}px<input className="mt-2 w-full accent-orange-500" type="range" min="8" max="100" value={brushSize} onChange={e=>setBrushSize(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Värin peittävyys {Math.round(opacity*100)}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="90" value={Math.round(opacity*100)} onChange={e=>setOpacity(Number(e.target.value)/100)}/></label><label className="mt-4 block text-sm font-bold">Pinnan vaihtelu {tolerance}<input className="mt-2 w-full accent-orange-500" type="range" min="30" max="100" value={tolerance} onChange={e=>setTolerance(Number(e.target.value))}/></label><label className="mt-4 block text-sm font-bold">Rajojen suojaus {edgeLock}%<input className="mt-2 w-full accent-orange-500" type="range" min="35" max="85" value={edgeLock} onChange={e=>setEdgeLock(Number(e.target.value))}/></label></div>
           <div className="card p-4"><p className="text-sm leading-6 text-navy-700">{message}</p><div className="mt-3 grid grid-cols-2 gap-2"><button className="btn-outline" onClick={()=>download('png')} disabled={!imageUrl}><Download className="size-4"/>PNG</button><button className="btn-primary" onClick={()=>download('jpg')} disabled={!imageUrl}><Download className="size-4"/>JPG</button></div></div>
