@@ -24,8 +24,39 @@ export type PainterOrderPayload = {
   pdfBlob: Blob;
 };
 
+export type AdminPainterOrder = {
+  id: string;
+  project_id: string;
+  project_title: string;
+  city: string | null;
+  name: string;
+  email: string;
+  phone: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+  summary_pdf_path?: string | null;
+  before_image_path?: string | null;
+  after_image_path?: string | null;
+  design_data?: Record<string, unknown>;
+  paint_projects?: {
+    id: string;
+    design_data: Record<string, unknown>;
+    photo_path: string | null;
+  } | null;
+};
+
 function configured() {
   return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+}
+
+function authHeaders(accessToken: string) {
+  if (!configured()) throw new Error('Supabase-yhteyttä ei ole määritetty.');
+  return {
+    apikey: SUPABASE_ANON_KEY!,
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
 }
 
 async function uploadProjectArtifact(projectId: string, file: Blob, filename: string) {
@@ -36,8 +67,7 @@ async function uploadProjectArtifact(projectId: string, file: Blob, filename: st
   const response = await fetch(`${SUPABASE_URL}/storage/v1/object/paint-planner/${path}`, {
     method: 'POST',
     headers: {
-      apikey: SUPABASE_ANON_KEY!,
-      Authorization: `Bearer ${session.access_token}`,
+      ...authHeaders(session.access_token),
       'Content-Type': file.type || 'application/octet-stream',
       'x-upsert': 'false',
     },
@@ -141,4 +171,34 @@ export async function submitPainterOrder(payload: PainterOrderPayload) {
   }
 
   return { projectId: project.id, beforePath, afterPath, pdfPath, emailDelivered };
+}
+
+export async function listPainterOrdersForAdmin() {
+  const session = await requireSession();
+  if (!configured()) throw new Error('Supabase-yhteyttä ei ole määritetty.');
+  const select = encodeURIComponent('*,paint_projects(id,design_data,photo_path)');
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/quote_requests?select=${select}&order=created_at.desc`, {
+    headers: authHeaders(session.access_token),
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    throw new Error(payload?.message || payload?.error || 'Admin-tilausten lataus epäonnistui.');
+  }
+  return response.json() as Promise<AdminPainterOrder[]>;
+}
+
+export async function getPainterArtifactUrl(path: string | null | undefined) {
+  if (!path) return null;
+  const session = await requireSession();
+  if (!configured()) throw new Error('Supabase-yhteyttä ei ole määritetty.');
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/paint-planner/${path}`, {
+    method: 'POST',
+    headers: authHeaders(session.access_token),
+    body: JSON.stringify({ expiresIn: 900 }),
+  });
+  if (!response.ok) return null;
+  const payload = await response.json() as { signedURL?: string; signedUrl?: string };
+  const signed = payload.signedURL || payload.signedUrl;
+  if (!signed) return null;
+  return signed.startsWith('http') ? signed : `${SUPABASE_URL}/storage/v1${signed}`;
 }
