@@ -68,73 +68,42 @@
   }
 }
 
-/* Reveal-on-scroll: starts hidden, becomes visible when .is-visible is added */
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-::-webkit-scrollbar-track {
-  background: #f0f5fb;
-}
-::-webkit-scrollbar-thumb {
-  background: #b6cfeb;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #84acd9;
-}
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #f0f5fb; }
+::-webkit-scrollbar-thumb { background: #b6cfeb; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #84acd9; }
 
-/* Popup animations */
-.popup-fade-in {
-  animation: popupFadeIn 0.25s ease-out forwards;
-}
-.popup-scale-in {
-  animation: popupScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes popupFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes popupScaleIn {
-  from { opacity: 0; transform: scale(0.92) translateY(12px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
+.popup-fade-in { animation: popupFadeIn 0.25s ease-out forwards; }
+.popup-scale-in { animation: popupScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes popupFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popupScaleIn { from { opacity: 0; transform: scale(0.92) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-/* Before / After slider */
-.ba-slider input[type='range'] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-}
+.ba-slider input[type='range'] { -webkit-appearance: none; appearance: none; background: transparent; }
 .ba-slider input[type='range']::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 9999px;
-  background: #fb5e11;
-  border: 4px solid #ffffff;
-  box-shadow: 0 4px 16px rgba(15, 46, 92, 0.3);
-  cursor: ew-resize;
+  -webkit-appearance: none; appearance: none; width: 44px; height: 44px; border-radius: 9999px; background: #fb5e11; border: 4px solid #ffffff; box-shadow: 0 4px 16px rgba(15, 46, 92, 0.3); cursor: ew-resize;
 }
 .ba-slider input[type='range']::-moz-range-thumb {
-  width: 44px;
-  height: 44px;
-  border-radius: 9999px;
-  background: #fb5e11;
-  border: 4px solid #ffffff;
-  box-shadow: 0 4px 16px rgba(15, 46, 92, 0.3);
-  cursor: ew-resize;
+  width: 44px; height: 44px; border-radius: 9999px; background: #fb5e11; border: 4px solid #ffffff; box-shadow: 0 4px 16px rgba(15, 46, 92, 0.3); cursor: ew-resize;
+}
+
+/* VäriKamu mobile: keep the canvas and tools in focus. The full walkthrough remains available on desktop; mobile uses the compact Ohje trigger. */
+@media (max-width: 1023px) {
+  section.min-h-screen.w-full.overflow-x-hidden.bg-navy-50 > .container-base > .mb-4.rounded-2xl.border.border-orange-200.bg-orange-50 {
+    display: none;
+  }
+  section.min-h-screen.w-full.overflow-x-hidden.bg-navy-50 > .container-base > .mb-3 {
+    margin-bottom: .5rem;
+  }
+  section.min-h-screen.w-full.overflow-x-hidden.bg-navy-50 > .container-base > .mb-3 h1 {
+    font-size: 1.25rem;
+    line-height: 1.35;
+  }
 }
