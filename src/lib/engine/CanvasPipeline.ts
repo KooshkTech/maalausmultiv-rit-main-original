@@ -1,7 +1,9 @@
 import { MaskLayer } from './MaskLayer';
 import type { CleaningParams, IRenderPipeline, PaintParams, RenderSize } from './types';
 
-const COAT_ALPHA: Record<1 | 2 | 3, number> = { 1: 0.45, 2: 0.72, 3: 0.90 };
+// Coats describe paint build-up. The user coverage slider remains the final
+// authority: 0% = original image and 100% = visually complete chosen colour.
+const COAT_BUILD: Record<1 | 2 | 3, number> = { 1: 0.72, 2: 0.88, 3: 1 };
 const clamp = (v: number) => Math.max(0, Math.min(255, v));
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
@@ -17,10 +19,7 @@ export class CanvasPipeline implements IRenderPipeline {
     this.ctx = ctx;
   }
 
-  setSize(size: RenderSize): void {
-    this.canvas.width = size.width;
-    this.canvas.height = size.height;
-  }
+  setSize(size: RenderSize): void { this.canvas.width = size.width; this.canvas.height = size.height; }
 
   renderBaseImage(image: CanvasImageSource): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -34,39 +33,36 @@ export class CanvasPipeline implements IRenderPipeline {
     const output = new ImageData(new Uint8ClampedArray(source.data), source.width, source.height);
     const data = output.data;
     const [tr, tg, tb] = params.tint;
-    const targetLum = Math.max(1, 0.299 * tr + 0.587 * tg + 0.114 * tb);
-    const coatAlpha = COAT_ALPHA[params.coat] * clamp01(params.opacity ?? 1);
+    const coverage = clamp01(params.opacity ?? 1);
+    const coatBuild = COAT_BUILD[params.coat];
 
     for (let y = 0; y < source.height; y += 1) {
       const row = y * source.width;
       for (let x = 0; x < source.width; x += 1) {
         const idx = row + x;
         const maskAlpha = mask.alpha[idx] / 255;
-        if (maskAlpha <= 0) continue;
+        if (maskAlpha <= 0 || coverage <= 0) continue;
         const p = idx * 4;
         const r = source.data[p], g = source.data[p + 1], b = source.data[p + 2];
         const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        const ln = lum / 255;
 
-        // Preserve the photograph's illumination instead of multiplying the
-        // pigment by a very dark luminance factor. This keeps wall shadows,
-        // window light and texture readable while changing chroma.
-        const illumination = Math.max(0.42, Math.min(1.42, lum / targetLum));
-        const shadedR = clamp(tr * illumination);
-        const shadedG = clamp(tg * illumination);
-        const shadedB = clamp(tb * illumination);
+        // Keep photographic light/shadow texture but do not dilute the chosen
+        // pigment at 100%. Midtones stay close to the selected colour, shadows
+        // become naturally darker and highlights naturally lighter.
+        const shade = 0.68 + 0.64 * ln;
+        const shadedR = clamp(tr * shade);
+        const shadedG = clamp(tg * shade);
+        const shadedB = clamp(tb * shade);
 
-        // Protect bright specular/highlight information and dark edge detail.
-        const highlight = clamp01((lum - 205) / 50);
-        const shadowDetail = clamp01((70 - lum) / 70);
-        const structurePreserve = Math.max(highlight * 0.34, shadowDetail * 0.20);
-        const alpha = clamp01(coatAlpha * maskAlpha * (1 - structurePreserve));
-
+        // At 100% + final coat the pigment is complete. Texture comes from the
+        // luminance modulation above, not from leaking 30–50% of the old colour.
+        const alpha = clamp01(maskAlpha * coverage * coatBuild);
         data[p] = clamp(shadedR * alpha + r * (1 - alpha));
         data[p + 1] = clamp(shadedG * alpha + g * (1 - alpha));
         data[p + 2] = clamp(shadedB * alpha + b * (1 - alpha));
       }
     }
-
     this.ctx.putImageData(output, 0, 0);
   }
 
@@ -77,7 +73,6 @@ export class CanvasPipeline implements IRenderPipeline {
     const data = output.data;
     const intensity = clamp01(params.intensity);
     const qualityScale = params.quality === 'final' ? 1 : 0.82;
-
     for (let y = 0; y < source.height; y += 1) {
       const row = y * source.width;
       for (let x = 0; x < source.width; x += 1) {
@@ -93,24 +88,13 @@ export class CanvasPipeline implements IRenderPipeline {
         }
       }
     }
-
     this.ctx.putImageData(output, 0, 0);
   }
 
   exportFinalImage(type: 'image/jpeg' | 'image/png' = 'image/jpeg', quality = 0.92): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      this.canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Image export failed.')), type, quality);
-    });
+    return new Promise((resolve, reject) => { this.canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Image export failed.')), type, quality); });
   }
-
   getCanvas(): HTMLCanvasElement { return this.canvas; }
-
-  private requireBase(): ImageData {
-    if (!this.baseImageData) throw new Error('renderBaseImage must be called before applying an effect.');
-    return this.baseImageData;
-  }
-
-  private assertMask(mask: MaskLayer): void {
-    if (mask.width !== this.canvas.width || mask.height !== this.canvas.height) throw new Error('Mask dimensions must match the render surface.');
-  }
+  private requireBase(): ImageData { if (!this.baseImageData) throw new Error('renderBaseImage must be called before applying an effect.'); return this.baseImageData; }
+  private assertMask(mask: MaskLayer): void { if (mask.width !== this.canvas.width || mask.height !== this.canvas.height) throw new Error('Mask dimensions must match the render surface.'); }
 }
