@@ -13,8 +13,9 @@ export class MaskLayer {
   }
 
   clone(): MaskLayer { return new MaskLayer(this.width, this.height, this.alpha); }
-
   clear(): void { this.alpha.fill(0); }
+  isEmpty(): boolean { for(let i=0;i<this.alpha.length;i+=1) if(this.alpha[i]>0) return false; return true; }
+  coverage(): number { let n=0; for(let i=0;i<this.alpha.length;i+=1) if(this.alpha[i]>0)n+=1; return n/this.alpha.length; }
 
   get(x: number, y: number): number {
     if (x < 0 || y < 0 || x >= this.width || y >= this.height) return 0;
@@ -33,11 +34,24 @@ export class MaskLayer {
     return new MaskLayer(this.width, this.height, out);
   }
 
+  intersect(other: MaskLayer): MaskLayer {
+    this.assertCompatible(other);
+    const out = new Uint8ClampedArray(this.alpha.length);
+    for (let i = 0; i < out.length; i += 1) out[i] = Math.min(this.alpha[i], other.alpha[i]);
+    return new MaskLayer(this.width, this.height, out);
+  }
+
   subtract(other: MaskLayer): MaskLayer {
     this.assertCompatible(other);
     const out = new Uint8ClampedArray(this.alpha.length);
     for (let i = 0; i < out.length; i += 1) out[i] = Math.max(0, this.alpha[i] - other.alpha[i]);
     return new MaskLayer(this.width, this.height, out);
+  }
+
+  invert(): MaskLayer {
+    const out = new Uint8ClampedArray(this.alpha.length);
+    for(let i=0;i<out.length;i+=1) out[i]=255-this.alpha[i];
+    return new MaskLayer(this.width,this.height,out);
   }
 
   toImageData(): ImageData {
