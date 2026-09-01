@@ -96,13 +96,13 @@
 
 /* VäriKamu mobile: keep the canvas and tools in focus. The full walkthrough remains available on desktop; mobile uses the compact Ohje trigger. */
 @media (max-width: 1023px) {
-  section.min-h-screen.w-full.overflow-x-hidden.bg-navy-50 > .container-base > .mb-4.rounded-2xl.border.border-orange-200.bg-orange-50 {
+  section[class~="min-h-screen"][class~="overflow-x-hidden"][class~="bg-navy-50"] > .container-base > .mb-4.rounded-2xl.border.border-orange-200.bg-orange-50 {
     display: none;
   }
-  section.min-h-screen.w-full.overflow-x-hidden.bg-navy-50 > .container-base > .mb-3 {
+  section[class~="min-h-screen"][class~="overflow-x-hidden"][class~="bg-navy-50"] > .container-base > .mb-3 {
     margin-bottom: .5rem;
   }
-  section.min-h-screen.w-full.overflow-x-hidden.bg-navy-50 > .container-base > .mb-3 h1 {
+  section[class~="min-h-screen"][class~="overflow-x-hidden"][class~="bg-navy-50"] > .container-base > .mb-3 h1 {
     font-size: 1.25rem;
     line-height: 1.35;
   }
