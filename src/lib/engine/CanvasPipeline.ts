@@ -1,8 +1,9 @@
 import { MaskLayer } from './MaskLayer';
 import type { CleaningParams, IRenderPipeline, PaintParams, RenderSize } from './types';
 
-const COAT_ALPHA: Record<1 | 2 | 3, number> = { 1: 0.45, 2: 0.75, 3: 0.95 };
+const COAT_ALPHA: Record<1 | 2 | 3, number> = { 1: 0.45, 2: 0.72, 3: 0.90 };
 const clamp = (v: number) => Math.max(0, Math.min(255, v));
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
 export class CanvasPipeline implements IRenderPipeline {
   private readonly canvas: HTMLCanvasElement;
@@ -33,7 +34,8 @@ export class CanvasPipeline implements IRenderPipeline {
     const output = new ImageData(new Uint8ClampedArray(source.data), source.width, source.height);
     const data = output.data;
     const [tr, tg, tb] = params.tint;
-    const coatAlpha = COAT_ALPHA[params.coat] * (params.opacity ?? 1);
+    const targetLum = Math.max(1, 0.299 * tr + 0.587 * tg + 0.114 * tb);
+    const coatAlpha = COAT_ALPHA[params.coat] * clamp01(params.opacity ?? 1);
 
     for (let y = 0; y < source.height; y += 1) {
       const row = y * source.width;
@@ -43,12 +45,25 @@ export class CanvasPipeline implements IRenderPipeline {
         if (maskAlpha <= 0) continue;
         const p = idx * 4;
         const r = source.data[p], g = source.data[p + 1], b = source.data[p + 2];
-        const ln = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        const shade = 0.35 + 0.65 * ln;
-        const alpha = Math.max(0, Math.min(1, coatAlpha * maskAlpha));
-        data[p] = clamp(tr * shade * alpha + r * (1 - alpha));
-        data[p + 1] = clamp(tg * shade * alpha + g * (1 - alpha));
-        data[p + 2] = clamp(tb * shade * alpha + b * (1 - alpha));
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+        // Preserve the photograph's illumination instead of multiplying the
+        // pigment by a very dark luminance factor. This keeps wall shadows,
+        // window light and texture readable while changing chroma.
+        const illumination = Math.max(0.42, Math.min(1.42, lum / targetLum));
+        const shadedR = clamp(tr * illumination);
+        const shadedG = clamp(tg * illumination);
+        const shadedB = clamp(tb * illumination);
+
+        // Protect bright specular/highlight information and dark edge detail.
+        const highlight = clamp01((lum - 205) / 50);
+        const shadowDetail = clamp01((70 - lum) / 70);
+        const structurePreserve = Math.max(highlight * 0.34, shadowDetail * 0.20);
+        const alpha = clamp01(coatAlpha * maskAlpha * (1 - structurePreserve));
+
+        data[p] = clamp(shadedR * alpha + r * (1 - alpha));
+        data[p + 1] = clamp(shadedG * alpha + g * (1 - alpha));
+        data[p + 2] = clamp(shadedB * alpha + b * (1 - alpha));
       }
     }
 
@@ -60,7 +75,7 @@ export class CanvasPipeline implements IRenderPipeline {
     this.assertMask(mask);
     const output = new ImageData(new Uint8ClampedArray(source.data), source.width, source.height);
     const data = output.data;
-    const intensity = Math.max(0, Math.min(1, params.intensity));
+    const intensity = clamp01(params.intensity);
     const qualityScale = params.quality === 'final' ? 1 : 0.82;
 
     for (let y = 0; y < source.height; y += 1) {
