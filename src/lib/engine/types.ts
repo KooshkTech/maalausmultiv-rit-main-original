@@ -2,7 +2,7 @@ export type RGB = readonly [number, number, number];
 
 export interface PaintParams {
   tint: RGB;
-  coat: 1 | 2 | 3;
+  coat: 1 | 2 | 3 | 4;
   opacity?: number;
 }
 
