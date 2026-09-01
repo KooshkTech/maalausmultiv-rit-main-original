@@ -10,7 +10,6 @@ import {
   PaintRoller,
   Plus,
   Sparkles,
-  WandSparkles,
 } from 'lucide-react';
 import { listProjects, listQuoteRequests, type PaintProjectRecord } from '@/lib/customerAppApi';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
@@ -39,9 +38,10 @@ export function KamuStudioDashboardPage() {
   }, []);
 
   const firstName = useMemo(() => {
-    const metaName = session?.user.user_metadata?.full_name;
-    if (typeof metaName === 'string' && metaName.trim()) return metaName.trim().split(/\s+/)[0];
-    return '';
+    const email = session?.user.email;
+    if (!email) return '';
+    const local = email.split('@')[0]?.replace(/[._-]+/g, ' ').trim();
+    return local ? local.split(/\s+/)[0] : '';
   }, [session]);
 
   return (
@@ -51,7 +51,7 @@ export function KamuStudioDashboardPage() {
           <div className="grid gap-8 p-6 sm:p-9 lg:grid-cols-[1.08fr_.92fr] lg:items-center lg:p-12">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-bold uppercase tracking-[0.18em] text-orange-300">
-                <WandSparkles className="h-4 w-4" /> Kamu Studio
+                <Sparkles className="h-4 w-4" /> Kamu Studio
               </div>
               <h1 className="mt-5 max-w-3xl font-display text-3xl font-extrabold leading-tight sm:text-5xl">
                 {firstName ? `Hei ${firstName}, mitä suunnitellaan tänään?` : 'Mitä suunnitellaan tänään?'}
