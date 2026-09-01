@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X, Phone, PaintRoller, Palette } from 'lucide-react';
+import { Menu, X, Phone, PaintRoller, Sparkles } from 'lucide-react';
 import { company } from '@/data/company';
 import { trackPhoneClick } from '@/lib/analytics';
 
@@ -60,8 +60,8 @@ export function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Link to="/varikamu" className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition hover:bg-orange-100">
-            <Palette className="h-4 w-4" />VäriKamu
+          <Link to="/kamu" className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3.5 py-2 text-xs font-bold text-orange-700 transition hover:bg-orange-100">
+            <Sparkles className="h-4 w-4" />Kamu Studio
           </Link>
           <a href={company.phoneHref} onClick={() => trackPhoneClick('navbar_desktop')} className="flex items-center gap-2 text-sm font-semibold text-navy-800 hover:text-orange-600">
             <Phone className="h-4 w-4" />{company.phone}
@@ -81,7 +81,7 @@ export function Navbar() {
               <Link to="/palvelut" className="rounded-xl bg-navy-900 px-4 py-3 text-center text-sm font-extrabold text-white">Maalaus</Link>
               <Link to="/palvelut/siivous" className="rounded-xl bg-navy-50 px-4 py-3 text-center text-sm font-extrabold text-navy-900">Siivous</Link>
             </div>
-            <Link to="/varikamu" className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-orange-50 py-3 text-sm font-extrabold text-orange-700"><Palette className="h-5 w-5" />Kokeile VäriKamua</Link>
+            <Link to="/kamu" className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-orange-50 py-3 text-sm font-extrabold text-orange-700"><Sparkles className="h-5 w-5" />Avaa Kamu Studio</Link>
             <div className="mb-4 grid grid-cols-2 gap-2">
               <a href={company.phoneHref} onClick={() => trackPhoneClick('navbar_mobile')} className="flex items-center justify-center gap-2 rounded-xl bg-navy-50 py-3 text-sm font-bold text-navy-800"><Phone className="h-4 w-4" />Soita</a>
               <Link to="/yhteystiedot" className="btn-primary justify-center">Pyydä tarjous</Link>
@@ -90,6 +90,7 @@ export function Navbar() {
               {navLinks.slice(2).map((link) => (
                 <li key={link.to}><NavLink to={link.to} className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">{link.label}</NavLink></li>
               ))}
+              <li><Link to="/varikamu" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">VäriKamu</Link></li>
               <li><Link to="/siivouskamu" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">SiivousKamu</Link></li>
               <li><Link to="/app/login" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">Oma tili / Kirjaudu</Link></li>
               <li><Link to="/arvostelut" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">Arvostelut</Link></li>
