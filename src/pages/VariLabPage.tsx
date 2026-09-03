@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, Factory, GraduationCap, Heart, Home, Hospital, House, PaintRoller, School, ShoppingBasket, Sparkles, Utensils } from 'lucide-react';
+import { ArrowRight, Building2, Factory, GraduationCap, Heart, Home, PaintRoller, School, ShoppingBasket, Sparkles, Stethoscope, Utensils } from 'lucide-react';
 import { Seo } from '@/components/Seo';
 
 type SpaceKey='home'|'office'|'shop'|'school'|'daycare'|'clinic'|'restaurant'|'housing'|'industrial';
@@ -11,9 +11,9 @@ const spaces=[
  {key:'shop' as const,label:'Liike & marketti',hint:'Myymälä, seinät, katot, brändisävyt',icon:ShoppingBasket},
  {key:'school' as const,label:'Koulu',hint:'Luokka, käytävä, ruokala, toimintatila',icon:GraduationCap},
  {key:'daycare' as const,label:'Päiväkoti',hint:'Leikki-, lepo- ja toimintatilat',icon:School},
- {key:'clinic' as const,label:'Klinikka & hoivatila',hint:'Vastaanotto, odotustila, hoivaympäristö',icon:Hospital},
+ {key:'clinic' as const,label:'Klinikka & hoivatila',hint:'Vastaanotto, odotustila, hoivaympäristö',icon:Stethoscope},
  {key:'restaurant' as const,label:'Ravintola & kahvila',hint:'Sali, kahvila, tunnelma ja brändi',icon:Utensils},
- {key:'housing' as const,label:'Taloyhtiö',hint:'Porraskäytävä, yhteistila, julkisivu, ovet',icon:House},
+ {key:'housing' as const,label:'Taloyhtiö',hint:'Porraskäytävä, yhteistila, julkisivu, ovet',icon:Building2},
  {key:'industrial' as const,label:'Varasto & teollisuus',hint:'Seinät, lattiat ja toiminnalliset pinnat',icon:Factory},
 ];
 const moods=[{key:'happy' as const,label:'Iloinen',emoji:'☀️'},{key:'calm' as const,label:'Rauhallinen',emoji:'🌿'},{key:'energy' as const,label:'Energinen',emoji:'✨'},{key:'focus' as const,label:'Keskittynyt',emoji:'🎯'}];
