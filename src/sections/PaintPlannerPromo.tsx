@@ -13,17 +13,17 @@ export function PaintPlannerPromo() {
               <div className="lg:col-span-7">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-orange-300"><Palette className="h-4 w-4" />Uusi asiakastyökalu</span>
                 <h2 className="mt-5 font-display text-3xl font-extrabold leading-tight sm:text-4xl">Muuta tilasi ennen kuin päätät</h2>
-                <p className="mt-4 max-w-2xl leading-relaxed text-navy-100">Lataa kuva tilastasi, kokeile värejä tai merkitse puhdistettavat alueet. Suunnittele rauhassa ja pyydä ammattilainen toteuttamaan hyvältä tuntuva lopputulos.</p>
+                <p className="mt-4 max-w-2xl leading-relaxed text-navy-100">Lataa kuva kodista tai talosta ja kokeile eri sävyjä VäriKamulla. Kun suunnitelma on valmis, arvioi työn laajuutta Maalauslaskurilla ja pyydä kohdekohtainen tarjous.</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                  <Link to="/varikamu" className="btn-primary">Aloita maalausstudio <ArrowRight className="h-4 w-4" /></Link>
-                  <Link to="/siivouskamu" className="btn-ghost-light">Aloita siivousstudio <ArrowRight className="h-4 w-4" /></Link>
+                  <Link to="/varikamu" className="btn-primary">Kokeile värejä VäriKamulla <ArrowRight className="h-4 w-4" /></Link>
+                  <Link to="/maalauslaskuri" className="btn-ghost-light">Laske maalauksen hinta <ArrowRight className="h-4 w-4" /></Link>
                 </div>
               </div>
               <div className="lg:col-span-5">
                 <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                   <PromoItem icon={ImagePlus} title="Lataa kuva" text="Käytä omaa talo-, huone- tai kattokuvaa." />
                   <PromoItem icon={Palette} title="Suunnittele värit" text="Anna eri pinnoille omat sävyt." />
-                  <PromoItem icon={Calculator} title="Näe hinta-arvio" text="Saat valintoihin perustuvan alustavan hintahaarukan." />
+                  <PromoItem icon={Calculator} title="Arvioi työn hinta" text="Maalauslaskuri antaa suuntaa-antavan hintahaarukan." />
                 </div>
               </div>
             </div>

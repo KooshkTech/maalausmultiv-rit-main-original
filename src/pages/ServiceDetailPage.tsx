@@ -29,6 +29,55 @@ const serviceFaqs = [
   { q: 'Voitteko työskennellä asutussa asunnossa?', a: 'Kyllä. Suojamme kalusteet ja lattiat huolellisesti ja käytämme matalahajuisia maaleja. Voimme maalata huone kerrallaan.' },
 ];
 
+const priorityServiceGuides: Record<string, {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  sections: { title: string; text: string }[];
+  pricingFactors: string[];
+}> = {
+  'talon-maalaus': {
+    eyebrow: 'Omakoti- ja pientalot',
+    title: 'Talon maalaus alkaa pinnan kunnon arvioinnista',
+    intro: 'Talon maalaus ei ole vain uuden värin levittämistä. Kestävä lopputulos syntyy, kun julkisivumateriaali, vanha maalipinta, vauriot ja sääolosuhteet arvioidaan ennen työmenetelmän valintaa.',
+    sections: [
+      { title: 'Kunto ja valmistelu', text: 'Tarkistamme maalipinnan tartunnan, lian, mahdollisen kasvuston, halkeamat sekä lahon tai muun korjaustarpeen. Sovitut pinnat pestään, irtoava maali poistetaan ja korjattavat kohdat käsitellään ennen pohjustusta.' },
+      { title: 'Pohjustus ja maalaus', text: 'Pohjustus ja pintamaalaus valitaan julkisivumateriaalin sekä aiemman käsittelyn perusteella. Ikkunapuitteet, listat, räystäät ja muut yksityiskohdat rajataan tarjouksessa, jotta työn sisältö on selkeä.' },
+      { title: 'Sopivat rakennukset', text: 'Palvelu soveltuu omakoti- ja pientaloille sekä sovituille rivi- ja paritalokohteille. Puu-, rappaus- ja muut maalattavat pinnat tarvitsevat omat esikäsittely- ja maalausjärjestelmänsä.' },
+      { title: 'Sää ja huolto', text: 'Ulkotyö ajoitetaan tuotteen ohjeiden ja todellisten olosuhteiden mukaan. Maalipinnan kuntoa kannattaa seurata säännöllisesti, jotta pesu tai huoltomaalaus voidaan tehdä ennen laajempia vaurioita.' },
+    ],
+    pricingFactors: ['julkisivun pinta-ala ja korkeus', 'pinnan materiaali ja nykyinen kunto', 'pesun, kaavinnan ja korjausten määrä', 'pohjustus, maalit ja käsittelykerrat', 'telineet, suojaukset ja kohteen saavutettavuus'],
+  },
+  julkisivumaalaus: {
+    eyebrow: 'Julkisivun suoja ja ilme',
+    title: 'Julkisivumaalaus materiaalin ja kunnon mukaan',
+    intro: 'Julkisivumaalauksen menetelmä ratkaistaan vasta pinnan tarkastuksen jälkeen. Puu-, rappaus- ja tiilipinnat reagoivat kosteuteen ja vanhoihin pinnoitteisiin eri tavoin, joten sama työvaihe ei sovi kaikkiin kohteisiin.',
+    sections: [
+      { title: 'Kuntoarvio', text: 'Arvioimme halkeamat, irtoavan maalin, lian, kasvuston, kosteuden merkit ja alustan kantavuuden. Samalla selvitetään, tarvitaanko ennen maalausta erillisiä korjauksia.' },
+      { title: 'Pesu ja maalinpoisto', text: 'Julkisivu pestään pinnalle sopivalla menetelmällä. Hilseilevä tai heikosti kiinni oleva maali poistetaan sovitussa laajuudessa, ja pinta saa kuivua riittävästi ennen seuraavaa työvaihetta.' },
+      { title: 'Pohjustus ja pintamaalaus', text: 'Pohjuste ja pintamaali valitaan materiaalin, vanhan pinnoitteen ja valmistajan ohjeiden mukaan. Rappauksen korjaukset, puupinnan suojaus ja tiilipinnan käsittely suunnitellaan erikseen.' },
+      { title: 'Suomen sääolosuhteet', text: 'Lämpötila, sade, ilman kosteus, tuuli ja suora auringonpaiste vaikuttavat työn ajoitukseen ja kuivumiseen. Siksi toteutukselle varataan kohteeseen ja vuodenaikaan sopiva sääikkuna.' },
+      { title: 'Huolto maalauksen jälkeen', text: 'Valmis julkisivu tarkistetaan luovutuksessa. Jatkossa pinnan puhtautta, halkeamia ja maalipinnan kulumista kannattaa seurata, jotta huoltotoimet voidaan ajoittaa oikein.' },
+    ],
+    pricingFactors: ['julkisivumateriaali ja vanha pinnoite', 'pinta-ala, korkeus ja muodot', 'pesu-, poisto- ja korjaustarve', 'pohjuste, maalityyppi ja käsittelykerrat', 'telineet, nostimet, suojaukset ja työmaan järjestelyt'],
+  },
+};
+
+const priorityServiceFaqs: Record<string, { q: string; a: string }[]> = {
+  'talon-maalaus': [
+    { q: 'Mitä talon maalaus sisältää?', a: 'Sisältö määritellään kuntoarvion perusteella. Työhön voivat kuulua suojaus, pesu, irtoavan maalin poisto, paikalliset korjaukset, pohjustus ja sovitut pintamaalaukset.' },
+    { q: 'Mistä talon maalauksen hinta muodostuu?', a: 'Hintaan vaikuttavat muun muassa pinta-ala, korkeus, julkisivumateriaali, pohjatöiden määrä, maalauskerrat, suojaukset sekä telineiden tai nostimen tarve. Lopullinen hinta vahvistetaan kohdekohtaisessa tarjouksessa.' },
+    { q: 'Milloin talon voi maalata?', a: 'Ajankohta valitaan käytettävän tuotteen ohjeiden, pinnan kuivuuden, lämpötilan ja sääennusteen mukaan. Kohde tarkistetaan ennen työn aloitusta.' },
+    { q: 'Missä teette talon maalauksia?', a: 'Palvelemme Vantaalla, Helsingissä, Espoossa ja muualla Uudellamaalla sovitun kohteen mukaan.' },
+  ],
+  julkisivumaalaus: [
+    { q: 'Miten julkisivun kunto tutkitaan ennen maalausta?', a: 'Tarkistamme pinnan materiaalin, vanhan pinnoitteen tartunnan, halkeamat, lian, kasvuston ja näkyvät vauriot. Tarvittavat korjaukset ja pohjatyöt eritellään tarjouksessa.' },
+    { q: 'Voiko kaikki julkisivut maalata samalla maalilla?', a: 'Ei. Maalityyppi ja pohjustus valitaan julkisivumateriaalin, vanhan käsittelyn ja tuotteen yhteensopivuuden perusteella.' },
+    { q: 'Miten sää vaikuttaa julkisivumaalaukseen?', a: 'Sade, lämpötila, ilmankosteus, tuuli ja auringonpaiste vaikuttavat levitykseen ja kuivumiseen. Työ ajoitetaan valmistajan ohjeiden ja kohteen olosuhteiden mukaan.' },
+    { q: 'Miten saan hinnan julkisivumaalaukselle?', a: 'Lähetä kohteen tiedot ja kuvat tai pyydä maksuton arvio. Saat tarjouksen, jossa työn laajuus, pohjatyöt, materiaalit ja rajaukset on määritelty.' },
+  ],
+};
+
 export function ServiceDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const service = slug ? getService(slug) : undefined;
@@ -43,6 +92,8 @@ export function ServiceDetailPage() {
   const next = categoryServices[(catIndex + 1) % categoryServices.length];
   const serviceImage = images.services[service.slug as keyof typeof images.services] || service.image;
   const seo = serviceSeoMap[service.slug];
+  const priorityGuide = priorityServiceGuides[service.slug];
+  const pageFaqs = priorityServiceFaqs[service.slug] || serviceFaqs;
   const priorityCities = cities.filter((city) => ['vantaa', 'helsinki', 'espoo'].includes(city.slug));
   const relevantIndustries = getIndustriesForService(service.slug);
 
@@ -63,7 +114,7 @@ export function ServiceDetailPage() {
           description: service.short,
           areaServed: 'Uusimaa',
         }}
-        faqSchema={serviceFaqs}
+        faqSchema={pageFaqs}
       />
 
       {/* Hero */}
@@ -123,7 +174,7 @@ export function ServiceDetailPage() {
             </h2>
             <p className="mt-4 text-navy-600">
               Jokainen {service.title.toLowerCase()}-työmme sisältää seuraavat vaiheet.
-              Näin taatumme, että lopputulos kestää sään ja ajan.
+              Näin varmistamme, että työmenetelmä sopii kohteeseen ja sovittuun lopputulokseen.
             </p>
             <ul className="mt-6 flex flex-col gap-3">
               {service.bullets.map((b) => (
@@ -141,7 +192,7 @@ export function ServiceDetailPage() {
             <div className="card sticky top-24 p-8">
               <h3 className="font-display text-xl font-bold text-navy-900">Pyydä tarjous</h3>
               <p className="mt-3 text-sm text-navy-600">
-                Tarjous on ilmainen ja sitouttomaton. Käymme paikan päällä tutkimassa kohteen
+                Tarjous on ilmainen ja sitoutumaton. Käymme paikan päällä tutkimassa kohteen
                 ja laadimme tarkan aikataulun ja hinta-arvion.
               </p>
               <div className="mt-6 flex flex-col gap-3">
@@ -153,12 +204,12 @@ export function ServiceDetailPage() {
                   <Phone className="h-4 w-4" />
                   {company.phone}
                 </a>
-                <Link to="/kustannuslaskuri" className="text-center text-sm font-semibold text-orange-600 transition hover:text-orange-700">
-                  Tai laske arvio kustannuslaskurilla →
+                <Link to="/maalauslaskuri" className="text-center text-sm font-semibold text-orange-600 transition hover:text-orange-700">
+                  Laske maalauksen hinta →
                 </Link>
               </div>
               <p className="mt-5 text-center text-xs text-navy-500">
-                Vastaamme 24 tunnin sisällä.
+                Vastaamme tarjouspyyntöön mahdollisimman pian.
               </p>
             </div>
           </Reveal>
@@ -195,6 +246,38 @@ export function ServiceDetailPage() {
         </div>
       </section>
 
+      {priorityGuide && (
+        <section className="section-pad bg-white">
+          <div className="container-base">
+            <div className="mx-auto max-w-3xl text-center">
+              <span className="eyebrow-orange">{priorityGuide.eyebrow}</span>
+              <h2 className="mt-4 font-display text-3xl font-bold text-navy-900 sm:text-4xl">{priorityGuide.title}</h2>
+              <p className="mt-4 leading-relaxed text-navy-600">{priorityGuide.intro}</p>
+            </div>
+            <div className="mt-10 grid gap-5 md:grid-cols-2">
+              {priorityGuide.sections.map((section) => (
+                <article key={section.title} className="card p-6">
+                  <h3 className="font-display text-xl font-bold text-navy-900">{section.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-navy-600">{section.text}</p>
+                </article>
+              ))}
+              <article className="card border-orange-100 bg-orange-50 p-6">
+                <h3 className="font-display text-xl font-bold text-navy-900">Hintaan vaikuttavat tekijät</h3>
+                <ul className="mt-4 space-y-3">
+                  {priorityGuide.pricingFactors.map((factor) => (
+                    <li key={factor} className="flex gap-2 text-sm text-navy-700"><Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-600" />{factor}</li>
+                  ))}
+                </ul>
+              </article>
+            </div>
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link to="/maalauslaskuri" onClick={() => trackCtaClick('Laske maalauksen hinta', 'priority_service_guide')} className="btn-primary">Laske maalauksen hinta <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä maksuton tarjous', 'priority_service_guide')} className="btn-outline">Pyydä maksuton tarjous</Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* FAQ */}
       <section className="section-pad bg-white">
         <div className="container-base max-w-3xl">
@@ -208,7 +291,7 @@ export function ServiceDetailPage() {
             </h2>
           </div>
           <div className="mt-10 space-y-3">
-            {serviceFaqs.map((f, i) => (
+            {pageFaqs.map((f, i) => (
               <details key={i} className="group rounded-xl border border-navy-100 p-5">
                 <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-navy-800">
                   {f.q}

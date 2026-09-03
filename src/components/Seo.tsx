@@ -50,11 +50,6 @@ const localBusinessSchema = {
     addressRegion: company.region,
     addressCountry: 'FI',
   },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 60.2934,
-    longitude: 24.9574,
-  },
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
@@ -113,9 +108,10 @@ export function Seo({
   articleSchema,
 }: SeoProps) {
   const fullTitle = title
-    ? `${title} | ${company.name}`
+    ? title.includes(company.name) ? title : `${title} | ${company.name}`
     : `${company.name} | Maalaus- ja siivouspalveluja Uudellamaalla`;
-  const url = `${BASE_URL}${path}`;
+  const normalizedPath = path === '/' ? '/' : `/${path.replace(/^\/+|\/+$/g, '')}`;
+  const url = `${BASE_URL}${normalizedPath}`;
   // Social crawlers (Facebook, LinkedIn, WhatsApp, X) require an absolute
   // URL for og:image / twitter:image — a root-relative path like
   // "/images/..." is not reliably resolved and breaks link previews.
@@ -156,10 +152,10 @@ export function Seo({
       '@context': 'https://schema.org',
       '@type': 'Service',
       serviceType: serviceSchema.name,
+      url,
       description: serviceSchema.description,
       provider: {
-        '@type': 'ProfessionalService',
-        name: company.name,
+        '@id': `${BASE_URL}/#localbusiness`,
         telephone: '+358402429650',
         areaServed: serviceAreas.map((a) => a.name),
       },

@@ -4,10 +4,10 @@ import { Seo } from '@/components/Seo';
 import { PageHero } from '@/sections/PageHero';
 import { ContactCTA } from '@/sections/ContactCTA';
 import { getCity, cities } from '@/data/cities';
-import { services } from '@/data/services';
+import { getPaintingServices } from '@/data/services';
 import { company } from '@/data/company';
 import { locationSeoMap } from '@/data/seoMap';
-import { trackPhoneClick } from '@/lib/analytics';
+import { trackCtaClick, trackPhoneClick } from '@/lib/analytics';
 import { localServicePath } from '@/data/localSeo';
 
 export function CityPage() {
@@ -19,13 +19,14 @@ export function CityPage() {
   }
 
   const seo = locationSeoMap[city.slug];
+  const paintingServices = getPaintingServices();
 
   const otherCities = cities
     .filter((otherCity) => otherCity.slug !== city.slug)
     .slice(0, 6);
 
   const pageTitle =
-    seo?.title || `Maalaus- ja siivouspalvelut ${city.locative}`;
+    seo?.title || `Maalari ${city.name} – maalauspalvelut`;
 
   const pageDescription =
     seo?.description ||
@@ -34,11 +35,11 @@ export function CityPage() {
   const cityFaqs = [
     {
       q: `Palveletteko ${city.locative}?`,
-      a: `Kyllä. ${city.name} on Maalaus Multivärin palvelualue. Tarjoamme maalaus- ja siivouspalveluita kotitalouksille, yrityksille ja kiinteistöille. Ota yhteyttä, niin arvioimme kohteesi ja teemme tarjouksen.`,
+      a: `Kyllä. ${city.name} on Maalaus Multivärin palvelualue. Toteutamme maalaustöitä kotitalouksille, taloyhtiöille, yrityksille ja kiinteistöille. Ota yhteyttä, niin arvioimme kohteen ja laadimme tarjouksen.`,
     },
     {
-      q: `Mitä maalaus- ja siivouspalveluita tarjoatte ${city.locative}?`,
-      a: 'Maalauspalveluihimme kuuluvat muun muassa ulkomaalaus, sisämaalaus, julkisivumaalaus, kattomaalaus, huoneistomaalaus ja toimistomaalaus. Siivouspalveluihimme kuuluvat toimistosiivous, yrityssiivous, rakennussiivous, muuttosiivous sekä päiväkotien, koulujen ja hoivakotien siivous.',
+      q: `Mitä maalauspalveluita tarjoatte ${city.locative}?`,
+      a: 'Maalauspalveluihimme kuuluvat muun muassa talon maalaus, ulkomaalaus, sisämaalaus, julkisivumaalaus, kattomaalaus, huoneistomaalaus ja toimistomaalaus. Työn sisältö määritellään aina pinnan ja kohteen kunnon mukaan.',
     },
     {
       q: `Kuinka nopeasti voitte aloittaa työn ${city.locative}?`,
@@ -82,7 +83,7 @@ export function CityPage() {
           <div className="space-y-8">
             <div>
               <h2 className="font-display text-2xl font-bold text-navy-900">
-                Maalaus- ja siivouspalvelut {city.locative}
+                Maalauspalvelut ja maalari {city.locative}
               </h2>
 
               <p className="mt-4 leading-relaxed text-navy-600">
@@ -124,7 +125,7 @@ export function CityPage() {
               </h3>
 
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {services.map((service) => (
+                {paintingServices.map((service) => (
                   <Link
                     key={service.slug}
                     to={localServicePath(service.slug, city.slug)}
@@ -137,6 +138,10 @@ export function CityPage() {
                   </Link>
                 ))}
               </div>
+              <p className="mt-5 border-t border-navy-100 pt-4 text-sm leading-relaxed text-navy-600">
+                Etsitkö siivouspalvelua? Maalaus- ja siivoussisällöt pidetään erillään.{' '}
+                <Link to="/palvelut/siivous" className="font-semibold text-orange-600 hover:underline">Katso siivouspalvelut</Link>.
+              </p>
             </div>
 
             <div>
@@ -193,6 +198,13 @@ export function CityPage() {
 
                 <Link to="/yhteystiedot" className="btn-outline w-full">
                   Pyydä tarjous
+                </Link>
+                <Link
+                  to="/maalauslaskuri"
+                  onClick={() => trackCtaClick('Laske maalauksen hinta', 'city_page_sidebar')}
+                  className="w-full text-center text-sm font-bold text-orange-600 hover:underline"
+                >
+                  Laske maalauksen hinta →
                 </Link>
               </div>
 

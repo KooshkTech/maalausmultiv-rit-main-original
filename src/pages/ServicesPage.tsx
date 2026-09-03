@@ -106,7 +106,7 @@ export function ServicesPage() {
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">
             <Link to="/hinnat" className="btn-primary">Maalausten hinnat <ArrowRight className="h-4 w-4" /></Link>
-            <Link to="/kustannuslaskuri" className="btn-outline">Alustava hinta-arvio</Link>
+            <Link to="/maalauslaskuri" className="btn-outline">Laske maalauksen hinta</Link>
           </div>
         </div>
       </section>

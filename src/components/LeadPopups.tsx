@@ -46,7 +46,7 @@ const POPUPS: Record<PopupVariant, PopupState> = {
   portfolio: {
     variant: 'portfolio',
     headline: 'Innostuitko työstämme?',
-    body: 'Maalataan sinun kotisi seuraavaksi. Pyydä ilmainen tarjous ja saat sitouttamattoman arvion 24 h sisällä.',
+    body: 'Maalataan sinun kotisi seuraavaksi. Pyydä maksuton ja sitoutumaton arvio kohteestasi.',
     primaryLabel: 'Pyydä ilmainen tarjous',
     primaryHref: '/yhteystiedot',
     primaryIcon: 'send',
@@ -55,8 +55,8 @@ const POPUPS: Record<PopupVariant, PopupState> = {
   calculator: {
     variant: 'calculator',
     headline: 'Arviosi on valmis!',
-    body: 'Lataa kuvat kohteestasi ja saat tarkan virallisen tarjouksen. Vastaamme 24 tunnin sisällä.',
-    primaryLabel: 'Pyydä virallinen tarjous',
+    body: 'Lataa kuvat kohteestasi ja pyydä kohdetietoihin perustuva tarjous.',
+    primaryLabel: 'Pyydä maksuton tarjous',
     primaryHref: '/yhteystiedot',
     primaryIcon: 'send',
     showCallButton: true,
@@ -244,11 +244,10 @@ export function LeadPopups() {
           </div>
 
           <p className="mt-4 text-center text-xs text-navy-400">
-            Sitouttamaton · Vastaamme 24 h sisällä
+            Maksuton · Sitoutumaton tarjouspyyntö
           </p>
         </div>
       </div>
     </div>
   );
 }
-

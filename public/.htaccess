@@ -21,16 +21,21 @@
     RewriteRule ^ https://maalausmultivari.fi%{REQUEST_URI} [L,R=301]
 
     # V20 permanent URL migration. Keep old indexed planner URLs out of the sitemap.
-    RewriteRule ^maalauslaskuri/?$ /varikamu [L,R=301,NE]
+    RewriteRule ^kustannuslaskuri/?$ /maalauslaskuri [L,R=301,NE]
     RewriteRule ^paint-studio/?$ /varikamu [L,R=301,NE]
-    RewriteRule ^siivoussuunnittelija/?$ /siivouskamu [L,R=301,NE]
-    RewriteRule ^cleaning-studio/?$ /siivouskamu [L,R=301,NE]
+    RewriteRule ^siivoussuunnittelija/?$ /varikamu [L,R=301,NE]
+    RewriteRule ^cleaning-studio/?$ /varikamu [L,R=301,NE]
+    RewriteRule ^siivouskamu/?$ /varikamu [L,R=301,NE]
 
     # Send common AI-tool URLs to the authenticated customer applications.
-    RewriteRule ^siivouskamu/(ai|app)/?$ /app/siivouskamu [L,R=302,NE]
-    RewriteRule ^siivouskamu-ai/?$ /app/siivouskamu [L,R=302,NE]
-    RewriteRule ^varikamu/(ai|app)/?$ /app/varikamu [L,R=302,NE]
-    RewriteRule ^varikamu-ai/?$ /app/varikamu [L,R=302,NE]
+    RewriteRule ^siivouskamu/(ai|app)/?$ /app/varikamu [L,R=301,NE]
+    RewriteRule ^siivouskamu-ai/?$ /app/varikamu [L,R=301,NE]
+    RewriteRule ^varikamu/(ai|app)/?$ /app/varikamu [L,R=301,NE]
+    RewriteRule ^varikamu-ai/?$ /app/varikamu [L,R=301,NE]
+
+    # Keep one canonical URL format: root keeps '/', other pages do not.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.+)/$ /$1 [L,R=301,NE]
 
     # SPA fallback: real files/directories bypass React Router.
     RewriteRule ^index\.html$ - [L]

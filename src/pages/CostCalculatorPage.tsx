@@ -5,7 +5,7 @@ import { PageHero } from '@/sections/PageHero';
 import { ContactCTA } from '@/sections/ContactCTA';
 import { images } from '@/config/images';
 import { company } from '@/data/company';
-import { services } from '@/data/services';
+import { getPaintingServices } from '@/data/services';
 import { Link } from 'react-router-dom';
 import { trackCalcComplete } from '@/lib/leadPopupEvents';
 import { trackPhoneClick, trackCtaClick } from '@/lib/analytics';
@@ -53,6 +53,7 @@ const initialState: CalcState = {
 
 export function CostCalculatorPage() {
   const [state, setState] = useState<CalcState>(initialState);
+  const paintingServices = getPaintingServices();
 
   const estimate = useMemo(() => {
     const propFactor = propertyTypes.find((p) => p.id === state.propertyType)?.factor ?? 1;
@@ -72,21 +73,21 @@ export function CostCalculatorPage() {
     trackCalcComplete();
   };
 
-  const selectedService = services.find((s) => s.slug === state.service);
+  const selectedService = paintingServices.find((s) => s.slug === state.service);
 
   return (
     <>
       <Seo
-        title="Maalauskustannuslaskuri"
-        description="Laske arvio maalaustyön kustannuksista ilmaisella laskurilla. Saat heti arvion ja voit pyytää virallisen tarjouksen."
-        path="/kustannuslaskuri"
-        breadcrumbs={[{ name: 'Kustannuslaskuri', path: '/kustannuslaskuri' }]}
+        title="Maalauslaskuri – laske maalauksen hinta"
+        description="Laske maalaustyön alustava hintahaarukka Maalauslaskurilla. Arvioi kohteen laajuus ja pyydä maksuton, kohdekohtainen tarjous Uudellamaalla."
+        path="/maalauslaskuri"
+        breadcrumbs={[{ name: 'Maalauslaskuri', path: '/maalauslaskuri' }]}
       />
       <PageHero
         eyebrow="Ilmainen laskuri"
-        title="Maalauskustannuslaskuri"
-        description="Saat heti arvion maalaustyön kustannuksista. Täytä tiedot alla ja pyydä tarjous tarkalla hinnalla."
-        crumb="Kustannuslaskuri"
+        title="Maalauslaskuri – arvioi maalauksen hinta"
+        description="Arvioi maalaustyön hintahaarukka omilla lähtötiedoillasi. Lopullinen hinta vahvistetaan aina kohdekohtaisessa tarjouksessa."
+        crumb="Maalauslaskuri"
         image={images.pages.calculator}
       />
 
@@ -122,7 +123,7 @@ export function CostCalculatorPage() {
                   onChange={(e) => update('service', e.target.value)}
                   className={selectClass}
                 >
-                  {services.map((s) => (
+                  {paintingServices.map((s) => (
                     <option key={s.slug} value={s.slug}>{s.title}</option>
                   ))}
                 </select>
@@ -242,9 +243,9 @@ export function CostCalculatorPage() {
                   Arvio on suuntaa-antava. Lopullinen hinta määräytyy kohteen tarkastuksen
                   perusteella. Pyydä ilmainen tarjous tarkalla hinnalla.
                 </p>
-                <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä virallinen tarjous', 'cost_calculator_result')} className="btn-primary w-full">
+                <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä maksuton tarjous', 'cost_calculator_result')} className="btn-primary w-full">
                   <Send className="h-4 w-4" />
-                  Pyydä virallinen tarjous
+                  Pyydä maksuton tarjous
                 </Link>
                 <a href={company.phoneHref} onClick={() => trackPhoneClick('cost_calculator_result')} className="btn-outline mt-3 w-full">
                   <Phone className="h-4 w-4" />
@@ -252,7 +253,7 @@ export function CostCalculatorPage() {
                 </a>
                 <div className="mt-5 space-y-2">
                   <Bullet text="Ilmainen paikallinen arviokäynti" />
-                  <Bullet text="Sitouttamaton tarjous 24 h sisällä" />
+                  <Bullet text="Maksuton ja sitoutumaton tarjouspyyntö" />
                   <Bullet text="Kirjallinen takuu 2 vuotta" />
                 </div>
               </div>

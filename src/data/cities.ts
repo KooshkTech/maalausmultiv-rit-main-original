@@ -21,7 +21,7 @@ export const cities: CityInfo[] = [
     locative: 'Helsingissä',
     genitive: 'Helsingin',
     intro:
-      'Ammattimaista maalaus- ja siivouspalvelua Helsingissä — nopeasti, siististi ja luotettavasti.',
+      'Ammattimaista maalauspalvelua Helsingissä koteihin, taloyhtiöille ja yrityksille.',
     description:
       'Maalaus Multiväri palvelee koko Helsinkiä Kalliosta Munkkivuoreen ja Töölöstä Vuosaareen. Helsinkiläiset kohteet vaihtelevat historiallisista puutaloista moderneihin kerrostaloasuntoihin, ja jokainen kohde vaatii omanlaisensa pintakäsittelyn. Tunnemme Helsingin asuinkerrostalojen rappauspinnat, tiilijulkisivut ja puutaloalueiden erityisvaatimukset. Toimimme myös Helsingin keskusta-alueen toimitiloissa häiritsemättä yritysten arkea.',
     highlights: [
@@ -41,7 +41,7 @@ export const cities: CityInfo[] = [
     locative: 'Espoossa',
     genitive: 'Espoon',
     intro:
-      'Laadukasta maalaus- ja siivouspalvelua Espoossa — omakotitaloista kerrostaloihin.',
+      'Laadukasta maalauspalvelua Espoossa — omakotitaloista kerrostaloihin ja toimitiloihin.',
     description:
       'Espoon laajat pientaloalueet ja kerrostalokeskukset Tapiolasta Matinkylään tarjoavat monipuolisia maalauskohteita. Maalaus Multiväri tekee Espoossa omakotitalojen ulkomaalausta, asuntojen sisämaalausta ja toimitilojen pintakäsittelyä. Työt suunnitellaan aina kohteen rakennustyypin ja pintamateriaalien mukaan.',
     highlights: [
@@ -61,14 +61,14 @@ export const cities: CityInfo[] = [
   locative: 'Vantaalla',
   genitive: 'Vantaan',
   intro:
-    'Luotettavaa maalaus- ja siivouspalvelua Vantaalla — kotimme kaupunki.',
+    'Paikallinen maalari Vantaalla koteihin, taloyhtiöille ja yrityksille.',
   description:
-    'Maalaus Multivärin kotikaupunki on Vantaa, ja palvelemme koko kaupungin aluetta Tikkurilasta Myyrmäkeen ja Hakunilaasta Aviapolikseen. Vantaan kerrostaloasunnot, omakotitalot ja toimitilat ovat tyypillisiä kohteitamme. Teemme sisä- ja ulkomaalausta, julkisivujen pesua ja erilaisia siivouspalveluita Vantaan asukkaille ja yrityksille.',
+    'Maalaus Multivärin kotikaupunki on Vantaa, ja palvelemme koko kaupungin aluetta Tikkurilasta Myyrmäkeen ja Hakunilasta Aviapolikseen. Vantaan kerrostaloasunnot, omakotitalot ja toimitilat ovat tyypillisiä maalauskohteita. Toteutamme talon maalausta, ulko- ja sisämaalausta sekä julkisivumaalausta kohteen materiaalin ja kunnon mukaan.',
   highlights: [
-    'Vantaan kerrostalojen sisämaalaus ja muuttosiivous',
+    'Vantaan kerrostalojen ja asuntojen sisämaalaus',
     'Omakotitalojen ulkomaalaus Tikkurilan ja Myyrmäen alueella',
-    'Toimitilojen maalaus ja siivous lentoaseman tuntumassa',
-    'Paikallinen yritys — nopea paikan päälle tulo',
+    'Toimitilojen ja yrityskohteiden maalaus lentoaseman tuntumassa',
+    'Paikallinen yritys ja kohdekohtainen arvio',
   ],
   localFacts:
     'Vantaalla on monipuolisesti kerrostalo-, rivitalo- ja pientaloalueita sekä runsaasti toimitiloja. Paikallinen palvelu mahdollistaa joustavan yhteydenpidon ja kohteen arvioinnin eri puolilla kaupunkia.',

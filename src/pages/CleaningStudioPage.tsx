@@ -192,7 +192,7 @@ export function CleaningStudioPage() {
     <section className="min-h-[calc(100vh-64px)] bg-navy-50 px-3 py-4 sm:px-5 sm:py-6">
       <div className="container-base">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3"><Link to="/siivouskamu" className="flex size-10 items-center justify-center rounded-xl border border-navy-200 bg-white" aria-label="Takaisin SiivousKamun esittelyyn"><ArrowLeft className="size-4" /></Link><div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">SiivousKamu</p><h1 className="font-display text-xl font-extrabold text-navy-950">Siivoussuunnittelija</h1></div></div>
+          <div className="flex items-center gap-3"><Link to="/palvelut/siivous" className="flex size-10 items-center justify-center rounded-xl border border-navy-200 bg-white" aria-label="Takaisin siivouspalveluihin"><ArrowLeft className="size-4" /></Link><div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">SiivousKamu</p><h1 className="font-display text-xl font-extrabold text-navy-950">Siivoussuunnittelija</h1></div></div>
           <button type="button" onClick={() => setAdvanced((value) => !value)} className="btn-outline !px-3 !py-2"><SlidersHorizontal className="size-4" />{advanced ? 'Simple Mode' : 'Advanced Mode'}</button>
         </div>
 

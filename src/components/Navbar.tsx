@@ -91,7 +91,7 @@ export function Navbar() {
                 <li key={link.to}><NavLink to={link.to} className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">{link.label}</NavLink></li>
               ))}
               <li><Link to="/varikamu" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">VäriKamu</Link></li>
-              <li><Link to="/siivouskamu" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">SiivousKamu</Link></li>
+              <li><Link to="/maalauslaskuri" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">Maalauslaskuri</Link></li>
               <li><Link to="/app/login" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">Oma tili / Kirjaudu</Link></li>
               <li><Link to="/arvostelut" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">Arvostelut</Link></li>
               <li><Link to="/blogi" className="block rounded-xl px-4 py-3 text-base font-semibold text-navy-800 hover:bg-navy-50">Oppaat ja blogi</Link></li>

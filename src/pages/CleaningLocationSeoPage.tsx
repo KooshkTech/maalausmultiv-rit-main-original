@@ -61,7 +61,7 @@ export function CleaningLocationSeoPage() {
     { q: `Mitä ${intent.keyword.toLowerCase()} ${city.locative} maksaa?`, a: 'Hinta riippuu tilan koosta, siivouksen sisällöstä, nykyisestä kunnosta ja toistuvuudesta. Pyydä kohdekohtainen tarjous, jotta arvio perustuu todellisiin tietoihin.' },
     { q: `Mitä ${intent.keyword.toLowerCase()} ${city.locative} sisältää?`, a: `Palvelu sovitaan kohteen mukaan. Työ voi sisältää esimerkiksi ${intent.tasks.slice(0, 3).join(', ').toLowerCase()} sekä muut etukäteen sovitut tehtävät.` },
     { q: 'Voiko siivouksen ajoittaa työajan ulkopuolelle?', a: 'Mahdollinen ajankohta sovitaan kohteen, palvelun ja saatavuuden mukaan. Kerro tarjouspyynnössä toivottu aikataulu.' },
-    { q: 'Voinko suunnitella siivoustarpeen ennen tarjouspyyntöä?', a: 'Kyllä. SiivousKamu auttaa kokoamaan tilan, tehtävät, toistuvuuden ja mahdolliset kuvaan merkittävät erityiskohdat ennen tarjouspyyntöä.' },
+    { q: 'Mitä tietoja tarjouspyyntöön kannattaa lisätä?', a: 'Kerro tilan tyyppi ja koko, tärkeimmät tehtävät, toistuvuus, toivottu ajankohta sekä mahdolliset erityiskohdat. Näin tarjous voidaan valmistella todellisten tietojen perusteella.' },
   ];
 
   return (
@@ -81,7 +81,7 @@ export function CleaningLocationSeoPage() {
             <div className="flex items-center gap-2 text-sm font-semibold text-orange-300"><MapPin className="size-4" />{city.name}, Uusimaa</div>
             <h1 className="mt-4 max-w-4xl font-display text-4xl font-extrabold tracking-tight sm:text-5xl">{intent.keyword} {city.locative} – luotettava siivouspalvelu</h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-navy-100">Tarjoamme {intent.keyword.toLowerCase()}a {city.locative} {intent.lead}. Sovimme työn sisällön, aikataulun ja toistuvuuden kohteen todellisen tarpeen mukaan.</p>
-            <div className="mt-7 flex flex-wrap gap-3"><Link to="/siivouskamu" className="btn-primary">Suunnittele siivous <ArrowRight className="size-4" /></Link><Link to="/yhteystiedot" className="btn-outline border-white/20 text-white hover:bg-white/10">Pyydä tarjous</Link></div>
+            <div className="mt-7 flex flex-wrap gap-3"><Link to="/yhteystiedot" className="btn-primary">Pyydä tarjous <ArrowRight className="size-4" /></Link><Link to="/palvelut/siivous" className="btn-outline border-white/20 text-white hover:bg-white/10">Kaikki siivouspalvelut</Link></div>
           </div>
         </section>
 
@@ -99,13 +99,13 @@ export function CleaningLocationSeoPage() {
               <p className="mt-4 leading-7 text-navy-700">Yritys- ja toimistosiivouksessa asiakkaan suurimpia huolia ovat yleensä työn tasaisuus, sovittujen tehtävien toteutuminen, aikataulujen pitävyys ja se, että hinta vastaa työn todellista laajuutta. Siksi emme lupaa yhdellä sivulla samaa hintaa kaikille kohteille. Tarjous muodostetaan tilan, tehtävien ja toistuvuuden perusteella.</p>
               <p className="mt-4 leading-7 text-navy-700">{cityCopy.areas} Jos tarvitset {intent.secondary}a, kerro tarjouspyynnössä mahdollisimman selkeästi tilojen käyttötarkoitus ja nykyinen siivoustarve. Se auttaa arvioimaan palvelun järkevästi jo ennen mahdollista kohdekäyntiä.</p>
 
-              <h2 className="mt-9 font-display text-3xl font-bold text-navy-950">Suunnittele ensin SiivousKamussa</h2>
-              <p className="mt-4 leading-7 text-navy-700">SiivousKamu on suunnittelutyökalu, jolla voit valita tilan tyypin, siivoustehtävät, arvioidun pinta-alan, siivouksen tason ja toistuvuuden. Halutessasi voit lisätä kuvan ja merkitä siihen erityistä huomiota vaativat kohdat. Työkalu ei korvaa lopullista tarjousta, mutta se tekee tarjouspyynnöstä huomattavasti täsmällisemmän.</p>
+              <h2 className="mt-9 font-display text-3xl font-bold text-navy-950">Valmistele selkeä tarjouspyyntö</h2>
+              <p className="mt-4 leading-7 text-navy-700">Kirjaa tarjouspyyntöön tilan tyyppi, arvioitu pinta-ala, tärkeimmät siivoustehtävät, toistuvuus ja mahdolliset erityiskohdat. Tiedot eivät korvaa kohdekohtaista arviota, mutta ne auttavat mitoittamaan palvelun järkevästi.</p>
             </article>
 
             <aside className="space-y-5">
               <div className="card p-6"><ShieldCheck className="size-8 text-orange-600" /><h2 className="mt-4 font-display text-2xl font-bold text-navy-950">Miksi selkeä tarjouspyyntö kannattaa?</h2><ul className="mt-4 space-y-3 text-sm leading-6 text-navy-700"><li>• Vähemmän arvailua työn laajuudesta</li><li>• Helpompi vertailla sovittua palvelusisältöä</li><li>• Toistuvuus ja aikataulu voidaan huomioida alusta asti</li><li>• Mahdolliset erityiskohdat voidaan kuvata etukäteen</li></ul></div>
-              <div className="rounded-3xl bg-orange-50 p-6"><h2 className="font-display text-2xl font-bold text-navy-950">Aloita ilman hinnan arvaamista</h2><p className="mt-3 text-sm leading-6 text-navy-700">SiivousKamu näyttää suunnitelman laajuuden, mutta ei keksi euromääräistä hintaa ilman hyväksyttyä hinnastoa ja riittäviä kohdetietoja.</p><Link to="/siivouskamu" className="btn-primary mt-5">Avaa SiivousKamu <ArrowRight className="size-4" /></Link></div>
+              <div className="rounded-3xl bg-orange-50 p-6"><h2 className="font-display text-2xl font-bold text-navy-950">Aloita ilman hinnan arvaamista</h2><p className="mt-3 text-sm leading-6 text-navy-700">Kerro kohteen tiedot tarjouspyynnössä. Vahvistamme hinnan palvelun sisällön, laajuuden ja toistuvuuden perusteella.</p><Link to="/yhteystiedot" className="btn-primary mt-5">Pyydä tarjous <ArrowRight className="size-4" /></Link></div>
             </aside>
           </div>
         </section>

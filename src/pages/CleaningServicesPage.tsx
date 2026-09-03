@@ -40,7 +40,7 @@ export function CleaningServicesPage() {
       />
 
       <section className="relative z-20 -mt-9 px-5">
-        <div className="container-base"><div className="card grid gap-5 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><span className="eyebrow-orange">SiivousKamu</span><h2 className="mt-3 font-display text-2xl font-bold text-navy-950">Suunnittele siivoustarve ennen tarjouspyyntöä</h2><p className="mt-2 max-w-2xl leading-relaxed text-navy-600">Valitse tila, tehtävät, arvioitu pinta-ala ja siivouksen toistuvuus. Halutessasi lisää kuva ja merkitse erityiskohdat.</p></div><Link to="/siivouskamu" className="btn-primary">Avaa SiivousKamu <ArrowRight className="size-4" /></Link></div></div>
+        <div className="container-base"><div className="card grid gap-5 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8"><div><span className="eyebrow-orange">Kohdekohtainen arvio</span><h2 className="mt-3 font-display text-2xl font-bold text-navy-950">Kerro siivoustarpeesta tarjouspyynnössä</h2><p className="mt-2 max-w-2xl leading-relaxed text-navy-600">Kerro tila, tehtävät, arvioitu pinta-ala ja siivouksen toistuvuus. Hinta vahvistetaan kohteen ja työn laajuuden perusteella.</p></div><Link to="/yhteystiedot" className="btn-primary">Pyydä tarjous <ArrowRight className="size-4" /></Link></div></div>
       </section>
 
       <section className="section-pad bg-white">

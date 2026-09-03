@@ -436,7 +436,7 @@ export function QuoteForm() {
 
           <div className="rounded-xl bg-navy-50/50 px-4 py-3">
             <p className="text-sm font-semibold text-navy-800">Valmis lähettämään?</p>
-            <p className="mt-1 text-xs leading-relaxed text-navy-500">Tarkista yhteystietosi. Vastaamme 24 tunnin sisällä.</p>
+            <p className="mt-1 text-xs leading-relaxed text-navy-500">Tarkista yhteystietosi. Vastaamme tarjouspyyntöön mahdollisimman pian.</p>
             {files.length > 0 && <p className="mt-1 text-xs font-semibold text-orange-700">{files.length} kuvaa liitetään tarjouspyyntöön.</p>}
           </div>
         </>

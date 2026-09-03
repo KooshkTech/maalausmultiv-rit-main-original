@@ -29,8 +29,8 @@ export function PricingHubPage() {
                 Maalaustyön hinta riippuu kohteesta, pintojen kunnosta, pohjatöistä ja työn laajuudesta. Emme julkaise keksittyjä neliöhintoja — pyydä arvio, joka perustuu omaan kohteeseesi.
               </p>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Link to="/kustannuslaskuri" className="btn-primary">
-                  Laske alustava arvio <Calculator className="h-4 w-4" />
+                <Link to="/maalauslaskuri" className="btn-primary">
+                  Laske maalauksen hinta <Calculator className="h-4 w-4" />
                 </Link>
                 <Link to="/yhteystiedot" className="btn-ghost-light">
                   Pyydä maksuton tarjous <ArrowRight className="h-4 w-4" />
@@ -75,7 +75,7 @@ export function PricingHubPage() {
               <span className="text-sm font-bold uppercase tracking-wider text-orange-600">Vaihtoehto 1</span>
               <h2 className="mt-2 font-display text-2xl font-extrabold text-navy-950">Arvioi projektin laajuus</h2>
               <p className="mt-3 text-slate-600">Käytä kustannuslaskuria, kun haluat ensin hahmottaa projektin kokoa ja antaa meille jäsennellyt lähtötiedot.</p>
-              <Link to="/kustannuslaskuri" className="mt-6 inline-flex items-center gap-2 font-bold text-orange-600 hover:text-orange-700">Avaa kustannuslaskuri <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/maalauslaskuri" className="mt-6 inline-flex items-center gap-2 font-bold text-orange-600 hover:text-orange-700">Avaa Maalauslaskuri <ArrowRight className="h-4 w-4" /></Link>
             </div>
             <div className="rounded-3xl bg-navy-950 p-7 text-white shadow-sm sm:p-8">
               <span className="text-sm font-bold uppercase tracking-wider text-orange-400">Vaihtoehto 2</span>

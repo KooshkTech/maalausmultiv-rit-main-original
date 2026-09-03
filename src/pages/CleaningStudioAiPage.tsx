@@ -155,7 +155,7 @@ export function CleaningStudioAiPage() {
     <section className="min-h-screen bg-navy-50 px-3 py-4 sm:px-5 sm:py-6">
       <div className="container-base max-w-6xl pb-10">
         <div className="mb-5 flex items-center gap-3">
-          <Link to="/siivouskamu" className="flex size-10 items-center justify-center rounded-xl border border-navy-200 bg-white" aria-label="Takaisin"><ArrowLeft className="size-4" /></Link>
+          <Link to="/palvelut/siivous" className="flex size-10 items-center justify-center rounded-xl border border-navy-200 bg-white" aria-label="Takaisin siivouspalveluihin"><ArrowLeft className="size-4" /></Link>
           <div><p className="text-xs font-bold uppercase tracking-wider text-orange-600">SiivousKamu AI</p><h1 className="font-display text-xl font-extrabold text-navy-950 sm:text-2xl">Näe realistinen siivouksen jälkeinen tila</h1></div>
         </div>
 

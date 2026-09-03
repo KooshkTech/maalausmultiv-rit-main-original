@@ -35,6 +35,10 @@ if (fs.existsSync(sitemapPath)) {
     if (url.includes('?') || url.includes('#')) fail(`Non-canonical sitemap URL contains query/hash: ${url}`);
     if (url !== `${baseUrl}/` && url.endsWith('/')) warn(`Trailing-slash sitemap URL: ${url}`);
   }
+  if (!urls.includes(`${baseUrl}/maalauslaskuri`)) fail('Canonical Maalauslaskuri URL is missing from sitemap.xml.');
+  for (const redirectedPath of ['/kustannuslaskuri', '/siivouskamu', '/paint-studio']) {
+    if (urls.includes(`${baseUrl}${redirectedPath}`)) fail(`Redirecting URL must not be in sitemap.xml: ${redirectedPath}`);
+  }
   console.log(`SEO audit: ${urls.length} sitemap URLs checked.`);
 }
 

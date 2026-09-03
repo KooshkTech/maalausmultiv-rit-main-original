@@ -24,9 +24,9 @@
       "url": "/app/varikamu"
     },
     {
-      "name": "Avaa SiivousKamu",
-      "short_name": "SiivousKamu",
-      "url": "/app/siivouskamu"
+      "name": "Avaa Maalauslaskuri",
+      "short_name": "Maalauslaskuri",
+      "url": "/maalauslaskuri"
     }
   ]
 }

@@ -73,6 +73,9 @@ export function Hero() {
                 <Sparkles className="h-5 w-5" />
                 Kokeile VäriKamua
               </Link>
+              <Link to="/maalauslaskuri" onClick={() => trackCtaClick('Laske maalauksen hinta', 'homepage_hero')} className="btn-ghost-light text-base">
+                Laske maalauksen hinta
+              </Link>
               <a href={company.phoneHref} onClick={() => trackPhoneClick('homepage_hero')} className="btn-ghost-light text-base">
                 <Phone className="h-5 w-5" />
                 Soita nyt

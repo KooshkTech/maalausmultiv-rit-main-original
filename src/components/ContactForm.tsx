@@ -261,7 +261,7 @@ export function ContactForm() {
         )}
       </button>
       <p className="text-center text-xs text-navy-500">
-        Vastaamme 24 tunnin sisällä. Tietosi käsitellään luottamuksellisesti.
+        Vastaamme yhteydenottoon mahdollisimman pian. Tietosi käsitellään luottamuksellisesti.
       </p>
     </form>
   );

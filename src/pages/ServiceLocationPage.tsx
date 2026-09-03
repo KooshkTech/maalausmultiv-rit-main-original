@@ -185,7 +185,8 @@ export function ServiceLocationPage() {
           <aside className="card h-fit p-6 lg:sticky lg:top-24">
             <h2 className="font-display text-xl font-bold text-navy-900">Pyydä arvio {city.locative}</h2>
             <p className="mt-3 text-sm leading-relaxed text-navy-600">Kerro kohteen sijainti, pintamateriaali ja työn arvioitu laajuus. Saat selkeän tarjouksen ennen työn aloitusta.</p>
-            <Link to="/yhteystiedot" className="btn-primary mt-5 w-full">Pyydä tarjous <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/yhteystiedot" onClick={() => trackCtaClick('Pyydä maksuton tarjous', 'service_location_sidebar')} className="btn-primary mt-5 w-full">Pyydä maksuton tarjous <ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/maalauslaskuri" onClick={() => trackCtaClick('Laske maalauksen hinta', 'service_location_sidebar')} className="btn-outline mt-3 w-full">Laske maalauksen hinta</Link>
             <Link to={`/palvelualueet/${city.slug}`} className="mt-4 block text-center text-sm font-semibold text-orange-600">Kaikki palvelut {city.locative} →</Link>
           </aside>
         </div>

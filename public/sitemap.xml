@@ -5,13 +5,13 @@
   <url><loc>https://maalausmultivari.fi/palvelut/siivous</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/ulkomaalaus</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/kattomaalaus</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://maalausmultivari.fi/palvelut/julkisivumaalaus</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/julkisivumaalaus</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/sisamaalaus</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/huoneistomaalaus</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/toimistomaalaus</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/aidan-maalaus</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/huoltomaalaus</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maalausmultivari.fi/palvelut/talon-maalaus</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelut/talon-maalaus</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/julkisivun-pesu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/ikkunan-pesu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelut/yrityssiivous</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -27,7 +27,7 @@
   <url><loc>https://maalausmultivari.fi/palvelualueet</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/helsinki</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/espoo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://maalausmultivari.fi/palvelualueet/vantaa</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/palvelualueet/vantaa</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/kauniainen</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/kirkkonummi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/kerava</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -35,13 +35,15 @@
   <url><loc>https://maalausmultivari.fi/palvelualueet/hyvinkaa</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/nurmijarvi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/palvelualueet/sipoo</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://maalausmultivari.fi/kustannuslaskuri</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/maalauslaskuri</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/varikamu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://maalausmultivari.fi/siivouskamu</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://maalausmultivari.fi/kamu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://maalausmultivari.fi/varilab</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://maalausmultivari.fi/yhteistyossa</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/projektit</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://maalausmultivari.fi/arvostelut</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://maalausmultivari.fi/blogi</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://maalausmultivari.fi/blogi/varit-tunteet-ja-hyvinvointi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://maalausmultivari.fi/blogi/ulkomaalauksen-ajankohta</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://maalausmultivari.fi/blogi/julkisivun-hoito-ja-pesu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://maalausmultivari.fi/blogi/mita-valita-puunsuoja-tiili</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>

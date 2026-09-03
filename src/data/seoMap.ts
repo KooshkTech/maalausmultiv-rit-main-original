@@ -28,8 +28,8 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
   julkisivumaalaus: {
     primaryKeyword: 'julkisivumaalaus',
     secondaryKeywords: ['julkisivun maalaus', 'talon julkisivumaalaus', 'julkisivun huolto'],
-    title: 'Julkisivumaalaus – kestävä julkisivun maalaus',
-    description: 'Julkisivumaalaus puu-, rappaus- ja tiilipinnoille. Oikea pintakäsittely ja huolellinen esityö pidentävät julkisivun käyttöikää.',
+    title: 'Julkisivumaalaus Uusimaa – pyydä arvio',
+    description: 'Julkisivumaalaus puu-, rappaus- ja tiilipinnoille Uudellamaalla. Kuntoarvio, pesu, pohjatyöt ja pintamaalaus kohteen mukaan. Pyydä maksuton arvio.',
   },
   sisamaalaus: {
     primaryKeyword: 'sisämaalaus',
@@ -130,8 +130,8 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
   'talon-maalaus': {
     primaryKeyword: 'talon maalaus',
     secondaryKeywords: ['omakotitalon maalaus', 'pientalon maalaus', 'talon maalaus Uusimaa'],
-    title: 'Talon maalaus – omakotitalon maalaus Uudellamaalla',
-    description: 'Talon ja omakotitalon maalaus huolellisilla esivalmisteluilla ja kestävillä maaleilla. Palvelemme Helsingissä, Espoossa, Vantaalla ja Uudellamaalla. Pyydä ilmainen tarjous.',
+    title: 'Talon maalaus Uusimaa – pyydä maksuton arvio',
+    description: 'Omakoti- ja pientalon maalaus Vantaalla, Helsingissä, Espoossa ja Uudellamaalla. Kuntoarvio, huolelliset pohjatyöt ja selkeä tarjous.',
   },
   yrityssiivous: {
     primaryKeyword: 'yrityssiivous',
@@ -149,18 +149,18 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
 
 export const locationSeoMap: Record<string, { primaryKeywords: string[]; title: string; description: string }> = {
   helsinki: {
-    primaryKeywords: ['maalaus Helsinki', 'talon maalaus Helsinki', 'siivous Helsinki'],
-    title: 'Maalaus Helsinki – talon maalaus ja siivouspalvelut',
-    description: 'Maalaus Helsingissä koteihin, taloyhtiöille ja yrityksille: talon maalaus, ulko- ja sisämaalaus sekä siivouspalvelut. Maksuton arvio ja tarjous.',
+    primaryKeywords: ['maalari Helsinki', 'maalaus Helsinki', 'talon maalaus Helsinki'],
+    title: 'Maalari Helsinki – talon maalaus',
+    description: 'Maalari Helsingissä talon maalaukseen, ulko-, sisä- ja julkisivumaalaukseen. Kohdekohtaiset pohjatyöt ja maksuton arvio Maalaus Multiväriltä.',
   },
   vantaa: {
-    primaryKeywords: ['maalaus Vantaa', 'talon maalaus Vantaa', 'siivous Vantaa'],
-    title: 'Maalaus Vantaa – talon maalaus ja siivouspalvelut',
-    description: 'Maalaus Vantaalla koteihin, taloyhtiöille ja yrityksille: talon maalaus, ulko- ja sisämaalaus sekä siivouspalvelut. Pyydä maksuton tarjous.',
+    primaryKeywords: ['maalari Vantaa', 'maalaus Vantaa', 'talon maalaus Vantaa'],
+    title: 'Maalari Vantaa – talon maalaus',
+    description: 'Paikallinen maalari Vantaalla: talon maalaus, ulko-, sisä- ja julkisivumaalaus koteihin, taloyhtiöille ja yrityksille. Pyydä maksuton arvio.',
   },
   espoo: {
-    primaryKeywords: ['maalaus Espoo', 'talon maalaus Espoo', 'siivous Espoo'],
-    title: 'Maalaus Espoo – talon maalaus ja siivouspalvelut',
-    description: 'Maalaus Espoossa omakotitaloihin, asuntoihin, taloyhtiöille ja yrityksille. Ulko- ja sisämaalaus sekä siivouspalvelut. Pyydä maksuton tarjous.',
+    primaryKeywords: ['maalari Espoo', 'maalaus Espoo', 'talon maalaus Espoo'],
+    title: 'Maalari Espoo – talon maalaus',
+    description: 'Maalari Espoossa omakotitaloihin, asuntoihin, taloyhtiöille ja yrityksille. Ulko-, sisä- ja julkisivumaalaus sekä maksuton arvio.',
   },
 };
