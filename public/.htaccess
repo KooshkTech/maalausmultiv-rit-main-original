@@ -15,27 +15,27 @@
     RewriteEngine On
     RewriteBase /
 
+    # Resolve legacy URLs directly to the canonical HTTPS/non-www destination.
+    RewriteRule ^kustannuslaskuri/?$ https://maalausmultivari.fi/maalauslaskuri [L,R=301,NE]
+    RewriteRule ^paint-studio/?$ https://maalausmultivari.fi/varikamu [L,R=301,NE]
+    RewriteRule ^siivoussuunnittelija/?$ https://maalausmultivari.fi/varikamu [L,R=301,NE]
+    RewriteRule ^cleaning-studio/?$ https://maalausmultivari.fi/varikamu [L,R=301,NE]
+    RewriteRule ^siivouskamu/?$ https://maalausmultivari.fi/varikamu [L,R=301,NE]
+
+    # Send common AI-tool URLs to the authenticated customer applications.
+    RewriteRule ^siivouskamu/(ai|app)/?$ https://maalausmultivari.fi/app/varikamu [L,R=301,NE]
+    RewriteRule ^siivouskamu-ai/?$ https://maalausmultivari.fi/app/varikamu [L,R=301,NE]
+    RewriteRule ^varikamu/(ai|app)/?$ https://maalausmultivari.fi/app/varikamu [L,R=301,NE]
+    RewriteRule ^varikamu-ai/?$ https://maalausmultivari.fi/app/varikamu [L,R=301,NE]
+
+    # Keep one canonical URL format: root keeps '/', other pages do not.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.+)/$ https://maalausmultivari.fi/$1 [L,R=301,NE]
+
     # One-hop canonical host: HTTPS + non-www.
     RewriteCond %{HTTPS} !=on [OR]
     RewriteCond %{HTTP_HOST} !^maalausmultivari\.fi$ [NC]
     RewriteRule ^ https://maalausmultivari.fi%{REQUEST_URI} [L,R=301]
-
-    # V20 permanent URL migration. Keep old indexed planner URLs out of the sitemap.
-    RewriteRule ^kustannuslaskuri/?$ /maalauslaskuri [L,R=301,NE]
-    RewriteRule ^paint-studio/?$ /varikamu [L,R=301,NE]
-    RewriteRule ^siivoussuunnittelija/?$ /varikamu [L,R=301,NE]
-    RewriteRule ^cleaning-studio/?$ /varikamu [L,R=301,NE]
-    RewriteRule ^siivouskamu/?$ /varikamu [L,R=301,NE]
-
-    # Send common AI-tool URLs to the authenticated customer applications.
-    RewriteRule ^siivouskamu/(ai|app)/?$ /app/varikamu [L,R=301,NE]
-    RewriteRule ^siivouskamu-ai/?$ /app/varikamu [L,R=301,NE]
-    RewriteRule ^varikamu/(ai|app)/?$ /app/varikamu [L,R=301,NE]
-    RewriteRule ^varikamu-ai/?$ /app/varikamu [L,R=301,NE]
-
-    # Keep one canonical URL format: root keeps '/', other pages do not.
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.+)/$ /$1 [L,R=301,NE]
 
     # SPA fallback: real files/directories bypass React Router.
     RewriteRule ^index\.html$ - [L]
