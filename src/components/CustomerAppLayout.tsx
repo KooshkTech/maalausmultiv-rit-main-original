@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
-import { LogOut, PaintRoller, Palette, Sparkles, UserRound } from 'lucide-react';
+import { LogOut, PaintRoller, Palette, UserRound } from 'lucide-react';
 import { Seo } from '@/components/Seo';
 import { useCustomerAuth } from '@/context/CustomerAuthContext';
 
@@ -10,9 +10,6 @@ export function CustomerAppLayout() {
   const authenticated = Boolean(session);
 
   useEffect(() => {
-    // `capture="environment"` can force the camera on mobile browsers.
-    // Removing it keeps camera access available while also letting users
-    // choose an existing image from Photos/Files.
     const enableImagePickerChoices = () => {
       document.querySelectorAll<HTMLInputElement>('input[type="file"][capture]').forEach((input) => {
         input.removeAttribute('capture');
@@ -33,8 +30,8 @@ export function CustomerAppLayout() {
   return (
     <div className="min-h-screen bg-navy-50/60">
       <Seo
-        title="VäriKamu ja SiivousKamu"
-        description="Maalaus Multivärin kirjautumista vaativat maalaus- ja siivoussuunnittelutyökalut."
+        title="VäriKamu"
+        description="Maalaus Multivärin kirjautumista vaativa maalaussuunnittelutyökalu."
         path={location.pathname}
         indexable={false}
       />
@@ -44,14 +41,13 @@ export function CustomerAppLayout() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-800 text-white"><PaintRoller className="h-5 w-5" /></span>
             <span className="min-w-0">
               <span className="block truncate font-display text-sm font-extrabold text-navy-900 sm:text-base">Maalaus Multiväri</span>
-              <span className="block text-[11px] font-semibold uppercase tracking-wider text-orange-600">Kamu Studio</span>
+              <span className="block text-[11px] font-semibold uppercase tracking-wider text-orange-600">VäriKamu</span>
             </span>
           </Link>
 
           {authenticated ? (
             <div className="flex items-center gap-1 sm:gap-2">
               <NavLink to="/app/varikamu" className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-navy-700 hover:bg-navy-50 md:inline-flex md:items-center md:gap-2"><Palette className="h-4 w-4" />VäriKamu</NavLink>
-              <NavLink to="/app/siivouskamu" className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-navy-700 hover:bg-navy-50 md:inline-flex md:items-center md:gap-2"><Sparkles className="h-4 w-4" />SiivousKamu</NavLink>
               <NavLink to="/app/dashboard" className="hidden rounded-xl px-3 py-2 text-sm font-semibold text-navy-700 hover:bg-navy-50 sm:block">Omat suunnitelmat</NavLink>
               <NavLink to="/app/profile" className="flex h-10 w-10 items-center justify-center rounded-xl text-navy-700 hover:bg-navy-50" aria-label="Profiili"><UserRound className="h-5 w-5" /></NavLink>
               <button type="button" onClick={signOut} className="flex h-10 w-10 items-center justify-center rounded-xl text-navy-700 hover:bg-navy-50" aria-label="Kirjaudu ulos"><LogOut className="h-5 w-5" /></button>
@@ -59,7 +55,6 @@ export function CustomerAppLayout() {
           ) : (
             <div className="flex items-center gap-3 text-sm font-bold">
               <Link to="/varikamu" className="text-navy-600 hover:text-orange-600">VäriKamu</Link>
-              <Link to="/siivouskamu" className="text-navy-600 hover:text-orange-600">SiivousKamu</Link>
             </div>
           )}
         </div>
