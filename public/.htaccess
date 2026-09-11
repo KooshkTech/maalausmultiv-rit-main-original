@@ -37,6 +37,11 @@
     RewriteCond %{HTTP_HOST} !^maalausmultivari\.fi$ [NC]
     RewriteRule ^ https://maalausmultivari.fi%{REQUEST_URI} [L,R=301]
 
+    # Serve build-time SEO entry documents for the 15 highest-priority
+    # painting service + city pages while preserving the public clean URL.
+    # React still hydrates normally after the static metadata is read.
+    RewriteRule ^palvelut/(talon-maalaus|ulkomaalaus|sisamaalaus|julkisivumaalaus|kattomaalaus)/(helsinki|espoo|vantaa)$ /_seo/palvelut/$1/$2.html [L]
+
     # SPA fallback: real files/directories bypass React Router.
     RewriteRule ^index\.html$ - [L]
     RewriteCond %{REQUEST_FILENAME} !-f
