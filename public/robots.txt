@@ -3,4 +3,3 @@ Allow: /
 
 Sitemap: https://maalausmultivari.fi/sitemap.xml
 Sitemap: https://maalausmultivari.fi/sitemap-cleaning-local.xml
-Sitemap: https://maalausmultivari.fi/sitemap-window-painting.xml
