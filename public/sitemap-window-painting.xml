@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url>
+    <loc>https://maalausmultivari.fi/blogi/ikkunoiden-maalaus</loc>
+    <lastmod>2026-09-13</lastmod>
+    <video:video>
+      <video:thumbnail_loc>https://maalausmultivari.fi/images/services/exterior-painting.webp</video:thumbnail_loc>
+      <video:title>Ikkunoiden pohjatyöt: maalin poisto, hionta ja pohjamaalaus</video:title>
+      <video:description>Ensimmäinen vaihe ikkunoiden maalauksessa: vanhan irtoavan maalin poisto, hionta ja pohjamaalaus.</video:description>
+      <video:content_loc>https://maalausmultivari.fi/videos/window-painting/01-pohjatyot-scraping-sanding-primer.mp4</video:content_loc>
+      <video:duration>29</video:duration>
+      <video:publication_date>2026-09-13T00:00:00+03:00</video:publication_date>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://maalausmultivari.fi/images/services/exterior-painting.webp</video:thumbnail_loc>
+      <video:title>Ikkunoiden kittaus, hionta ja korjaus</video:title>
+      <video:description>Toinen vaihe ikkunoiden maalauksessa: kittaus, hionta ja tarvittavat korjaukset ennen pintamaalausta.</video:description>
+      <video:content_loc>https://maalausmultivari.fi/videos/window-painting/02-kittaus-sanding-repair.mp4</video:content_loc>
+      <video:duration>29</video:duration>
+      <video:publication_date>2026-09-13T00:00:00+03:00</video:publication_date>
+    </video:video>
+    <video:video>
+      <video:thumbnail_loc>https://maalausmultivari.fi/images/services/exterior-painting.webp</video:thumbnail_loc>
+      <video:title>Ikkunoiden maalaus ja viimeistely</video:title>
+      <video:description>Kolmas vaihe: peittävä pintamaalaus ja ikkunoiden huolellinen viimeistely.</video:description>
+      <video:content_loc>https://maalausmultivari.fi/videos/window-painting/03-maalaus-final-coat.mp4</video:content_loc>
+      <video:duration>29</video:duration>
+      <video:publication_date>2026-09-13T00:00:00+03:00</video:publication_date>
+    </video:video>
+  </url>
+</urlset>
