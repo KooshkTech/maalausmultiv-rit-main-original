@@ -22,9 +22,9 @@ function Landing({ kind }: { kind: 'paint' | 'cleaning' }) {
   const paint = kind === 'paint';
   const path = paint ? '/varikamu' : '/siivouskamu';
   const appPath = paint ? '/app/varikamu' : '/app/siivouskamu';
-  const title = paint ? 'VäriKamu – kokeile värejä ja suunnittele maalattavat pinnat' : 'SiivousKamu – merkitse puhdistettavat pinnat ja suunnittele siivous';
+  const title = paint ? 'VäriKamu – kokeile seinäväriä omassa kuvassa' : 'SiivousKamu – merkitse puhdistettavat pinnat ja suunnittele siivous';
   const description = paint
-    ? 'Kokeile värejä omassa kuvassasi ja suunnittele seinien, ovien, ikkunoiden, kalusteiden, puuosien ja muiden maalattavien pintojen uudistus. VäriKamu auttaa ennen maalaustarjousta Helsingissä, Espoossa, Vantaalla ja Uudellamaalla.'
+    ? 'Kokeile seinäväriä ja muita maalisävyjä omassa kuvassasi. VäriKamu auttaa vertaamaan maalattavia pintoja ennen tarjouspyyntöä Vantaalla ja Uudellamaalla.'
     : 'Merkitse kuvasta puhdistettavat pinnat, vertaile ennen ja jälkeen -näkymää ja kokoa siivoustarve ennen tarjouspyyntöä Uudellamaalla.';
   const faq = paint ? paintFaq : cleaningFaq;
 

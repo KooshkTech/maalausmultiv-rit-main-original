@@ -12,10 +12,12 @@ function warn(message) { warnings.push(message); }
 const robotsPath = path.join(root, 'public', 'robots.txt');
 const sitemapPath = path.join(root, 'public', 'sitemap.xml');
 const seoPath = path.join(root, 'src', 'components', 'Seo.tsx');
+const publicHtaccessPath = path.join(root, 'public', '.htaccess');
 
 if (!fs.existsSync(robotsPath)) fail('public/robots.txt is missing.');
 if (!fs.existsSync(sitemapPath)) fail('public/sitemap.xml is missing.');
 if (!fs.existsSync(seoPath)) fail('src/components/Seo.tsx is missing.');
+if (!fs.existsSync(publicHtaccessPath)) fail('public/.htaccess is missing.');
 
 if (fs.existsSync(robotsPath)) {
   const robots = fs.readFileSync(robotsPath, 'utf8');
@@ -34,12 +36,37 @@ if (fs.existsSync(sitemapPath)) {
     if (!url.startsWith(`${baseUrl}/`) && url !== `${baseUrl}/`) fail(`Off-domain sitemap URL: ${url}`);
     if (url.includes('?') || url.includes('#')) fail(`Non-canonical sitemap URL contains query/hash: ${url}`);
     if (url !== `${baseUrl}/` && url.endsWith('/')) warn(`Trailing-slash sitemap URL: ${url}`);
+    if (url.startsWith('http://') || url.includes('://www.maalausmultivari.fi')) fail(`Non-canonical host in sitemap: ${url}`);
   }
+  if (urls.some((url) => url.endsWith('/404'))) fail('The noindex /404 route must not be in sitemap.xml.');
   if (!urls.includes(`${baseUrl}/maalauslaskuri`)) fail('Canonical Maalauslaskuri URL is missing from sitemap.xml.');
   for (const redirectedPath of ['/kustannuslaskuri', '/siivouskamu', '/paint-studio']) {
     if (urls.includes(`${baseUrl}${redirectedPath}`)) fail(`Redirecting URL must not be in sitemap.xml: ${redirectedPath}`);
   }
   console.log(`SEO audit: ${urls.length} sitemap URLs checked.`);
+}
+
+if (fs.existsSync(publicHtaccessPath)) {
+  const htaccess = fs.readFileSync(publicHtaccessPath, 'utf8');
+  if (!/RewriteCond %\{HTTPS\} !=on/.test(htaccess)) fail('.htaccess does not redirect HTTP to HTTPS.');
+  if (!/HTTP_HOST\} !\^maalausmultivari\\\.fi\$/.test(htaccess)) fail('.htaccess does not enforce the non-www host.');
+}
+
+const sourceRoot = path.join(root, 'src');
+const sourceFiles = [];
+function collectSourceFiles(directory) {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const absolute = path.join(directory, entry.name);
+    if (entry.isDirectory()) collectSourceFiles(absolute);
+    else if (/\.(tsx?|jsx?)$/.test(entry.name)) sourceFiles.push(absolute);
+  }
+}
+collectSourceFiles(sourceRoot);
+for (const file of sourceFiles) {
+  const source = fs.readFileSync(file, 'utf8');
+  if (/<Link[^>]+to=["']\/404["']/.test(source)) {
+    fail(`Internal link points to /404: ${path.relative(root, file)}`);
+  }
 }
 
 if (fs.existsSync(seoPath)) {

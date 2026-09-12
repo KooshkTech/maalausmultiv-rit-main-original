@@ -60,9 +60,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: 'vahapaastoiset-maalit-ja-m1-luokitus',
-    title: 'Vähäpäästöiset maalit ja M1-luokitus: mitä ne tarkoittavat?',
+    title: 'M1-maali ja M1-luokitus: mitä vähäpäästöisyys tarkoittaa?',
     excerpt:
-      'M1-merkki näkyy yhä useamman maalipurkin kyljessä. Kerromme, mitä luokitus oikeasti tarkoittaa, mihin se perustuu ja miksi se kannattaa huomioida etenkin sisätiloissa.',
+      'Mitä M1-maali tarkoittaa? Kerromme, miten M1-luokitus liittyy rakennusmateriaalien päästöihin ja miksi se kannattaa huomioida etenkin sisätiloissa.',
     image: images.blog['sisamaalauksen-kustannukset'],
     date: '2025-03-04',
     author: 'Maalaus Multiväri',
