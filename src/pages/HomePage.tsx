@@ -18,6 +18,7 @@ import { PaintPlannerPromo } from '@/sections/PaintPlannerPromo';
 import { PaintingJourney } from '@/sections/PaintingJourney';
 import { AssessmentCTA } from '@/sections/AssessmentCTA';
 import { StudioIntroPopup } from '@/components/StudioIntroPopup';
+import { WindowPaintingProjectVideo } from '@/sections/WindowPaintingProjectVideo';
 
 export function HomePage() {
   return (
@@ -33,6 +34,7 @@ export function HomePage() {
       <ServiceFinder />
       <QuickQuote />
       <ServicesOverview />
+      <WindowPaintingProjectVideo />
       <BeforeAfterGallery />
       <LocalProjectProof />
       <PaintPlannerPromo />
