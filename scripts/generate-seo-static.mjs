@@ -37,6 +37,21 @@ const services = {
     suffix: 'peltikaton pesu ja pinnoitus',
     description: (city) => `Peltikaton pesu ja kattomaalaus ${city.locative}. Kuntoarvio, huolelliset pohjatyöt ja selkeä tarjous. Pyydä maksuton arvio.`,
   },
+  toimistosiivous: {
+    label: 'Toimistosiivous',
+    suffix: 'yrityksille ja toimitiloihin',
+    description: (city) => `Toimistosiivous ${city.locative} yrityksille ja toimitiloihin. Palvelusisältö ja aikataulu sovitaan kohteen tarpeen mukaan. Pyydä maksuton tarjous.`,
+  },
+  yrityssiivous: {
+    label: 'Yrityssiivous',
+    suffix: 'toimistot ja toimitilat',
+    description: (city) => `Yrityssiivous ${city.locative} toimistoihin ja toimitiloihin. Säännöllinen tai kertaluonteinen siivous, selkeä palvelusisältö ja maksuton tarjous.`,
+  },
+  muuttosiivous: {
+    label: 'Muuttosiivous',
+    suffix: 'huolellinen loppusiivous',
+    description: (city) => `Muuttosiivous ${city.locative} asuntoihin ja muihin soveltuviin muuttokohteisiin. Kohdekohtainen sisältö ja selkeä tarjous. Pyydä maksuton arvio.`,
+  },
 };
 
 function escapeHtml(value) {
