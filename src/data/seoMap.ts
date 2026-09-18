@@ -40,14 +40,14 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
   huoneistomaalaus: {
     primaryKeyword: 'huoneistomaalaus',
     secondaryKeywords: ['asunnon maalaus', 'asunnon sisämaalaus', 'huoneiston maalaus'],
-    title: 'Huoneistomaalaus – asunnon maalaus',
-    description: 'Huoneistomaalaus muuton, remontin tai kodin päivityksen yhteydessä. Koko asunto tai yksittäiset huoneet ammattimaisesti.',
+    title: 'Huoneistomaalaus – asunnon maalaus muuttoon tai remonttiin',
+    description: 'Huoneistomaalaus muuton, remontin tai kodin päivityksen yhteydessä. Koko asunto tai yksittäiset huoneet siististi Helsingissä, Espoossa ja Vantaalla.',
   },
   toimistomaalaus: {
     primaryKeyword: 'toimistomaalaus',
     secondaryKeywords: ['toimitilojen maalaus', 'yrityksen maalaus', 'liiketilan maalaus'],
-    title: 'Toimistomaalaus – toimitilojen maalaus',
-    description: 'Toimistojen ja toimitilojen maalaus joustavasti myös iltaisin ja viikonloppuisin. Pyydä yrityksellesi tarjous.',
+    title: 'Toimistomaalaus – yrityksen toimitilojen maalaus',
+    description: 'Toimistojen ja toimitilojen maalaus yrityksille joustavasti myös iltaisin ja viikonloppuisin. Pyydä maksuton arvio ja selkeä tarjous.',
   },
   'aidan-maalaus': {
     primaryKeyword: 'aidan maalaus',
@@ -155,7 +155,7 @@ export const locationSeoMap: Record<string, { primaryKeywords: string[]; title: 
   },
   vantaa: {
     primaryKeywords: ['maalari Vantaa', 'maalaus Vantaa', 'talon maalaus Vantaa'],
-    title: 'Maalari Vantaa – talon maalaus',
+    title: 'Maalari Vantaa – talon maalaus ja maalauspalvelut',
     description: 'Paikallinen maalari Vantaalla: talon maalaus, ulko-, sisä- ja julkisivumaalaus koteihin, taloyhtiöille ja yrityksille. Pyydä maksuton arvio.',
   },
   espoo: {

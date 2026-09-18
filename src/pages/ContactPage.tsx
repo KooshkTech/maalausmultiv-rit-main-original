@@ -11,8 +11,8 @@ export function ContactPage() {
   return (
     <>
       <Seo
-        title="Yhteystiedot"
-        description="Ota yhteyttä Maalaus Multiväriin. Soita, lähetä WhatsApp-viesti tai täytä tarjouspyyntölomake. Pyydä ilmainen arvio maalaus- tai siivoustyöstä."
+        title="Pyydä tarjous maalauksesta – yhteystiedot"
+        description="Pyydä maksuton arvio maalaus- tai siivoustyöstä Vantaalla ja Uudellamaalla. Soita, lähetä WhatsApp-viesti tai täytä tarjouspyyntölomake."
         path="/yhteystiedot"
         breadcrumbs={[
           { name: 'Etusivu', path: '/' },
