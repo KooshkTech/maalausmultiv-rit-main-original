@@ -76,7 +76,8 @@ function replaceMeta(html, { title, description, url }) {
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/i, `<meta name="twitter:title" content="${safeTitle}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/i, `<meta name="twitter:description" content="${safeDescription}" />`);
 
-  const canonical = `<link rel="canonical" href="${safeUrl}" />`;
+  // Let Helmet replace the build-time canonical instead of adding a second one.
+  const canonical = `<link rel="canonical" href="${safeUrl}" data-rh="true" />`;
   if (/<link rel="canonical"/i.test(output)) {
     output = output.replace(/<link rel="canonical" href="[^"]*"\s*\/>/i, canonical);
   } else {

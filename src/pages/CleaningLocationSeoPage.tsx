@@ -1,4 +1,4 @@
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useMatch } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, MapPin, ShieldCheck } from 'lucide-react';
 import { Seo } from '@/components/Seo';
 import { getService } from '@/data/services';
@@ -47,7 +47,9 @@ const serviceIntent: Record<string, { keyword: string; secondary: string; lead: 
 };
 
 export function CleaningLocationSeoPage() {
-  const { serviceSlug = '', citySlug = '' } = useParams<{ serviceSlug: string; citySlug: string }>();
+  // The three explicit cleaning routes only expose citySlug through useParams.
+  // Match the URL itself so both slugs are available without changing route priority.
+  const { serviceSlug = '', citySlug = '' } = useMatch('/palvelut/:serviceSlug/:citySlug')?.params ?? {};
   const service = getService(serviceSlug);
   const city = getCity(citySlug);
   if (!service || service.category !== 'cleaning' || !city || !supportedServices.has(serviceSlug) || !supportedCities.has(citySlug)) return <Navigate to="/404" replace />;
