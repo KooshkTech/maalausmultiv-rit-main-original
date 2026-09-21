@@ -119,8 +119,8 @@ export const projects: Project[] = [
     description:
       'Kerrostalon kaikkien ikkunoiden ammattimainen pesu. Työ tehtiin turvavaljaiden ja tikkaiden avulla yhden viikonlopun aikana häiritsemättä asukkaiden arkea.',
     image: images.projects['project-08'],
-    beforeImage: images.projects['project-08'],
-    afterImage: images.projects['project-08'],
+    beforeImage: 'https://images.pexels.com/photos/33468223/pexels-photo-33468223.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+    afterImage: 'https://images.pexels.com/photos/7027844/pexels-photo-7027844.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
     services: ['Ikkunanpesu', 'Kehysten pesu'],
   },
   {

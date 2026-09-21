@@ -7,11 +7,15 @@ import { Reveal } from '@/components/Reveal';
 import { Lightbox } from '@/components/Lightbox';
 import { ContactCTA } from '@/sections/ContactCTA';
 import { projects, projectCategories } from '@/data/projects';
+import type { Project } from '@/data/projects';
 import { getServiceByTitle } from '@/data/services';
 import { images } from '@/config/images';
+import { BeforeAfter } from '@/components/BeforeAfter';
 
 const priorityCitySlugs: Record<string, string> = { Helsinki: 'helsinki', Espoo: 'espoo', Vantaa: 'vantaa' };
 const localPaintingServices = new Set(['talon-maalaus', 'ulkomaalaus', 'sisamaalaus', 'julkisivumaalaus', 'kattomaalaus']);
+
+const hasSlider = (project: Project) => project.beforeImage !== project.afterImage;
 
 export function ProjectsPage() {
   const [filter, setFilter] = useState('Kaikki');
@@ -73,11 +77,17 @@ export function ProjectsPage() {
               <Reveal key={project.id} delay={(i % 3) * 80}>
                 <article className="card group h-full overflow-hidden">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={project.image} alt={project.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                    <button type="button" onClick={() => setLightboxIndex(i)} className="absolute inset-0 flex items-center justify-center bg-navy-950/0 opacity-0 transition-all duration-300 group-hover:bg-navy-950/40 group-hover:opacity-100" aria-label="Avaa kuva">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-navy-900 shadow-lift"><Maximize2 className="h-5 w-5" /></span>
-                    </button>
-                    <span className="absolute left-3 top-3 rounded-full bg-orange-500 px-3 py-1 text-xs font-semibold text-white">{project.category}</span>
+                    {hasSlider(project) ? (
+                      <BeforeAfter before={project.beforeImage} after={project.afterImage} alt={project.title} className="aspect-[4/3] rounded-none shadow-none" />
+                    ) : (
+                      <>
+                        <img src={project.image} alt={project.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                        <button type="button" onClick={() => setLightboxIndex(i)} className="absolute inset-0 flex items-center justify-center bg-navy-950/0 opacity-0 transition-all duration-300 group-hover:bg-navy-950/40 group-hover:opacity-100" aria-label="Avaa kuva">
+                          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-navy-900 shadow-lift"><Maximize2 className="h-5 w-5" /></span>
+                        </button>
+                      </>
+                    )}
+                    <span className="absolute left-3 top-3 z-30 rounded-full bg-orange-500 px-3 py-1 text-xs font-semibold text-white">{project.category}</span>
                   </div>
                   <div className="p-5">
                     <h3 className="font-display text-base font-bold text-navy-900">{project.title}</h3>
