@@ -9,6 +9,25 @@ import { company } from '@/data/company';
 import { locationSeoMap } from '@/data/seoMap';
 import { trackCtaClick, trackPhoneClick } from '@/lib/analytics';
 import { localServicePath } from '@/data/localSeo';
+import { projects } from '@/data/projects';
+
+const vantaaPriorityServices = [
+  {
+    slug: 'talon-maalaus',
+    title: 'Talon maalaus Vantaalla',
+    description: 'Omakoti- ja pientalon kuntoarvio, pohjatyöt ja maalaus yhtenä selkeänä kokonaisuutena.',
+  },
+  {
+    slug: 'ulkomaalaus',
+    title: 'Ulkomaalaus Vantaalla',
+    description: 'Puu- ja muiden ulkopintojen pesu, irtoavan maalin poisto, pohjustus ja pintamaalaus.',
+  },
+  {
+    slug: 'julkisivumaalaus',
+    title: 'Julkisivumaalaus Vantaalla',
+    description: 'Puu-, rappaus- ja tiilipintojen käsittely materiaalin, vanhan pinnoitteen ja kunnon mukaan.',
+  },
+];
 
 export function CityPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -49,7 +68,21 @@ export function CityPage() {
       q: `Voinko pyytää tarjouksen ${city.genitive} kohteeseen?`,
       a: 'Kyllä. Voit pyytää maksuttoman tarjouksen ottamalla yhteyttä puhelimitse tai yhteydenottolomakkeen kautta. Kerro kohteen sijainti, työn tyyppi ja mahdollisuuksien mukaan työn laajuus.',
     },
+    ...(city.slug === 'vantaa' ? [
+      {
+        q: 'Millä Vantaan alueilla teette maalaustöitä?',
+        a: 'Palvelemme koko Vantaan alueella, esimerkiksi Tikkurilassa, Myyrmäessä, Hakunilassa, Aviapoliksessa, Kivistössä ja Koivukylässä. Kohteen sijainti ja saavutettavuus tarkistetaan tarjouspyynnön yhteydessä.',
+      },
+      {
+        q: 'Mistä maalauksen hinta Vantaalla muodostuu?',
+        a: 'Hintaan vaikuttavat maalattava pinta-ala, alustan materiaali ja kunto, tarvittavat pohjatyöt, maalauskerrat, suojaukset sekä mahdollisten telineiden tai nostimen tarve. Siksi lopullinen hinta vahvistetaan kohdekohtaisessa tarjouksessa.',
+      },
+    ] : []),
   ];
+
+  const localProjects = city.slug === 'vantaa'
+    ? projects.filter((project) => project.location === 'Vantaa' && project.category !== 'Muuttosiivous').slice(0, 3)
+    : [];
 
   return (
     <>
@@ -101,6 +134,36 @@ export function CityPage() {
               </p>
             </div>
 
+            {city.slug === 'vantaa' && (
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-orange-600">Suosituimmat palvelut</p>
+                <h2 className="mt-2 font-display text-2xl font-bold text-navy-900">
+                  Talon ja julkisivun maalaus Vantaalla
+                </h2>
+                <p className="mt-3 leading-relaxed text-navy-600">
+                  Valitse kohteeseesi sopiva palvelu. Jokaisella sivulla kerromme tarkemmin työn vaiheista,
+                  pohjatöistä ja hintaan vaikuttavista tekijöistä.
+                </p>
+                <div className="mt-5 grid gap-4 md:grid-cols-3">
+                  {vantaaPriorityServices.map((service) => (
+                    <Link
+                      key={service.slug}
+                      to={localServicePath(service.slug, city.slug)}
+                      className="card group p-5 transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-lift"
+                    >
+                      <h3 className="font-display text-lg font-bold text-navy-900 group-hover:text-orange-700">
+                        {service.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-navy-600">{service.description}</p>
+                      <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-orange-600">
+                        Tutustu palveluun <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <h3 className="font-display text-lg font-bold text-navy-900">
                 Palvelut {city.locative}
@@ -143,6 +206,37 @@ export function CityPage() {
                 <Link to="/palvelut/siivous" className="font-semibold text-orange-600 hover:underline">Katso siivouspalvelut</Link>.
               </p>
             </div>
+
+            {localProjects.length > 0 && (
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-orange-600">Paikalliset referenssit</p>
+                <h2 className="mt-2 font-display text-2xl font-bold text-navy-900">
+                  Toteutettuja maalauskohteita Vantaalla
+                </h2>
+                <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                  {localProjects.map((project) => (
+                    <article key={project.id} className="card overflow-hidden">
+                      <img
+                        src={project.image}
+                        alt={`${project.title} Vantaalla`}
+                        className="aspect-[16/10] w-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="p-5">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-orange-600">
+                          {project.category} · {project.year}
+                        </p>
+                        <h3 className="mt-2 font-display text-lg font-bold text-navy-900">{project.title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-navy-600">{project.description}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                <Link to="/projektit" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-orange-600 hover:underline">
+                  Katso kaikki referenssit <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            )}
 
             <div>
               <h3 className="font-display text-lg font-bold text-navy-900">
