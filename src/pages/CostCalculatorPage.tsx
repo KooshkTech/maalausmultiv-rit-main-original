@@ -78,8 +78,8 @@ export function CostCalculatorPage() {
   return (
     <>
       <Seo
-        title="Maalauslaskuri – laske maalauksen hinta"
-        description="Laske maalaustyön alustava hintahaarukka Maalauslaskurilla. Arvioi kohteen laajuus ja pyydä maksuton, kohdekohtainen tarjous Uudellamaalla."
+        title="Maalauslaskuri 2026 – laske maalauksen hinta"
+        description="Maalauslaskuri 2026: laske maalaustyön suuntaa-antava hinta kohteen koon, pintojen kunnon ja työn mukaan. Saat arvion heti ja voit pyytää maksuttoman tarjouksen."
         path="/maalauslaskuri"
         breadcrumbs={[{ name: 'Maalauslaskuri', path: '/maalauslaskuri' }]}
       />
