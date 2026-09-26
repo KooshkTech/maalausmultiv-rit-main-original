@@ -46,8 +46,8 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
   toimistomaalaus: {
     primaryKeyword: 'toimistomaalaus',
     secondaryKeywords: ['toimitilojen maalaus', 'yrityksen maalaus', 'liiketilan maalaus'],
-    title: 'Toimistomaalaus – toimitilojen maalaus',
-    description: 'Toimistojen ja toimitilojen maalaus joustavasti myös iltaisin ja viikonloppuisin. Pyydä yrityksellesi tarjous.',
+    title: 'Toimistomaalaus Uusimaa – toimistot ja toimitilat',
+    description: 'Toimistomaalaus yrityksille Uudellamaalla. Toimistot ja toimitilat joustavasti myös iltaisin ja viikonloppuisin. Pyydä maksuton tarjous.',
   },
   'aidan-maalaus': {
     primaryKeyword: 'aidan maalaus',
