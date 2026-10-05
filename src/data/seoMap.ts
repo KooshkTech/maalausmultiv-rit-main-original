@@ -81,9 +81,9 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
   },
   toimistosiivous: {
     primaryKeyword: 'toimistosiivous',
-    secondaryKeywords: ['yrityssiivous', 'toimitilasiivous', 'toimiston siivous'],
-    title: 'Toimistosiivous – yritysten siivouspalvelu',
-    description: 'Säännöllinen ja kertaluonteinen toimistosiivous yrityksille. Joustavat ajat ja selkeä tarjous.',
+    secondaryKeywords: ['yrityssiivous', 'toimitilasiivous', 'toimiston siivous', 'yritysten siivouspalvelu'],
+    title: 'Toimistosiivous Uusimaa – yritysten ja toimistojen siivous',
+    description: 'Ammattimainen toimistosiivous ja yrityssiivous toimistoihin, toimitiloihin ja neuvottelutiloihin. Säännöllinen tai kertaluonteinen siivous, joustavat ajat. Pyydä ilmainen tarjous.',
   },
   rakennussiivous: {
     primaryKeyword: 'rakennussiivous',
@@ -132,12 +132,6 @@ export const serviceSeoMap: Record<string, SeoTarget> = {
     secondaryKeywords: ['omakotitalon maalaus', 'pientalon maalaus', 'talon maalaus Uusimaa'],
     title: 'Talon maalaus Uusimaa – pyydä maksuton arvio',
     description: 'Omakoti- ja pientalon maalaus Vantaalla, Helsingissä, Espoossa ja Uudellamaalla. Kuntoarvio, huolelliset pohjatyöt ja selkeä tarjous.',
-  },
-  yrityssiivous: {
-    primaryKeyword: 'yrityssiivous',
-    secondaryKeywords: ['toimistosiivous', 'toimitilasiivous', 'yrityksen siivous'],
-    title: 'Yrityssiivous – siivouspalvelu yrityksille',
-    description: 'Yrityssiivous toimistoihin ja toimitiloihin säännöllisesti tai kertaluonteisesti. Joustava aikataulu ja selkeä tarjous Helsingissä, Espoossa, Vantaalla ja Uudellamaalla.',
   },
   remonttisiivous: {
     primaryKeyword: 'remonttisiivous',
