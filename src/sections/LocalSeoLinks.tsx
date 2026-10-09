@@ -4,13 +4,14 @@ import { SectionHeading } from '@/components/SectionHeading';
 import { Reveal } from '@/components/Reveal';
 
 const cities = [
+  { slug: 'vantaa', name: 'Vantaa', locative: 'Vantaalla' },
   { slug: 'helsinki', name: 'Helsinki', locative: 'Helsingissä' },
   { slug: 'espoo', name: 'Espoo', locative: 'Espoossa' },
-  { slug: 'vantaa', name: 'Vantaa', locative: 'Vantaalla' },
 ] as const;
 
 const paintingServices = [
   { slug: 'talon-maalaus', name: 'Talon maalaus' },
+  { slug: 'ulkomaalaus', name: 'Ulkomaalaus' },
   { slug: 'julkisivumaalaus', name: 'Julkisivumaalaus' },
   { slug: 'sisamaalaus', name: 'Sisämaalaus' },
 ] as const;
@@ -22,8 +23,8 @@ export function LocalSeoLinks() {
         <SectionHeading
           eyebrow="Palvelut lähelläsi"
           eyebrowOrange
-          title="Maalari Helsingissä, Espoossa ja Vantaalla"
-          description="Tutustu paikallisiin talon maalaus-, julkisivumaalaus- ja sisämaalauspalveluihin. Jokainen alue- ja palvelusivu auttaa arvioimaan kohteen tarpeita ennen tarjouspyyntöä."
+          title="Maalari Vantaalla, Helsingissä ja Espoossa"
+          description="Tutustu paikallisiin talon maalaus-, ulkomaalaus-, julkisivumaalaus- ja sisämaalauspalveluihin. Jokainen alue- ja palvelusivu auttaa arvioimaan kohteen tarpeita ennen tarjouspyyntöä."
         />
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
           {cities.map((city, cityIndex) => (
@@ -40,7 +41,7 @@ export function LocalSeoLinks() {
                     </Link>
                   ))}
                 </div>
-                <p className="mt-3 text-sm leading-6 text-navy-600">Etsitkö <strong>maalaria {city.locative}</strong>? Alue- ja palvelusivut kokoavat talon maalauksen, sisämaalauksen ja julkisivumaalauksen samaan paikalliseen kokonaisuuteen.</p>
+                <p className="mt-3 text-sm leading-6 text-navy-600">Etsitkö <strong>maalaria {city.locative}</strong>? Alue- ja palvelusivut kokoavat talon maalauksen, ulkomaalauksen, sisämaalauksen ja julkisivumaalauksen samaan paikalliseen kokonaisuuteen.</p>
 
                 <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold text-orange-600">
                   <Link to={`/palvelualueet/${city.slug}`} className="inline-flex items-center gap-1.5 hover:underline">Kaikki palvelut {city.locative}<ArrowRight className="h-4 w-4" /></Link>
