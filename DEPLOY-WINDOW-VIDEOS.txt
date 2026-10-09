@@ -1,0 +1,9 @@
+Upload the three MP4 files to the production server at:
+/videos/window-painting/
+
+Expected URLs:
+https://maalausmultivari.fi/videos/window-painting/01-pohjatyot-scraping-sanding-primer.mp4
+https://maalausmultivari.fi/videos/window-painting/02-kittaus-sanding-repair.mp4
+https://maalausmultivari.fi/videos/window-painting/03-maalaus-final-coat.mp4
+
+The React article page references these paths directly so the videos remain outside the JavaScript bundle.
