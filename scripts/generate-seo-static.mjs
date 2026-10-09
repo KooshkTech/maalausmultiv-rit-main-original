@@ -14,33 +14,33 @@ const cities = {
 const services = {
   'talon-maalaus': {
     label: 'Talon maalaus',
-    suffix: 'omakoti- ja pientaloille',
-    description: (city) => `Omakoti- ja pientalon maalaus ${city.locative}. Kohdekohtaiset pohjatyöt, selkeä tarjous ja 2 vuoden kirjallinen takuu maalaustyöjäljestä. Pyydä maksuton arvio.`,
+    suffix: 'omakotitalon maalaus',
+    description: (city) => `Omakoti- ja pientalon maalaus ${city.locative}. Huolelliset pohjatyöt, selkeä tarjous ja 2 vuoden kirjallinen työtakuu. Pyydä maksuton arvio.`,
   },
   ulkomaalaus: {
     label: 'Ulkomaalaus',
-    suffix: 'kestävät pohjatyöt ja maalaus',
-    description: (city) => `Ulkomaalaus ${city.locative}. Kohdekohtaiset pohjatyöt, selkeä tarjous ja 2 vuoden kirjallinen takuu maalaustyöjäljestä. Pyydä maksuton arvio.`,
+    suffix: 'talon ulkomaalaus',
+    description: (city) => `Talon ulkomaalaus ${city.locative}. Pesu, tarvittavat pohjatyöt ja kestävä maalipinta sekä 2 vuoden kirjallinen työtakuu. Pyydä maksuton arvio.`,
   },
   sisamaalaus: {
     label: 'Sisämaalaus',
     suffix: 'kodit ja toimitilat',
-    description: (city) => `Sisämaalaus koteihin ja toimitiloihin ${city.locative}. Huolellinen suojaus, selkeä tarjous ja 2 vuoden kirjallinen takuu maalaustyöjäljestä. Pyydä maksuton arvio.`,
+    description: (city) => `Sisämaalaus koteihin ja toimitiloihin ${city.locative}. Huolellinen suojaus, siistit pohjatyöt ja 2 vuoden kirjallinen työtakuu. Pyydä maksuton arvio.`,
   },
   julkisivumaalaus: {
     label: 'Julkisivumaalaus',
     suffix: 'puu- ja rappauspinnat',
-    description: (city) => `Julkisivumaalaus puu- ja rappauspinnoille ${city.locative}. Kohdekohtaiset pohjatyöt, selkeä tarjous ja 2 vuoden kirjallinen takuu maalaustyöjäljestä. Pyydä maksuton arvio.`,
+    description: (city) => `Julkisivumaalaus puu- ja rappauspinnoille ${city.locative}. Kohdekohtaiset pohjatyöt, selkeä tarjous ja 2 vuoden kirjallinen työtakuu. Pyydä maksuton arvio.`,
   },
   kattomaalaus: {
     label: 'Kattomaalaus',
-    suffix: 'peltikaton pesu ja pinnoitus',
-    description: (city) => `Peltikaton pesu ja kattomaalaus ${city.locative}. Kuntoarvio, huolelliset pohjatyöt ja selkeä tarjous. Pyydä maksuton arvio.`,
+    suffix: 'peltikaton maalaus',
+    description: (city) => `Peltikaton pesu ja kattomaalaus ${city.locative}. Kuntoarvio, ruostekohtien käsittely ja kohteelle sopiva pinnoitus. Pyydä maksuton arvio.`,
   },
   toimistosiivous: {
     label: 'Toimistosiivous',
-    suffix: 'yrityksille ja toimitiloihin',
-    description: (city) => `Toimistosiivous ${city.locative} yrityksille ja toimitiloihin. Palvelusisältö ja aikataulu sovitaan kohteen tarpeen mukaan. Pyydä maksuton tarjous.`,
+    suffix: 'yritysten siivous',
+    description: (city) => `Toimistosiivous ${city.locative} yrityksille ja toimitiloihin. Säännöllinen tai kertaluonteinen siivous ja joustavat ajat. Pyydä maksuton tarjous.`,
   },
   yrityssiivous: {
     label: 'Yrityssiivous',
@@ -49,8 +49,8 @@ const services = {
   },
   muuttosiivous: {
     label: 'Muuttosiivous',
-    suffix: 'huolellinen loppusiivous',
-    description: (city) => `Muuttosiivous ${city.locative} asuntoihin ja muihin soveltuviin muuttokohteisiin. Kohdekohtainen sisältö ja selkeä tarjous. Pyydä maksuton arvio.`,
+    suffix: 'loppusiivous',
+    description: (city) => `Muuttosiivous ja loppusiivous ${city.locative} asuntoihin ja muuttokohteisiin. Kohdekohtainen sisältö ja selkeä tarjous. Pyydä maksuton arvio.`,
   },
 };
 
@@ -76,7 +76,6 @@ function replaceMeta(html, { title, description, url }) {
     .replace(/<meta name="twitter:title" content="[^"]*"\s*\/>/i, `<meta name="twitter:title" content="${safeTitle}" />`)
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/>/i, `<meta name="twitter:description" content="${safeDescription}" />`);
 
-  // Let Helmet replace the build-time canonical instead of adding a second one.
   const canonical = `<link rel="canonical" href="${safeUrl}" data-rh="true" />`;
   if (/<link rel="canonical"/i.test(output)) {
     output = output.replace(/<link rel="canonical" href="[^"]*"\s*\/>/i, canonical);
