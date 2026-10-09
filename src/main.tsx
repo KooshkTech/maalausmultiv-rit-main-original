@@ -6,7 +6,7 @@ import { injectContentsquareScript } from '@contentsquare/tag-sdk';
 import App from './App.tsx';
 import './index.css';
 
-injectContentsquareScript({ clientId: '347575cdfa58f' });
+injectContentsquareScript({ clientId: '634146ae7b53c' });
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
