@@ -64,6 +64,11 @@
     RewriteCond %{HTTP_HOST} !^maalausmultivari\.fi$ [NC]
     RewriteRule ^ https://maalausmultivari.fi%{REQUEST_URI} [L,R=301]
 
+    # Route service landing pages through React even when physical directories exist.
+    # Keep this before city SEO routes; the generic SPA fallback excludes directories.
+    RewriteRule ^palvelut/?$ /index.html [L]
+    RewriteRule ^palvelut/(talon-maalaus|ulkomaalaus|sisamaalaus|julkisivumaalaus|kattomaalaus)/?$ /index.html [L]
+
     # Serve build-time SEO entry documents for priority painting service + city pages.
     # React still hydrates normally after the static metadata is read.
     RewriteRule ^palvelut/(talon-maalaus|ulkomaalaus|sisamaalaus|julkisivumaalaus|kattomaalaus)/(helsinki|espoo|vantaa)$ /_seo/palvelut/$1/$2.html [L]
